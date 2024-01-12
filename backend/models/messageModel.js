@@ -5,6 +5,10 @@ const messageSchema = new Schema({
         type: String,
         required: true
     },
+    senderName: {
+        type: String,
+        required: true
+    },
     receiverId: {
         type: String,
         required: true,

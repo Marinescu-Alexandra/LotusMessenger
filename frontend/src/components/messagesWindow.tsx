@@ -67,6 +67,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
     const sendMessage = () => {
         if (newMessage !== "") {
             const data = {
+                senderName: currentUserInfo?.username,
                 senderId: currentUserInfo?.id,
                 receiverId: selectedFriendData._id,
                 message: newMessage

@@ -25,20 +25,21 @@ const findFriend = (id) => {
 }
 
 io.on('connection', (socket) => {
-    socket.once('addUser', (userId, userInfo) => {
+    socket.on('addUser', (userId, userInfo) => {
         console.log('User added... with socket id', socket.id)
         addUser(userId, socket.id, userInfo)
         io.emit('getUser', users)
     })
 
-    socket.once('sendMessage', (data) => {
+    socket.on('sendMessage', (data) => {
         const user = findFriend(data.receiverId)
+        console.log(data)
         if (user !== undefined) {
             socket.to(user.socketId).emit('getMessage', data)
         }
     })
 
-    socket.once('messageSeen', (data) => {
+    socket.on('messageSeen', (data) => {
         const user = findFriend(data.senderId)
         if (user !== undefined) {
             socket.to(user.socketId).emit('messageSeenResponse', data)
@@ -56,7 +57,7 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.once('disconnect', () => {
+    socket.on('disconnect', () => {
         console.log('User is removed... with socket id', socket.id)
         userRemove(socket.id);
         io.emit('getUser', users);

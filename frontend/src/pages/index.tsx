@@ -52,7 +52,7 @@ export default function Home() {
         socket.on('getMessage', (data: any) => {
             console.log(data)
             setSocketMessage(data)
-            console.log('socketMessage',socketMessage)
+           //console.log('socketMessage',socketMessage)
         })
 
         socket.on('typingMessageGet', (data: any) => {
@@ -102,6 +102,12 @@ export default function Home() {
     useEffect(() => {
         if (socketMessage && selectedFriendData) {
             if (socketMessage.senderId !== selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
+                dispatch({
+                    type: 'UPDATE_FRIEND_MESSAGE',
+                    payload: {
+                        messageInfo: socketMessage
+                    }
+                })
                 toast.success(`${socketMessage.senderName} sent a new message`)
             }
         }

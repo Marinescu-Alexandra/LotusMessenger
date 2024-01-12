@@ -36,6 +36,7 @@ export const getSelectedFriend = (data: any) => {
 }
 
 export const messageSend = (data: any) => async (dispatch: any) => {
+    console.log(data)
     try {
         const response = await axios.post('http://localhost:5000/api/messenger/send-message', data, config);
         dispatch({

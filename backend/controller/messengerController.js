@@ -99,7 +99,8 @@ module.exports.messageUploadDB = async (req, res) => {
     const {
         senderId,
         receiverId,
-        message
+        message,
+        senderName
     } = req.body
 
     try {
@@ -109,7 +110,8 @@ module.exports.messageUploadDB = async (req, res) => {
             message: {
                 text: message,
                 image: []
-            }
+            },
+            senderName: senderName
         })
         res.status(201).json({
             success: true,
