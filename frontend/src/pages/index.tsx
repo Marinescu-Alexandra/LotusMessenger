@@ -50,22 +50,36 @@ export default function Home() {
         const socket = io('ws://localhost:8000')
         socketRef.current = socket
         socket.on('getMessage', (data: any) => {
-            console.log(data)
             setSocketMessage(data)
-           //console.log('socketMessage',socketMessage)
         })
 
         socket.on('typingMessageGet', (data: any) => {
             setTypingMessage(data)
-            const cct = data
-            //console.log(typingMessage)
-            //console.log(data)
+        })
+
+        socket.on('messageSeenResponse', (data: any) => {
+            console.log(data)
+            dispatch({
+                type: 'SEEN_MESSAGE',
+                payload: {
+                    messageInfo: data
+                }
+            })
+        })
+
+        socket.on('messageDeliverResponse', (data: any) => {
+            console.log(data)
+            dispatch({
+                type: 'DELIVER_MESSAGE',
+                payload: {
+                    messageInfo: data
+                }
+            })
         })
     }, [socketMessage, typingMessage])
 
     useEffect(() => {
-        if (socketMessage && selectedFriendData) {
-            //(socketMessage)
+        if (socketMessage && selectedFriendData && socketRef.current) {
             if (socketMessage.senderId === selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
                 dispatch({
                     type: 'SOCKET_MESSAGE',
@@ -73,11 +87,16 @@ export default function Home() {
                         message: socketMessage
                     }
                 })
+
                 dispatch(seenMessage(socketMessage))
+
+                socketRef.current.emit('messageSeen', socketMessage)
+
                 dispatch({
                     type: 'UPDATE_FRIEND_MESSAGE',
                     payload: {
-                        messageInfo: socketMessage
+                        messageInfo: socketMessage,
+                        status: 'seen'
                     }
                 })
             }
@@ -100,15 +119,21 @@ export default function Home() {
     }, [])
 
     useEffect(() => {
-        if (socketMessage && selectedFriendData) {
+        if (socketMessage && selectedFriendData && socketRef.current) {
             if (socketMessage.senderId !== selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
+                toast.success(`${socketMessage.senderName} sent a new message`)
+
+                dispatch(updateMessage(socketMessage))
+
+                socketRef.current.emit('deliverMessage', socketMessage)
+
                 dispatch({
                     type: 'UPDATE_FRIEND_MESSAGE',
                     payload: {
-                        messageInfo: socketMessage
+                        messageInfo: socketMessage,
+                        status: 'delivered'
                     }
                 })
-                toast.success(`${socketMessage.senderName} sent a new message`)
             }
         }
     }, [socketMessage])

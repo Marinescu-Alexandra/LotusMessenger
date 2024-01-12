@@ -3,12 +3,13 @@ import Image from "next/image";
 import profilePicturePlaceholder from '@/profilePicturePlaceholder.png'
 import dots from '@/dots.png'
 import editing from '@/editing.png'
-import read from '@/read.png'
+import delivered from '@/read.png'
 import searchIcon from '@/loupe.png'
 import { getSelectedFriend } from "@/store/actions/messengerAction"
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import moment from 'moment'
 import seen from '@/seen.png'
+import defaultStatus from '@/default.png'
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -36,8 +37,7 @@ interface LastMessage {
 
 const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUsers }) => {
 
-    const { lastMessages, friends } = useAppSelector(state => state.messenger)
-    const [lastIndex, setLastIndex] = useState(null)
+    const { friends } = useAppSelector(state => state.messenger)
     const dispatch = useAppDispatch()
 
     const [isClient, setIsClient] = useState(false)
@@ -48,9 +48,6 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
         }
     }, [myInfo])
 
-    useEffect(() => {
-        
-    }, [friends])
 
     return (
         <>
@@ -135,7 +132,10 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                                                 e.lastMessageInfo.status === 'seen'?
                                                                 <Image src={seen} alt='readIcon' width={25} height={25} className="rounded-full" priority />
                                                                 :
-                                                                <Image src={read} alt='readIcon' width={25} height={25} className="rounded-full" priority />
+                                                                    e.lastMessageInfo.status === 'delivered' ?
+                                                                    <Image src={delivered} alt='readIcon' width={25} height={25} className="rounded-full" priority />
+                                                                    :
+                                                                    <Image src={defaultStatus} alt='readIcon' width={25} height={25} className="rounded-full" priority />
                                                              : '' : ''
                                                     }
                                                 </div>

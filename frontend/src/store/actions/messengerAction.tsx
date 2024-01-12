@@ -101,7 +101,7 @@ export const seenMessage = (data: any) => async (dispatch: any) => {
 
 export const updateMessage = (data: any) => async (dispatch: any) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/messenger/seen-message', data, config);
+        const response = await axios.post('http://localhost:5000/api/messenger/deliver-message', data, config);
         console.log(response.data)
     } catch (error) {
         console.log(error)

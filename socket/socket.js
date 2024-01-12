@@ -46,6 +46,13 @@ io.on('connection', (socket) => {
         }
     })
 
+    socket.on('deliverMessage', (data) => {
+        const user = findFriend(data.senderId)
+        if (user !== undefined) {
+            socket.to(user.socketId).emit('messageDeliverResponse', data)
+        }
+    })
+
     socket.on('typingMessage', (data) => {
         const user = findFriend(data.receiverId)
         if (user !== undefined) {

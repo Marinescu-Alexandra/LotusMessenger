@@ -243,3 +243,22 @@ module.exports.messageSeen = async (req, res) => {
         })
     })
 }
+
+module.exports.messageDeliver = async (req, res) => {
+    const messageId = req.body._id
+
+    await messageModel.findByIdAndUpdate(messageId, {
+        status: 'delivered'
+    })
+        .then(() => {
+            res.status(200).json({
+                success: true
+            })
+        }).catch(() => {
+            res.status(500).json({
+                error: {
+                    errorMessage: 'Internal server error'
+                }
+            })
+        })
+}
