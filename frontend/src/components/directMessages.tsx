@@ -120,9 +120,12 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                             <div className="flex flex-row justify-between items-center w-full">
                                                 <div className="flex flex-col justify-center items-start">
                                                     <h2>{e.username}</h2>
-                                                    <p>{
+                                                    <p className={`${e.lastMessageInfo ? (e.lastMessageInfo.status === 'delivered' && myInfo && e.lastMessageInfo.senderId !== myInfo.id) ? 'font-bold' : 'font-normal' : '' }`}>
+                                                        {
                                                         //(index && lastIndex === index && lastMessage)? console.log(lastMessages) :
-                                                        e.lastMessageInfo ? e.lastMessageInfo.message.text : "No messages yet"}</p>
+                                                        e.lastMessageInfo ? e.lastMessageInfo.message.text : "No messages yet"
+                                                        }
+                                                    </p>
                                                 </div>
                                                 <div className="flex flex-col justify-center items-end">
                                                     <p>{e.lastMessageInfo ? moment(e.lastMessageInfo.createdAt).startOf('minute').fromNow() : "-"}</p>

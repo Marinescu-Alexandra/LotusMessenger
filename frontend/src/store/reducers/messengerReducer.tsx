@@ -52,7 +52,7 @@ export const messengerReducer = (state = messengerState, action: any) => {
             ...state.friends[index],
             lastMessageInfo: {
                 ...action.payload.messageInfo,
-                state: action.payload.status
+                status: action.payload.status
             }
         }, ...state.friends.slice(0, index), ...state.friends.slice(index + 1)]
         return {
