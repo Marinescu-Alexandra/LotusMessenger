@@ -1,0 +1,29 @@
+const { model, Schema } = require('mongoose')
+
+const messageSchema = new Schema({
+    senderId: {
+        type: String,
+        required: true
+    },
+    receiverId: {
+        type: String,
+        required: true,
+    },
+    message: {
+        text: {
+            type: String,
+            default: ''
+        },
+        image: {
+            type: Array,
+            default: []
+        }
+
+    },
+    status: {
+        type: String,
+        default: 'unseen'
+    }
+}, { timestamps: true });
+
+module.exports = model('message', messageSchema)
