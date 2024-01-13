@@ -35,7 +35,7 @@ type SocketTypyingMessage = {
 }
 
 export default function Home() {
-    const { friends, messages } = useAppSelector(state => state.messenger)
+    const { friends, messages, newUserAdded } = useAppSelector(state => state.messenger)
     const { authenticate } = useAppSelector(state => state.auth);
     const router = useRouter()
     const { myInfo } = useAppSelector(state => state.auth)
@@ -50,6 +50,8 @@ export default function Home() {
     const [typingMessage, setTypingMessage] = useState<Partial<SocketTypyingMessage>>({})
 
     const [isClient, setIsClient] = useState(false)
+
+    const dispatch = useAppDispatch()
 
     useEffect(() => {
         setIsClient(true)
@@ -103,17 +105,17 @@ export default function Home() {
                     }
                 })
 
-                dispatch(seenMessage(socketMessage))
+                // dispatch(seenMessage(socketMessage))
 
-                socketRef.current.emit('messageSeen', socketMessage)
+                // socketRef.current.emit('messageSeen', socketMessage)
 
-                dispatch({
-                    type: 'UPDATE_FRIEND_MESSAGE',
-                    payload: {
-                        messageInfo: socketMessage,
-                        status: 'seen'
-                    }
-                })
+                // dispatch({
+                //     type: 'UPDATE_FRIEND_MESSAGE',
+                //     payload: {
+                //         messageInfo: socketMessage,
+                //         status: 'seen'
+                //     }
+                // })
             }
         }
     }, [socketMessage, selectedFriendData])
@@ -129,6 +131,14 @@ export default function Home() {
             socketRef.current.on('getUser', (users: any) => {
                 const filteredUsers = users.filter((user: any) => user.userId !== currentUserInfo.id)
                 setActiveUsers(filteredUsers)
+            })
+            socketRef.current.on('newUserAdded', (data: boolean) => {
+                dispatch({
+                    type: 'NEW_USER_ADDED',
+                    payload: {
+                        newUserAdded: data
+                    }
+                })
             })
         }
     }, [])
@@ -172,10 +182,16 @@ export default function Home() {
             
     }, [selectedFriendData])
 
-    const dispatch = useAppDispatch()
+    
+
     useEffect(() => {
         dispatch(getFriends())
-    }, [dispatch]);
+        if (newUserAdded === true) {
+            dispatch({
+                type: 'NEW_USER_ADDED_CLEAR'
+            })
+        }
+    }, [newUserAdded]);
 
     if (authenticate && isClient) {
         return (

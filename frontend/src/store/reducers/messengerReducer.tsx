@@ -1,5 +1,6 @@
 import {
-    FRIEND_GET_SUCCESS, MESSAGE_GET_SUCCESS, SEND_MESSAGE_SUCCESS, SOCKET_MESSAGE, UPDATE_FRIEND_MESSAGE, MESSAGE_SEND_SUCCESS_CLEAR, SEEN_MESSAGE, DELIVER_MESSAGE
+    FRIEND_GET_SUCCESS, MESSAGE_GET_SUCCESS, SEND_MESSAGE_SUCCESS, SOCKET_MESSAGE, UPDATE_FRIEND_MESSAGE,
+    MESSAGE_SEND_SUCCESS_CLEAR, SEEN_MESSAGE, DELIVER_MESSAGE, NEW_USER_ADDED, NEW_USER_ADDED_CLEAR
 } from '../types/messengerType'
 import { LOGOUT_SUCCESS } from '../types/authType'
 
@@ -11,19 +12,33 @@ interface MessengerState {
     friends: Dictionary<string>[],
     messages: Dictionary<string>[],
     messageSendSuccess: boolean,
+    newUserAdded: boolean
 }
 
 const messengerState: MessengerState = {
     friends: [],
     messages: [],
     messageSendSuccess: false,
+    newUserAdded: false
 }
 
 export const messengerReducer = (state = messengerState, action: any) => {
-    if (action.type == FRIEND_GET_SUCCESS) {
+    if (action.type ===  FRIEND_GET_SUCCESS) {
         return {
             ...state,
             friends: action.payload.friends
+        }
+    }
+    if (action.type === NEW_USER_ADDED) {
+        return {
+            ...state,
+            newUserAdded: action.payload.newUserAdded
+        }
+    }
+    if (action.type === NEW_USER_ADDED_CLEAR) {
+        return {
+            ...state,
+            newUserAdded: false
         }
     }
     if (action.type === SEND_MESSAGE_SUCCESS) {

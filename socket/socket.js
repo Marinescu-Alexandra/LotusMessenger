@@ -34,7 +34,10 @@ io.on('connection', (socket) => {
         addUser(userId, socket.id, userInfo)
         io.emit('getUser', users)
 
-        const newUsers = users.filter(user => user.userId !== userId)
+        const filteredUsers = users.filter(user => user.userId !== userId)
+        for (var i = 0; i < filteredUsers.length; i++){
+            socket.to(filteredUsers[i].socketId).emit('newUserAdded', true)
+        }
     })
 
     socket.on('sendMessage', (data) => {
