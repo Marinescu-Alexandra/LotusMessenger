@@ -40,6 +40,15 @@ io.on('connection', (socket) => {
         }
     })
 
+    socket.on('checkIfActiveInstance', (userData) => {
+        console.log(userData)
+        console.log(users)
+        otherInstance = users.find(user => user.userId === userData.id)
+        if (otherInstance) {
+            socket.to(otherInstance.socketId).emit('removeOtherActiveInstance', userData.id)
+        }
+    })
+
     socket.on('sendMessage', (data) => {
         const user = findFriend(data.receiverId)
         console.log(data)

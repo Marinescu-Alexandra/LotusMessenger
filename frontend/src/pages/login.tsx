@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import React, { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import lotus from '@/lotus.png'
@@ -6,11 +6,13 @@ import { userLogin } from '@/store/actions/authAction'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { useRouter } from 'next/router'
 import { ERRORS_CLEAR, SUCCESS_MESSAGE_CLEAR } from '@/store/types/authType'
+import { Socket, io } from 'socket.io-client'
 
 const Login = () => {
     const router = useRouter()
     const dispatch = useAppDispatch()
     const { loading, authenticate, errors, successMessage, myInfo } = useAppSelector(state => state.auth)
+    const socketRef = useRef<Socket | null>(null)
 
     const [state, setState] = useState({
         email: '',
@@ -29,7 +31,20 @@ const Login = () => {
         e.preventDefault();
         console.log(state);
         dispatch(userLogin(state))
+
     }
+
+    useEffect(() => {
+        const socket = io('ws://localhost:8000')
+        socketRef.current = socket
+        console.log('doamne')
+        if (socketRef.current) {
+            socketRef.current.emit('checkIfActiveInstance', myInfo)
+        }
+
+
+
+    }, [myInfo])
 
     useEffect(() => {
         if (authenticate) {

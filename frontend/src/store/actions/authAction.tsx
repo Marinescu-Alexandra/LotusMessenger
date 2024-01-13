@@ -36,19 +36,17 @@ export const userRegister = (data: any) => {
                 })
             }
         }
-
     }
 }
 
 export const userLogin = (data: any) => {
 
     return async (dispatch: any) => {
-
+        
         try {
             console.log(data)
             const response = await axios.post('http://localhost:5000/api/messenger/user-login', data, config);
-            localStorage.setItem('authToken', response.data.token);
-
+            localStorage.setItem('authToken', response.data.token);            
             dispatch({
                 type: LOGIN_SUCCESS,
                 playload: {

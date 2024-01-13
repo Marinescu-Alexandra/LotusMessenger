@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { seenMessage, updateMessage, getFriends } from "@/store/actions/messengerAction"
 import { Socket, io } from 'socket.io-client'
 import { useRouter } from 'next/router'
+import { userLogout } from "@/store/actions/authAction";
 
 import toast, { Toaster } from 'react-hot-toast'
 
@@ -119,6 +120,14 @@ export default function Home() {
             }
         }
     }, [socketMessage, selectedFriendData])
+
+    useEffect(() => {
+        if (socketRef.current && currentUserInfo) {
+            socketRef.current.on('removeOtherActiveInstance', (data: any) => {
+                dispatch(userLogout());
+            })
+        }
+    })
 
     useEffect(() => {
         if (socketRef.current && currentUserInfo) {
