@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import profilePicturePlaceholder from '@/profilePicturePlaceholder.png'
 import dots from '@/dots.png'
@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import moment from 'moment'
 import seen from '@/seen.png'
 import defaultStatus from '@/default.png'
+import { Socket, io } from "socket.io-client";
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -43,8 +44,18 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
 
     const [isClient, setIsClient] = useState(false)
 
+    const socketRef = useRef<Socket | null>(null)
+
+    useEffect(() => {
+        const socket = io('ws://localhost:8000')
+        socketRef.current = socket
+    }, [])
+
     const logout = () => {
         dispatch(userLogout());
+        if (socketRef.current && myInfo) {
+            socketRef.current.emit('logout', myInfo.id)
+        }
     }
 
     useEffect(() => {

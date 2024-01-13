@@ -24,6 +24,10 @@ const findFriend = (id) => {
 
 }
 
+const userLogout = (userId) => {
+    users = users.filter( user => user.userId !== userId)
+}
+
 io.on('connection', (socket) => {
     socket.on('addUser', (userId, userInfo) => {
         console.log('User added... with socket id', socket.id)
@@ -51,6 +55,11 @@ io.on('connection', (socket) => {
         if (user !== undefined) {
             socket.to(user.socketId).emit('messageDeliverResponse', data)
         }
+    })
+
+    socket.on('logout', (userId) => {
+        userLogout(userId)
+        io.emit('getUser', users)
     })
 
     socket.on('typingMessage', (data) => {
