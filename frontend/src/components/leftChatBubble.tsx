@@ -18,13 +18,6 @@ interface LeftChatBubble {
 }
 
 const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, sent, seen, scrollRef, imageUrl }) => {
-    // if (imageUrl) {
-    //     const imagePath: string = imageUrl[0]
-    // } else {
-    //     imageUrl = profilePlaceholder
-    // }
-     
-
     return (
         <div ref={scrollRef} className="flex items-start gap-2.5 ml-4 mt-4 mb-4">
             <Image className="w-8 h-8 rounded-full" src={profilePlaceholder} alt="profilePicPlaceholder" />
@@ -69,7 +62,6 @@ const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, s
                 </div>
             </div>
         </div>
-
     )
 }
 

@@ -65,7 +65,11 @@ export default function Home() {
     })
 
     useEffect(() => {
-        const socket = io('ws://localhost:8000')
+        const socket = io("ws://localhost:8000", {
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000,
+        });
         socketRef.current = socket
         socket.on('getMessage', (data: any) => {
             setSocketMessage(data)
@@ -125,14 +129,22 @@ export default function Home() {
         if (socketRef.current && currentUserInfo) {
             socketRef.current.on('removeOtherActiveInstance', (data: any) => {
                 dispatch(userLogout());
+                if (socketRef.current && currentUserInfo) {
+                    //socketRef.current.emit('logout', currentUserInfo.id)
+                    socketRef.current.emit('removeSocketInstance', currentUserInfo.id)
+                }
             })
         }
     })
 
     useEffect(() => {
-        if (socketRef.current && currentUserInfo) {
-            socketRef.current.emit('addUser', currentUserInfo.id, currentUserInfo)
-        }
+        setTimeout(() => {
+            if (socketRef.current && currentUserInfo) {
+
+                socketRef.current.emit('addUser', currentUserInfo.id, currentUserInfo)
+            }
+        }, 1000)
+
     }, [])
 
     useEffect(() => {

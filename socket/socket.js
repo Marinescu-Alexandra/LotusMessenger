@@ -46,7 +46,19 @@ io.on('connection', (socket) => {
         otherInstance = users.find(user => user.userId === userData.id)
         if (otherInstance) {
             socket.to(otherInstance.socketId).emit('removeOtherActiveInstance', userData.id)
+            console.log('yes')
+        } else {
+            console.log('no')
         }
+    })
+
+    socket.on('removeSocketInstance', (userId) => {
+        otherInstance = users.find(user => user.userId === userId)
+        if (otherInstance) {
+            console.log('removing instance')
+            userRemove(otherInstance.socketId);
+        }
+        
     })
 
     socket.on('sendMessage', (data) => {

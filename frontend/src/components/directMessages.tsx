@@ -48,7 +48,11 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
     const socketRef = useRef<Socket | null>(null)
 
     useEffect(() => {
-        const socket = io('ws://localhost:8000')
+        const socket = io("ws://localhost:8000", {
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000,
+        });
         socketRef.current = socket
     }, [])
 
