@@ -103,10 +103,8 @@ export default function Home() {
                     }
                 })
                 
-                if (selectedFriendData.length > 0) {
-                    dispatch(seenMessage(socketMessage))
-                }
-                
+                dispatch(seenMessage(socketMessage))
+
                 socketRef.current.emit('messageSeen', socketMessage)
 
                 dispatch({
