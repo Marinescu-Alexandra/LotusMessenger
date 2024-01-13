@@ -102,7 +102,7 @@ export default function Home() {
                         message: socketMessage
                     }
                 })
-                
+
                 dispatch(seenMessage(socketMessage))
 
                 socketRef.current.emit('messageSeen', socketMessage)
@@ -152,6 +152,25 @@ export default function Home() {
             }
         }
     }, [socketMessage])
+
+    useEffect(() => {
+        if (selectedFriendData && socketRef.current) {
+            if (selectedFriendData.lastMessageInfo && selectedFriendData.lastMessageInfo.status === 'delivered') {
+                dispatch(seenMessage(selectedFriendData.lastMessageInfo))
+
+                socketRef.current.emit('messageSeen', selectedFriendData.lastMessageInfo)
+
+                dispatch({
+                    type: 'UPDATE_FRIEND_MESSAGE',
+                    payload: {
+                        messageInfo: selectedFriendData.lastMessageInfo,
+                        status: 'seen'
+                    }
+                })
+            }
+        }
+            
+    }, [selectedFriendData])
 
     const dispatch = useAppDispatch()
     useEffect(() => {
