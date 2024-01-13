@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, FC, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import profilePicturePlaceholder from '@/profilePicturePlaceholder.png'
 import dots from '@/dots.png'
@@ -40,6 +40,7 @@ interface LastMessage {
 const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUsers }) => {
 
     const { friends } = useAppSelector(state => state.messenger)
+    const [friendsList, setFriendList] = useState(friends)
     const dispatch = useAppDispatch()
 
     const [isClient, setIsClient] = useState(false)
@@ -57,6 +58,18 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
             socketRef.current.emit('logout', myInfo.id)
         }
     }
+
+    const serachFriend = (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.value.length > 0) {
+            setFriendList(friendsList.filter((friend: any) => friend.username.includes(e.target.value)))
+        } else {
+            setFriendList(friends)
+        }
+    }
+
+    useEffect(() => {
+        setFriendList(friends)
+    }, [friends])
 
     useEffect(() => {
         if (myInfo) {
@@ -107,14 +120,14 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                            50vw"
                         />
                         <div className="text-md text-black w-[85%] mr-4">
-                            <input className="w-full">
+                            <input className="w-full" onChange={serachFriend} type="text">
                             </input>
                         </div>
                     </div>
 
                     <div className="contactsList w-[95%] bg-gray-500 flex-col justify-start items-center overflow-y-scroll no-scrollbar">
                         {
-                            friends?.map((e:any, index: React.Key | null | undefined) => {
+                            friendsList?.map((e:any, index: React.Key | null | undefined) => {
                                 return (
                                     <button key={index} className=" w-full border-b-2 hover:bg-cyan-700 focus:bg-cyan-700">
                                         <div className="bg-transparent w-full flex flex-row justify-start 
@@ -140,7 +153,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                                     <p className={`${e.lastMessageInfo ? (e.lastMessageInfo.status === 'delivered' && myInfo && e.lastMessageInfo.senderId !== myInfo.id) ? 'font-extrabold' : 'font-normal' : '' }`}>
                                                         {
                                                         //(index && lastIndex === index && lastMessage)? console.log(lastMessages) :
-                                                        e.lastMessageInfo ? e.lastMessageInfo.message.text : "No messages yet"
+                                                            e.lastMessageInfo && (e.lastMessageInfo.message !== undefined) ? e.lastMessageInfo.message.text : "No messages yet"
                                                         }
                                                     </p>
                                                 </div>

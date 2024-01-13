@@ -102,9 +102,11 @@ export default function Home() {
                         message: socketMessage
                     }
                 })
-
-                dispatch(seenMessage(socketMessage))
-
+                
+                if (selectedFriendData.length > 0) {
+                    dispatch(seenMessage(socketMessage))
+                }
+                
                 socketRef.current.emit('messageSeen', socketMessage)
 
                 dispatch({

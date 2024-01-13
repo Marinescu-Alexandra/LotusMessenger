@@ -1,6 +1,7 @@
 import {
     FRIEND_GET_SUCCESS, MESSAGE_GET_SUCCESS, SEND_MESSAGE_SUCCESS, SOCKET_MESSAGE, UPDATE_FRIEND_MESSAGE, MESSAGE_SEND_SUCCESS_CLEAR, SEEN_MESSAGE, DELIVER_MESSAGE
 } from '../types/messengerType'
+import { LOGOUT_SUCCESS } from '../types/authType'
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -100,6 +101,14 @@ export const messengerReducer = (state = messengerState, action: any) => {
         }
     }
 
+    if (action.type === LOGOUT_SUCCESS) {
+        return {
+            ...state,
+            friends: [],
+            messages: [],
+            messageSendSuccess: false,
+        }
+    }
 
     return state;
 }

@@ -1,4 +1,5 @@
 import { GET_SELECTED_FRIEND_SUCCESS } from '../types/messengerType'
+import { LOGOUT_SUCCESS } from '../types/authType'
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -18,6 +19,11 @@ export const selectedFriendReducer = (state = selectedFriendState, action: any) 
             return {
                 ...state,
                 selectedFriendData: action.payload.selectedFriendData
+            }
+        case LOGOUT_SUCCESS:
+            return {
+                ...state,
+                selectedFriendData: {}
             }
         default:
             return {

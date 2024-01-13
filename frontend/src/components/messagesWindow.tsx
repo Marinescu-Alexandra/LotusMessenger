@@ -230,6 +230,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                             messages?.map((e: { senderId: any; message: { text: string; image:string[] }; createdAt: string}, index: React.Key | null | undefined) => {
                                 if (e.senderId === selectedFriendData._id) {
                                     return (
+                                        e.message?
                                         <LeftChatBubble
                                             scrollRef={scrollRefLeft}
                                             key={index}
@@ -238,7 +239,9 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                             sent={true}
                                             seen={false}
                                             imageUrl={e.message.image}
-                                        />
+                                            />
+                                        :
+                                        <></>
                                     )
                                 } else {
                                     return (
