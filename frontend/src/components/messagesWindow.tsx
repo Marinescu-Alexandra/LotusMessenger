@@ -12,6 +12,7 @@ import { getMessages, messageSend, imageMessageSend } from "@/store/actions/mess
 import LeftChatBubble from "./leftChatBubble";
 import RightChatBubble from "./rightChatBubble";
 import { Socket, io } from 'socket.io-client'
+import moment from 'moment'
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -35,10 +36,28 @@ interface MessagesWindowProps {
 
 const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, activeUsers, typying }) => {
 
-    const { selectedFriendData } = useAppSelector(state => state.selectedFriend)
-    const { messages, messageSendSuccess } = useAppSelector(state => state.messenger)
+    const { selectedFriendData} = useAppSelector(state => state.selectedFriend)
+    const { messages, messageSendSuccess, friends } = useAppSelector(state => state.messenger)
     const [newMessage, setNewMessage] = useState('')
     const [isContactInfoOpen, setContactInfoOpen] = useState(false)
+
+    const [lasMessageIsSeen, setLastMessageIsSeen] = useState(false)
+
+    useEffect(() => {
+        if (selectedFriendData && friends) {
+            const currentFriendData = friends.find((friend: any) => friend._id === selectedFriendData._id)
+            if (currentUserInfo && currentFriendData && currentFriendData.lastMessageInfo !== null) {
+                console.log(currentFriendData.lastMessageInfo.receiverId, currentUserInfo.id)
+                if (currentFriendData.lastMessageInfo.senderId === currentUserInfo.id) {
+                    if (currentFriendData.lastMessageInfo.status === 'seen') {
+                        setLastMessageIsSeen(true)
+                    } else {
+                        setLastMessageIsSeen(false)
+                    }
+                }
+            } 
+        }
+    }, [friends, selectedFriendData])
 
     const scrollRefLeft = useRef<HTMLDivElement | null>(null);
     const scrollRefRight = useRef<HTMLDivElement | null>(null);
@@ -208,14 +227,14 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     </div>
                     <div className="chatWindow h-[82%] w-full flex flex-col overflow-y-scroll no-scrollbar">
                         {
-                            messages?.map((e: { senderId: any; message: { text: string; image:string[] }; }, index: React.Key | null | undefined) => {
+                            messages?.map((e: { senderId: any; message: { text: string; image:string[] }; createdAt: string}, index: React.Key | null | undefined) => {
                                 if (e.senderId === selectedFriendData._id) {
                                     return (
                                         <LeftChatBubble
                                             scrollRef={scrollRefLeft}
                                             key={index}
                                             message={e.message.text}
-                                            deliverTime="17:40"
+                                            deliverTime={moment(e.createdAt).startOf('minute').fromNow()}
                                             sent={true}
                                             seen={false}
                                             imageUrl={e.message.image}
@@ -223,26 +242,35 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                     )
                                 } else {
                                     return (
-                                        <RightChatBubble
-                                            scrollRef={scrollRefRight}
-                                            key={index}
-                                            message={e.message.text}
-                                            deliverTime="17:40"
-                                            sent={true}
-                                            seen={false}
-                                            imageUrl={e.message.image}
-                                        />
+                                        <>
+                                            <RightChatBubble
+                                                scrollRef={scrollRefRight}
+                                                key={index}
+                                                message={e.message.text}
+                                                deliverTime={moment(e.createdAt).startOf('minute').fromNow()}
+                                                sent={true}
+                                                seen={lasMessageIsSeen}
+                                                imageUrl={e.message.image}
+                                            />
+                                            <div className="flex flex-col items-end mr-5">
+                                                {
+                                                    index === messages.length - 1 && lasMessageIsSeen === true ?
+                                                        <p>Seen</p> : ''
+                                                }
+
+                                            </div>
+                                        </>
+
                                     )
                                 }
                             })
-                        }
-                        {
-
-                            typying && typying.message && typying.senderId == selectedFriendData._id ?
-                                <p className="ml-14 mb-2 left-0 text-lg">Typing Message...</p> : ''
-                        }
-                        
+                        }                        
                     </div>
+                    {
+
+                        typying && typying.message && typying.senderId == selectedFriendData._id ?
+                            <p className="ml-14 mb-2 left-0 text-lg">Typing Message...</p> : ''
+                    }
                     <div className="writeMessage w-full min-h-[5%] flex flex-row justify-between items-center gap-4 px-4 my-4">
                         <button onClick={() => selectInputMedia()}>
                             <input onChange={mediaSelected} multiple={true} type="file" id="inputFile" ref={inputFile} style={{ display: "none" }} />

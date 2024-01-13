@@ -3,6 +3,7 @@ const validator = require('validator')
 const registerModel = require('../models/authModel')
 const bycrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+var Cookies = require('cookies')
 
 module.exports.userRegister = async (req, res) => {
     console.log(req.body)
@@ -59,7 +60,7 @@ module.exports.userRegister = async (req, res) => {
                     })
 
                     const options = { expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000) }
-
+                    console.log(JSON.stringify(req.headers));
                     try {
                         res.status(201).cookie('authToken', token, options).json({
                             successMessage: 'Registration complete.', token
@@ -167,4 +168,10 @@ module.exports.userLogin = async (req, res) => {
             })
         }
     }
+}
+
+module.exports.userLogout = (req, res) => {
+    res.status(201).cookie('authToken', '').json({
+        success: true
+    })
 }

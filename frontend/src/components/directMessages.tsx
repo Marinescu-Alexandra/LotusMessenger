@@ -6,6 +6,7 @@ import editing from '@/editing.png'
 import delivered from '@/read.png'
 import searchIcon from '@/loupe.png'
 import { getSelectedFriend } from "@/store/actions/messengerAction"
+import { userLogout } from "@/store/actions/authAction";
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import moment from 'moment'
 import seen from '@/seen.png'
@@ -42,6 +43,10 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
 
     const [isClient, setIsClient] = useState(false)
 
+    const logout = () => {
+        dispatch(userLogout());
+    }
+
     useEffect(() => {
         if (myInfo) {
             setIsClient(true)
@@ -71,6 +76,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                 sizes="(max-width: 768px) 100vw,
                                            (max-width: 1200px) 50vw,
                                            50vw"
+                                onClick={() => logout()}
                             />
                             <Image src={dots} alt='dotsIcon' width={25} height={25} className=""
                                 priority
@@ -120,7 +126,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                             <div className="flex flex-row justify-between items-center w-full">
                                                 <div className="flex flex-col justify-center items-start">
                                                     <h2>{e.username}</h2>
-                                                    <p className={`${e.lastMessageInfo ? (e.lastMessageInfo.status === 'delivered' && myInfo && e.lastMessageInfo.senderId !== myInfo.id) ? 'font-bold' : 'font-normal' : '' }`}>
+                                                    <p className={`${e.lastMessageInfo ? (e.lastMessageInfo.status === 'delivered' && myInfo && e.lastMessageInfo.senderId !== myInfo.id) ? 'font-extrabold' : 'font-normal' : '' }`}>
                                                         {
                                                         //(index && lastIndex === index && lastMessage)? console.log(lastMessages) :
                                                         e.lastMessageInfo ? e.lastMessageInfo.message.text : "No messages yet"

@@ -1,7 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { FC } from "react"
 import Image from "next/image"
-import profilePlaceholder from '@/profilePicturePlaceholder.png'
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -20,8 +19,8 @@ interface RightChatBubble {
 const RightChatBubble: FC<RightChatBubble> = ({ className, message, deliverTime, sent, seen, scrollRef, imageUrl }) => {
 
     return (
-        <div ref={scrollRef} className="flex flex-row items-end gap-2.5 ml-4 mt-4 mb-4 justify-end mr-4">
-            <div className="flex flex-col w-full max-w-[320px] leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-l-xl rounded-b-xl rounded-es-xl dark:bg-gray-700">
+        <div ref={scrollRef} className="flex flex-col items-end gap-2.5 ml-4 mt-4 mb-4 justify-end mr-4">
+            <div className="flex flex-col w-full max-w-[320px] leading-1.5 p-4 border-gray-200 bg-gray-100 rounded-l-xl rounded-b-xl rounded-es-xl dark:bg-gray-800">
                 <p className="text-sm font-normal pb-2.5 text-gray-900 dark:text-white break-words">{message}</p>
                 {
                     (imageUrl && imageUrl.length === 1) &&
@@ -49,7 +48,7 @@ const RightChatBubble: FC<RightChatBubble> = ({ className, message, deliverTime,
                                             </svg>
                                         </button>
                                     </div>
-                                    <img src={`/userImages/${url}`} alt="messageImage" className="rounded-lg object-cover w-[140px] h-[140px]"  />
+                                    <img src={`/userImages/${url}`} alt="messageImage" className="rounded-lg object-cover w-[140px] h-[140px]" />
                                 </div>
                             )
                         })}
@@ -61,7 +60,6 @@ const RightChatBubble: FC<RightChatBubble> = ({ className, message, deliverTime,
                 </div>
             </div>
         </div>
-
     )
 }
 

@@ -1,5 +1,5 @@
 
-import { REGISTER_FAIL, REGISTER_SUCCESS, SUCCESS_MESSAGE_CLEAR, ERRORS_CLEAR, LOGIN_FAIL, LOGIN_SUCCESS } from "../types/authType"
+import { REGISTER_FAIL, REGISTER_SUCCESS, SUCCESS_MESSAGE_CLEAR, ERRORS_CLEAR, LOGIN_FAIL, LOGIN_SUCCESS, LOGOUT_SUCCESS } from "../types/authType"
 import { jwtDecode } from "jwt-decode";
 
 interface Dictionary<T> {
@@ -93,6 +93,14 @@ export default function authReducer(state = authState, action: any) {
                 ...state,
                 errors: []
             }
+        case LOGOUT_SUCCESS:
+            return {
+                ...state,
+                authenticate: false,
+                myInfo: {},
+                successMessage: 'Logout Successfull'
+            }
+
         default:
             return state
     }

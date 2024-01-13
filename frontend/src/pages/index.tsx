@@ -5,8 +5,9 @@ import MessagesWinow from "@/components/messagesWindow"
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { seenMessage, updateMessage, getFriends } from "@/store/actions/messengerAction"
 import { Socket, io } from 'socket.io-client'
+import { useRouter } from 'next/router'
 
-import toast, {Toaster} from 'react-hot-toast'
+import toast, { Toaster } from 'react-hot-toast'
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -35,6 +36,8 @@ type SocketTypyingMessage = {
 
 export default function Home() {
     const { friends, messages } = useAppSelector(state => state.messenger)
+    const { authenticate } = useAppSelector(state => state.auth);
+    const router = useRouter()
     const { myInfo } = useAppSelector(state => state.auth)
     const { selectedFriendData } = useAppSelector(state => state.selectedFriend)
 
@@ -45,6 +48,18 @@ export default function Home() {
     const socketRef = useRef<Socket | null>(null)
     const [socketMessage, setSocketMessage] = useState<Partial<SocketMessage>>({})
     const [typingMessage, setTypingMessage] = useState<Partial<SocketTypyingMessage>>({})
+
+    const [isClient, setIsClient] = useState(false)
+
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
+
+    useEffect(() => {
+        if (!authenticate) {
+            router.push('/login')
+        }
+    })
 
     useEffect(() => {
         const socket = io('ws://localhost:8000')
@@ -143,25 +158,28 @@ export default function Home() {
         dispatch(getFriends())
     }, [dispatch]);
 
-    return (
-        <div>
-            <Head>
-                <title>Messenger</title>
-                <meta name="login page" content="content" />
-            </Head>
-            <main className="w-full min-h-screen bg-neutral-800 flex flex-row ">
-                <Toaster
-                    position={'top-right'}
-                    reverseOrder={false}
-                    toastOptions={{
-                        style: {
-                            fontSize: '18px'
-                        }
-                    }}
-                />
-                <DirectMessages className="w-[30%] bg-slate-400" myInfo={myInfo} activeUsers={activeUsers} />
-                <MessagesWinow className="w-[70%] bg-slate-500" currentUserInfo={myInfo} activeUsers={activeUsers} typying={typingMessage} />
-            </main>
-        </div>
-    )
+    if (authenticate && isClient) {
+        return (
+            <>
+                <Head>
+                    <title>Messenger</title>
+                    <meta name="login page" content="content" />
+                </Head>
+                <main className="w-full min-h-screen bg-neutral-800 flex flex-row ">
+                    <Toaster
+                        position={'top-right'}
+                        reverseOrder={false}
+                        toastOptions={{
+                            style: {
+                                fontSize: '18px'
+                            }
+                        }}
+                    />
+                    <DirectMessages className="w-[30%] bg-slate-400" myInfo={myInfo} activeUsers={activeUsers} />
+                    <MessagesWinow className="w-[70%] bg-slate-500" currentUserInfo={myInfo} activeUsers={activeUsers} typying={typingMessage} />
+                </main> 
+            </>
+
+        )
+    }
 }

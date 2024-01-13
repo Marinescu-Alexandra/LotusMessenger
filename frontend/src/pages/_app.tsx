@@ -22,7 +22,7 @@ export default function App({ Component, pageProps }: AppProps) {
             </Head>
             <main className={`${montserrat.variable} font-mont bg-light dark:bg-dark w-full min-h-screen`}>
                 <Provider store={store}>
-                    <Component key={router.asPath} {...pageProps} />
+                        <Component key={router.asPath} {...pageProps} />
                 </Provider>
                 
             </main>
