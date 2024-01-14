@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react"
 import DirectMessages from "@/components/directMessages"
 import MessagesWinow from "@/components/messagesWindow"
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { seenMessage, updateMessage, getFriends } from "@/store/actions/messengerAction"
+import { seenMessage, updateMessage, getFriends, deliverUnsentMessages, getUnseenMessages, getMessages } from "@/store/actions/messengerAction"
 import { Socket, io } from 'socket.io-client'
 import { useRouter } from 'next/router'
 import { userLogout } from "@/store/actions/authAction";
@@ -30,6 +30,16 @@ type SocketMessage = {
     status: string,
 }
 
+interface Message {
+    senderId: string,
+    message: {
+        text: string,
+        image: string[]
+    },
+    createdAt: string,
+    status: string
+}
+
 type SocketTypyingMessage = {
     senderId: string,
     receiverId: string,
@@ -37,7 +47,7 @@ type SocketTypyingMessage = {
 }
 
 export default function Home() {
-    const { friends, messages, newUserAdded } = useAppSelector(state => state.messenger)
+    const { friends, messages, newUserAdded, undeliveredMessages } = useAppSelector(state => state.messenger)
     const { authenticate } = useAppSelector(state => state.auth);
     const router = useRouter()
     const { myInfo } = useAppSelector(state => state.auth)
@@ -56,21 +66,12 @@ export default function Home() {
     const dispatch = useAppDispatch()
 
     useEffect(() => {
-        setIsClient(true)
-    }, [])
-
-    useEffect(() => {
-        if (!authenticate) {
-            router.push('/login')
-        }
-    })
-
-    useEffect(() => {
         const socket = io("ws://localhost:8000", {
             reconnection: true,
             reconnectionAttempts: Infinity,
             reconnectionDelay: 1000,
         });
+
         socketRef.current = socket
         socket.on('getMessage', (data: any) => {
             setSocketMessage(data)
@@ -98,7 +99,80 @@ export default function Home() {
                 }
             })
         })
+
+        socketRef.current.on('removeOtherActiveInstance', (data: any) => {
+            dispatch(userLogout());
+            if (socketRef.current && currentUserInfo) {
+                socketRef.current.emit('removeSocketInstance', currentUserInfo.id)
+            }
+        })
+
+        socketRef.current.on('getUser', (users: any) => {
+            const filteredUsers = users.filter((user: any) => user.userId !== currentUserInfo.id)
+            setActiveUsers(filteredUsers)
+        })
+
+        socketRef.current.on('newUserAdded', (data: boolean) => {
+            dispatch({
+                type: 'NEW_USER_ADDED',
+                payload: {
+                    newUserAdded: data
+                }
+            })
+        })
     }, [socketMessage, typingMessage])
+
+    // GET SELECTED FRIEND MESSAGES
+    useEffect(() => {
+        if (selectedFriendData && friends) {
+            dispatch(getMessages(selectedFriendData._id))
+        }
+    }, [friends, selectedFriendData])
+
+    // GET ALL UNDELIVERED MESSAGES
+    useEffect(() => {
+        if (friends) {
+            friends.forEach((friend:any) => {
+                if (friend.lastMessageInfo && friend.lastMessageInfo.status === 'unseen') {
+                    dispatch(deliverUnsentMessages(friend._id))
+                }
+            });
+        }
+    }, [friends])
+
+    // MARK ALL UNDELIVERED MESSAGES AS DELIVERED
+    useEffect(() => {
+        if (Object.keys(undeliveredMessages).length > 0) {
+            undeliveredMessages.forEach((undeliveredMessage: Message) => {
+                dispatch(updateMessage(undeliveredMessage))
+            })
+            if (socketRef.current) {
+                socketRef.current.emit('deliverMessage', undeliveredMessages[undeliveredMessages.length - 1])
+                dispatch({
+                    type: 'UPDATE_FRIEND_MESSAGE',
+                    payload: {
+                        messageInfo: undeliveredMessages[undeliveredMessages.length - 1],
+                        status: 'delivered'
+                    }
+                })
+            }
+            dispatch({
+                type: "UNDELIVERED_GET_SUCCESS_CLEAR",
+            })
+        }
+    }, [undeliveredMessages])
+
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
+
+
+    useEffect(() => {
+        if (!authenticate) {
+            router.push('/login')
+        }
+    })
+
 
     useEffect(() => {
         if (socketMessage && selectedFriendData && socketRef.current) {
@@ -126,41 +200,12 @@ export default function Home() {
     }, [socketMessage, selectedFriendData])
 
     useEffect(() => {
-        if (socketRef.current && currentUserInfo) {
-            socketRef.current.on('removeOtherActiveInstance', (data: any) => {
-                dispatch(userLogout());
-                if (socketRef.current && currentUserInfo) {
-                    //socketRef.current.emit('logout', currentUserInfo.id)
-                    socketRef.current.emit('removeSocketInstance', currentUserInfo.id)
-                }
-            })
-        }
-    })
-
-    useEffect(() => {
         setTimeout(() => {
             if (socketRef.current && currentUserInfo) {
                 socketRef.current.emit('addUser', currentUserInfo.id, currentUserInfo)
             }
         }, 1000)
 
-    }, [])
-
-    useEffect(() => {
-        if (socketRef.current && currentUserInfo) {
-            socketRef.current.on('getUser', (users: any) => {
-                const filteredUsers = users.filter((user: any) => user.userId !== currentUserInfo.id)
-                setActiveUsers(filteredUsers)
-            })
-            socketRef.current.on('newUserAdded', (data: boolean) => {
-                dispatch({
-                    type: 'NEW_USER_ADDED',
-                    payload: {
-                        newUserAdded: data
-                    }
-                })
-            })
-        }
     }, [])
 
     useEffect(() => {
@@ -185,7 +230,8 @@ export default function Home() {
 
     useEffect(() => {
         if (selectedFriendData && socketRef.current) {
-            if (selectedFriendData.lastMessageInfo && selectedFriendData.lastMessageInfo.status === 'delivered') {
+            if (selectedFriendData.lastMessageInfo && (selectedFriendData.lastMessageInfo.status === 'delivered' || selectedFriendData.lastMessageInfo.status === 'unseen')) {
+                
                 dispatch(seenMessage(selectedFriendData.lastMessageInfo))
 
                 socketRef.current.emit('messageSeen', selectedFriendData.lastMessageInfo)
@@ -201,7 +247,6 @@ export default function Home() {
         }
             
     }, [selectedFriendData])
-
     
 
     useEffect(() => {

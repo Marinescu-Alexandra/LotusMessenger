@@ -12,13 +12,12 @@ interface LeftChatBubble {
     className?: string,
     message: string,
     deliverTime: string,
-    sent: boolean,
-    seen: boolean,
     scrollRef: any
     imageUrl?: string[]
+    status: string
 }
 
-const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, sent, seen, scrollRef, imageUrl }) => {
+const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, scrollRef, imageUrl, status }) => {
     return (
         <div ref={scrollRef} className="flex items-start gap-2.5 ml-4 mt-4 mb-4 z-20">
             <Image className="w-8 h-8 rounded-full" src={profilePlaceholder} alt="profilePicPlaceholder" />

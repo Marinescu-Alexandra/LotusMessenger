@@ -1,6 +1,6 @@
 import {
     FRIEND_GET_SUCCESS, MESSAGE_GET_SUCCESS, SEND_MESSAGE_SUCCESS, SOCKET_MESSAGE, UPDATE_FRIEND_MESSAGE,
-    MESSAGE_SEND_SUCCESS_CLEAR, SEEN_MESSAGE, DELIVER_MESSAGE, NEW_USER_ADDED, NEW_USER_ADDED_CLEAR
+    MESSAGE_SEND_SUCCESS_CLEAR, SEEN_MESSAGE, DELIVER_MESSAGE, NEW_USER_ADDED, NEW_USER_ADDED_CLEAR, UNDELIVERED_GET_SUCCESS, UNDELIVERED_GET_SUCCESS_CLEAR
 } from '../types/messengerType'
 import { LOGOUT_SUCCESS } from '../types/authType'
 
@@ -12,14 +12,16 @@ interface MessengerState {
     friends: Dictionary<string>[],
     messages: Dictionary<string>[],
     messageSendSuccess: boolean,
-    newUserAdded: boolean
+    newUserAdded: boolean,
+    undeliveredMessages: Dictionary<string>[]
 }
 
 const messengerState: MessengerState = {
     friends: [],
     messages: [],
     messageSendSuccess: false,
-    newUserAdded: false
+    newUserAdded: false,
+    undeliveredMessages: []
 }
 
 export const messengerReducer = (state = messengerState, action: any) => {
@@ -113,6 +115,20 @@ export const messengerReducer = (state = messengerState, action: any) => {
         return {
             ...state,
             friends: newFriends
+        }
+    }
+
+    if (action.type === UNDELIVERED_GET_SUCCESS) {
+        return {
+            ...state,
+            undeliveredMessages: action.payload.undeliveredMessages
+        }
+    }
+
+    if (action.type === UNDELIVERED_GET_SUCCESS_CLEAR) {
+        return {
+            ...state,
+            undeliveredMessages: []
         }
     }
 

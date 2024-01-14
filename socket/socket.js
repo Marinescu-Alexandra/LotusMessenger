@@ -58,9 +58,17 @@ io.on('connection', (socket) => {
         
     })
 
+    // socket.on('checkUndeliveredMessages', (message) => {
+    //     const user = findFriend(message.senderId)
+    //     if (user !== undefined) {
+    //         socket.to(user.socketId).emit('getMessage', data)
+    //     }
+    // })
+
     socket.on('sendMessage', (data) => {
         const user = findFriend(data.receiverId)
-        console.log('seenMessage ',data)
+        console.log('sendMessage ', data)
+        console.log('user')
         if (user !== undefined) {
             socket.to(user.socketId).emit('getMessage', data)
         }
@@ -76,6 +84,7 @@ io.on('connection', (socket) => {
     socket.on('deliverMessage', (data) => {
         console.log('deliverMessage data', data)
         const user = findFriend(data.senderId)
+        console.log(user)
         if (user !== undefined) {
             socket.to(user.socketId).emit('messageDeliverResponse', data)
         }

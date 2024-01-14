@@ -155,7 +155,7 @@ module.exports.messageGet = async(req, res) => {
             }]
 
         })
-        getAllMessages = getAllMessages.filter(e => e.senderId === currentUserId && e.receiverId === friendId || e.receiverId === currentUserId && e.senderId === friendId)
+        //getAllMessages = getAllMessages.filter(e => e.senderId === currentUserId && e.receiverId === friendId || e.receiverId === currentUserId && e.senderId === friendId)
         res.status(200).json({
             success: true,
             messages: getAllMessages
@@ -167,6 +167,40 @@ module.exports.messageGet = async(req, res) => {
             }
         })
     }
+}
+
+module.exports.undeliveredMessagesGet = async (req, res) => {
+    const currentUserId = req.myId;
+    const friendId = req.params.id
+
+    try {
+        let getAllUndeliveredMessages = await messageModel.find({
+            $and: [{
+                senderId: {
+                    $eq: friendId
+                }
+            }, {
+                receiverId: {
+                    $eq: currentUserId
+                }
+            }, {
+                status: {
+                    $eq: 'unseen'
+                }
+            }]
+        })
+        res.status(200).json({
+            success: true,
+            undeliveredMessages: getAllUndeliveredMessages
+        })
+    } catch {
+        res.status(500).json({
+            error: {
+                errorMessage: ['Internal server error']
+            }
+        })
+    }
+    
 }
 
 module.exports.imageMessageSend = async (req, res) => {

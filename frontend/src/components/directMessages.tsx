@@ -3,13 +3,13 @@ import Image from "next/image";
 import profilePicturePlaceholder from '@/profilePicturePlaceholder.png'
 import dots from '@/dots.png'
 import editing from '@/edit.png'
-import delivered from '@/read.png'
 import searchIcon from '@/loupe.png'
 import { getSelectedFriend } from "@/store/actions/messengerAction"
 import { userLogout } from "@/store/actions/authAction";
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import moment from 'moment'
 import seen from '@/seen.png'
+import delivered from '@/read.png'
 import defaultStatus from '@/default.png'
 import { Socket, io } from "socket.io-client";
 import logoutIcon from '@/logout.png'

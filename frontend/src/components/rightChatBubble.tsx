@@ -2,6 +2,8 @@
 import React, { FC } from "react"
 import Image from "next/image"
 import seenIcon from '@/seen.png'
+import delivered from '@/read.png'
+import defaultStatus from '@/default.png'
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -11,13 +13,12 @@ interface RightChatBubble {
     className?: string,
     message: string,
     deliverTime: string,
-    sent: boolean,
-    seen: boolean,
+    status: string
     scrollRef: any
     imageUrl?: string[]
 }
 
-const RightChatBubble: FC<RightChatBubble> = ({ className, message, deliverTime, sent, seen, scrollRef, imageUrl }) => {
+const RightChatBubble: FC<RightChatBubble> = ({ className, message, deliverTime, status, scrollRef, imageUrl }) => {
 
     return (
         <div ref={scrollRef} className="flex flex-row items-end gap-2.5 ml-4 mt-4 mb-4 justify-end mr-4 z-20">
@@ -57,7 +58,17 @@ const RightChatBubble: FC<RightChatBubble> = ({ className, message, deliverTime,
                 }
                 <div className="flex flex-row justify-end items-center gap-2 ml-4">
                     <span className="text-sm font-normal text-gray-400">{deliverTime}</span>
-                    <Image src={seenIcon} alt='readIcon' width={25} height={25} className="rounded-full" priority />
+                    {
+                        status === 'seen' ?
+                            <Image src={seenIcon} alt='readIcon' width={25} height={25} className="rounded-full" priority />
+                            :
+                            status === 'delivered' ?
+                                <Image src={delivered} alt='readIcon' width={25} height={25} className="rounded-full" priority />
+                                :
+                                <Image src={defaultStatus} alt='readIcon' width={25} height={25} className="rounded-full" priority />
+                                                             
+                    }
+                    
                 </div>
                 
             </div>

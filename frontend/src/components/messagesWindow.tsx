@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, LegacyRef, RefObject, useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, FC, LegacyRef, RefObject, use, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import profilePicturePlaceholder from '@/profilePicturePlaceholder.png'
 import sendIcon from '@/send.png'
@@ -31,7 +31,8 @@ interface Message {
         text: string,
         image: string[]
     },
-    createdAt: string
+    createdAt: string,
+    status: string
 }
 
 
@@ -46,6 +47,16 @@ interface MessagesWindowProps {
 
 const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, activeUsers, typying }) => {
 
+    const variantsMessagesWindow = {
+        open: { width: '60%' },
+        closed: { width: '100%' },
+    }
+
+    const variantsContactInfo = {
+        open: { width: ['0%', '40%'] },
+        closed: { width: ['40%', '0%'] },
+    }
+
     const { selectedFriendData } = useAppSelector(state => state.selectedFriend)
     const { messages, messageSendSuccess, friends } = useAppSelector(state => state.messenger)
 
@@ -54,34 +65,46 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
     const [lasMessageIsSeen, setLastMessageIsSeen] = useState(false)
     const [isMediaSelected, setMediaSelected] = useState(false)
 
-    useEffect(() => {
-        if (selectedFriendData && friends) {
-            const currentFriendData = friends.find((friend: any) => friend._id === selectedFriendData._id)
-            if (currentUserInfo && currentFriendData && currentFriendData.lastMessageInfo !== null) {
-                console.log(currentFriendData.lastMessageInfo.receiverId, currentUserInfo.id)
-                if (currentFriendData.lastMessageInfo.senderId === currentUserInfo.id) {
-                    if (currentFriendData.lastMessageInfo.status === 'seen') {
-                        setLastMessageIsSeen(true)
-                    } else {
-                        setLastMessageIsSeen(false)
-                    }
-                }
-            }
-        }
-    }, [friends, selectedFriendData])
-
     const scrollRefLeft = useRef<HTMLDivElement | null>(null);
     const scrollRefRight = useRef<HTMLDivElement | null>(null);
     const inputFile = useRef<HTMLInputElement | null>(null);
 
     const dispatch = useAppDispatch()
-
     const socketRef = useRef<Socket | null>(null)
 
+    const [rightBubbleIsLast, setRightBubbleIsLast] = useState(false)
+
     useEffect(() => {
-        const socket = io('ws://localhost:8000')
+        const socket = io("ws://localhost:8000", {
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000,
+        });
         socketRef.current = socket
     }, [])
+
+    useEffect(() => {
+        if (messageSendSuccess) {
+            if (socketRef.current && currentUserInfo) {
+                socketRef.current.emit('sendMessage', messages[messages.length - 1])
+                dispatch({
+                    type: 'UPDATE_FRIEND_MESSAGE',
+                    payload: {
+                        messageInfo: messages[messages.length - 1]
+                    }
+                })
+                dispatch({
+                    type: 'MESSAGE_SEND_SUCCESS_CLEAR',
+                })
+            }
+        }
+    }, [messageSendSuccess])
+
+    useEffect(() => {
+        scrollRefLeft.current?.scrollIntoView({ behavior: 'smooth' });
+        scrollRefRight.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [messages])
+
 
     const inputHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setNewMessage(e.target.value)
@@ -153,44 +176,6 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
         // }
     }
 
-    useEffect(() => {
-        if (messageSendSuccess) {
-            if (socketRef.current && currentUserInfo) {
-                socketRef.current.emit('sendMessage', messages[messages.length - 1])
-                dispatch({
-                    type: 'UPDATE_FRIEND_MESSAGE',
-                    payload: {
-                        messageInfo: messages[messages.length - 1]
-                    }
-                })
-                dispatch({
-                    type: 'MESSAGE_SEND_SUCCESS_CLEAR',
-                })
-            }
-        }
-    }, [messageSendSuccess])
-
-    useEffect(() => {
-        scrollRefLeft.current?.scrollIntoView({ behavior: 'smooth' });
-        scrollRefRight.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages])
-
-    useEffect(() => {
-        if (selectedFriendData) {
-            dispatch(getMessages(selectedFriendData._id))
-        }
-    }, [dispatch, selectedFriendData])
-
-    const variantsMessagesWindow = {
-        open: { width: '60%' },
-        closed: { width: '100%' },
-    }
-
-    const variantsContactInfo = {
-        open: { width: ['0%', '40%'] },
-        closed: { width: ['40%', '0%'] },
-    }
-
     return (
         <>
             <div className={`flex flex-row justify-start items-center ${className}`}>
@@ -254,8 +239,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                                 key={index}
                                                 message={e.message.text}
                                                 deliverTime={moment(e.createdAt).format('kk:mm')}
-                                                sent={true}
-                                                seen={false}
+                                                status={e.status}
                                                 imageUrl={e.message.image}
                                             />
                                     )
@@ -267,17 +251,9 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                                 key={index}
                                                 message={e.message.text}
                                                 deliverTime={moment(e.createdAt).format('kk:mm')}
-                                                sent={true}
-                                                seen={lasMessageIsSeen}
+                                                status={e.status}
                                                 imageUrl={e.message.image}
                                             />
-                                            <div className="flex flex-col items-end mr-5">
-                                                {
-                                                    index === messages.length - 1 && lasMessageIsSeen === true ?
-                                                        <p>Seen</p> : ''
-                                                }
-
-                                            </div>
                                         </>
 
                                     )
