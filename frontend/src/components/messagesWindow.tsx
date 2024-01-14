@@ -14,6 +14,7 @@ import RightChatBubble from "./rightChatBubble";
 import { Socket, io } from 'socket.io-client'
 import moment from 'moment'
 import img from '@/img.png'
+import imgBg from '@/bg.png'
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -183,7 +184,10 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
     return (
         <>
             <div className={`flex flex-row justify-start items-center ${className}`}>
-                <motion.div className="messageWindow w-full h-screen flex flex-col justify-start items-center"
+                <Image src={imgBg} className="fixed z-1 overflow-hidden" alt="bg" >
+
+                </Image>
+                <motion.div className="messageWindow  w-full h-screen flex flex-col justify-start items-center"
                     initial={false}
                     animate={isContactInfoOpen ? "open" : "closed"}
                     variants={variantsMessagesWindow}
@@ -192,26 +196,27 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                         layout: { duration: 0.6 }
                     }}
                 >
-                    <div className="topbar w-full min-h-[9%] flex flex-row justify-between items-center px-6 bg-darkBgMain border-b border-neutral-400">
-                        <div className="flex flex-row gap-2 justify-center items-center">
+                    <div className="topbar z-20 w-full min-h-[7%] flex flex-row justify-between items-center px-6 bg-gradient-to-r from-orange via-magneta to-crayola border-b-2 border-darkBgPrimary">
 
-                            <div className="flex flex-row justify-between items-center px-2 gap-3">
+                        <div className="flex flex-row justify-center items-center px-2 gap-2">
+                            <div className="flex flex-row justify-center items-end -space-x-3.5">
                                 <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={50} height={50} className="rounded-full"
                                     priority
                                     sizes="(max-width: 768px) 100vw,
-                                           (max-width: 1200px) 50vw,
-                                           50vw"
+                                            (max-width: 1200px) 50vw,
+                                            50vw"
                                 />
-                                <h2 className="font-semibold text-xl w-full text-center text-white">
-                                    {selectedFriendData?.username ? selectedFriendData.username : 'Contact Username'}
-                                </h2>
-
                                 {
                                     activeUsers && activeUsers.find((user: any) => user.userId === selectedFriendData._id) ?
-                                        <div className="w-3 h-3 bg-green-500 rounded-full relative border-2 bottom-[14px] left-[45px]"></div> : ''
+                                        <div className="w-4 h-4 bg-green-500 rounded-full border-2 border-orange"></div> : ''
                                 }
                             </div>
+
+                            <h2 className="font-bold text-xl text-black">
+                                {selectedFriendData?.username ? selectedFriendData.username : 'Contact Username'}
+                            </h2>
                         </div>
+
                         <button
                             onClick={() => setContactInfoOpen(true)}
                             disabled={Object.keys(selectedFriendData).length !== 0 ? false : true}
@@ -226,7 +231,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                         </button>
 
                     </div>
-                    <div className="chatWindow h-[81%] w-full flex flex-col overflow-y-scroll no-scrollbar bg-darkBgMain">
+                    <div className="chatWindow h-[83%] w-full flex flex-col overflow-y-scroll no-scrollbar bg-darkBgMain">
                         {
                             messages?.map((e: { senderId: any; message: { text: string; image: string[] }; createdAt: string }, index: React.Key | null | undefined) => {
                                 if (e.senderId === selectedFriendData._id) {
@@ -274,8 +279,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                         typying && typying.message && typying.senderId == selectedFriendData._id ?
                             <p className="ml-14 mb-2 left-0 text-lg">Typing Message...</p> : ''
                     }
-                    <div className="writeMessage w-full min-h-[10%] ">
-                        <div className="flex w-full h-full flex-row justify-center items-center border-t border-neutral-400">
+                    <div className="writeMessage w-full min-h-[10%] z-20">
+                        <div className="flex w-full h-full flex-row justify-center items-center border-t-2 border-darkBgPrimary">
                             <button onClick={() => selectInputMedia()}>
                                 <input onChange={mediaSelected} multiple={true} type="file" id="inputFile" ref={inputFile} style={{ display: "none" }} />
                                 <Image src={img} alt='attachFileIcon' width={45} height={30} className="mr-4"
@@ -328,7 +333,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
                 </motion.div>
 
-                <motion.div className="contactInfo h-screen bg-black"
+                <motion.div className="contactInfo z-20 h-screen bg-black"
                     initial={false}
                     animate={isContactInfoOpen ? "open" : "closed"}
                     variants={variantsContactInfo}

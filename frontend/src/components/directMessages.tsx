@@ -84,9 +84,9 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
 
     return (
         <>
-            <div className={`border-r border-neutral-400 ${className}`}>
+            <div className={`border-r-2 border-darkBgPrimary ${className}`}>
                 <div className="w-full h-screen flex flex-col gap-4 justify-start items-center shrink-0">
-                    <div className="topbar w-full min-h-[9%] flex flex-row justify-between items-center px-6 border-b border-neutral-400">
+                    <div className="topbar w-full min-h-[7%] flex flex-row justify-between items-center px-6 border-b-2 border-darkBgPrimary bg-gradient-to-l from-orange via-magneta to-crayola">
                         <div className="flex flex-row gap-2 justify-center items-center">
                             <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={50} height={50} className="rounded-full"
                                 priority
@@ -94,7 +94,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                            (max-width: 1200px) 50vw,
                                            50vw"
                             />
-                            <h2 className="font-semibold text-2xl w-full text-center text-white">
+                            <h2 className="font-semibold text-2xl w-full text-center text-black">
                                 {isClient? myInfo?.username : " "}
                             </h2>
                         </div>
@@ -116,7 +116,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
 
                     </div>
                     
-                    <div className="searchBar w-[95%] min-h-[5%] flex flex-row justify-center items-center gap-4 bg-darkBgPrimary rounded-full">
+                    <div className="searchBar w-[95%] min-h-[5%] mt-4 mb-2 flex flex-row justify-center items-center gap-4  bg-darkBgPrimary rounded-full">
                         <Image src={searchIcon} alt='serachIcon' width={30} height={30} className="ml-4"
                             priority
                             sizes="(max-width: 768px) 100vw,
@@ -124,7 +124,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                            50vw"
                         />
                         <div className="text-md text-white w-[85%] mr-4">
-                            <input className="w-full bg-transparent" onChange={serachFriend} type="text">
+                            <input className="w-full bg-darkBgPrimary" onChange={serachFriend} type="text">
                             </input>
                         </div>
                     </div>
@@ -133,12 +133,12 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                         {
                             friendsList?.map((e:any, index: React.Key | null | undefined) => {
                                 return (
-                                    <button key={index} className=" w-full border-b border-neutral-400 hover:bg-cyan-700 focus:bg-cyan-700">
+                                    <button key={index} className=" w-full border-b-2 border-darkBgPrimary hover:bg-cyan-700 focus:bg-cyan-700">
                                         <div className="bg-transparent w-full flex flex-row justify-start 
-                                    items-center px-4 py-4 gap-4"
+                                    items-center px-4 py-6 gap-4"
                                             onClick={async () => await dispatch(getSelectedFriend(e))}
                                         >
-                                            <div>
+                                            <div className="flex flex-row justify-center items-end -space-x-4">
                                                 <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={60} height={60} className="rounded-full"
                                                     priority
                                                     sizes="(max-width: 768px) 100vw,
@@ -147,22 +147,22 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                                 />
                                                 {
                                                     activeUsers && activeUsers.find((user: any) => user.userId === e._id) ?
-                                                        <div className="w-3 h-3 bg-green-500 rounded-full relative border-2 bottom-[14px] left-[40px]"></div> : ''
+                                                        <div className="w-4 h-4 bg-green-500 rounded-full relative border-2 border-darkBgMain"></div> : ''
                                                 }
                                             </div>
 
-                                            <div className="flex flex-row gap-16 justify-between items-center w-full">
-                                                <div className="flex flex-col justify-center items-start w-[60%]">
-                                                    <h2>{e.username}</h2>
-                                                    <p className={`${e.lastMessageInfo ? (e.lastMessageInfo.status === 'delivered' && myInfo && e.lastMessageInfo.senderId !== myInfo.id) ? 'font-extrabold' : 'font-normal' : '' } line-clamp-1 text-left`}>
+                                            <div className="flex flex-row gap-2 justify-between items-start w-full">
+                                                <div className="flex flex-col gap-1 justify-center items-start w-[68%]">
+                                                    <h2 className="text-xl font-normal text-white">{e.username}</h2>
+                                                    <p className={`${e.lastMessageInfo ? (e.lastMessageInfo.status === 'delivered' && myInfo && e.lastMessageInfo.senderId !== myInfo.id) ? 'font-extrabold' : 'font-normal' : '' } line-clamp-1 break-all text-left`}>
                                                         {
                                                         //(index && lastIndex === index && lastMessage)? console.log(lastMessages) :
                                                             e.lastMessageInfo && (e.lastMessageInfo.message !== undefined) ? e.lastMessageInfo.message.text : "No messages yet"
                                                         }
                                                     </p>
                                                 </div>
-                                                <div className="flex flex-col justify-center items-end">
-                                                    <p>{e.lastMessageInfo ? moment(e.lastMessageInfo.createdAt).startOf('minute').fromNow() : "-"}</p>
+                                                <div className="flex flex-col gap-2 justify-center items-end">
+                                                    <p className="text-gray-400">{e.lastMessageInfo ? moment(e.lastMessageInfo.createdAt).startOf('minute').fromNow() : "-"}</p>
                                                     {
                                                         (isClient && e.lastMessageInfo) ? myInfo?.id === e.lastMessageInfo.senderId ?
                                                             

@@ -20,9 +20,9 @@ interface RightChatBubble {
 const RightChatBubble: FC<RightChatBubble> = ({ className, message, deliverTime, sent, seen, scrollRef, imageUrl }) => {
 
     return (
-        <div ref={scrollRef} className="flex flex-row items-end gap-2.5 ml-4 mt-4 mb-4 justify-end mr-4">
-            <div className="min-w-[30px] max-w-[380px] leading-1.5 p-4 border-gray-200 bg-darkBgPrimary rounded-l-xl rounded-b-xl rounded-es-xl">
-                <p className="text-sm font-normal pb-2.5 text-gray-900 dark:text-white break-words text-wrap">{message}</p>
+        <div ref={scrollRef} className="flex flex-row items-end gap-2.5 ml-4 mt-4 mb-4 justify-end mr-4 z-20">
+            <div className="min-w-[30px] max-w-[580px] leading-1.5 p-4 border-gray-200 bg-darkBgPrimary rounded-l-xl rounded-b-xl rounded-es-xl">
+                <p className="text-normal font-normal pb-2.5 text-textRightBubble break-words text-wrap">{message}</p>
                 {
                     (imageUrl && imageUrl.length === 1) &&
                     <div className="group relative my-2.5">
@@ -56,7 +56,7 @@ const RightChatBubble: FC<RightChatBubble> = ({ className, message, deliverTime,
                     </div>
                 }
                 <div className="flex flex-row justify-end items-center gap-2 ml-4">
-                    <span className="text-sm font-normal text-gray-500 dark:text-gray-400">{deliverTime}</span>
+                    <span className="text-sm font-normal text-gray-400">{deliverTime}</span>
                     <Image src={seenIcon} alt='readIcon' width={25} height={25} className="rounded-full" priority />
                 </div>
                 

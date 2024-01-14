@@ -20,11 +20,11 @@ interface LeftChatBubble {
 
 const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, sent, seen, scrollRef, imageUrl }) => {
     return (
-        <div ref={scrollRef} className="flex items-start gap-2.5 ml-4 mt-4 mb-4 ">
+        <div ref={scrollRef} className="flex items-start gap-2.5 ml-4 mt-4 mb-4 z-20">
             <Image className="w-8 h-8 rounded-full" src={profilePlaceholder} alt="profilePicPlaceholder" />
             
-            <div className="flex flex-col min-w-[30px] max-w-[380px] leading-1.5 p-4 border-gray-200 bg-darkBgPrimary rounded-e-xl rounded-es-xl">
-                <p className="text-sm font-normal pb-2.5 text-gray-900 dark:text-white break-words">{message}</p>
+            <div className="flex flex-col min-w-[30px] max-w-[580px] leading-1.5 p-4 border-gray-200 bg-darkBgPrimary rounded-e-xl rounded-es-xl">
+                <p className="text-normal font-normal pb-2.5 text-textLeftBubble break-words">{message}</p>
                 {
                     (imageUrl && imageUrl.length === 1) &&
                     <div className="group relative my-2.5">

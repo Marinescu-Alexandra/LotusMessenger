@@ -19,7 +19,9 @@ const config: Config = {
                 magneta: "#dd3675",
                 crayola: "#b44593",
                 darkBgMain: '#404040',
-                darkBgPrimary: '#262626'
+                darkBgPrimary: '#262626',
+                textRightBubble: '#00000',
+                textLeftBubble: '#00000'
             },
         },
     },

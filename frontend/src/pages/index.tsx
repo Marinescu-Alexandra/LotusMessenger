@@ -7,6 +7,7 @@ import { seenMessage, updateMessage, getFriends } from "@/store/actions/messenge
 import { Socket, io } from 'socket.io-client'
 import { useRouter } from 'next/router'
 import { userLogout } from "@/store/actions/authAction";
+import imgBg from '@/bg.png'
 
 import toast, { Toaster } from 'react-hot-toast'
 
