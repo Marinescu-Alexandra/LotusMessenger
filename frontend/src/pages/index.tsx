@@ -140,7 +140,6 @@ export default function Home() {
     useEffect(() => {
         setTimeout(() => {
             if (socketRef.current && currentUserInfo) {
-
                 socketRef.current.emit('addUser', currentUserInfo.id, currentUserInfo)
             }
         }, 1000)
@@ -221,7 +220,7 @@ export default function Home() {
                     <title>Messenger</title>
                     <meta name="login page" content="content" />
                 </Head>
-                <main className="w-full min-h-screen bg-neutral-800 flex flex-row ">
+                <main className="w-full min-h-[700px] min-w-[1280px] bg-neutral-800 flex flex-row ">
                     <Toaster
                         position={'top-right'}
                         reverseOrder={false}
@@ -231,8 +230,8 @@ export default function Home() {
                             }
                         }}
                     />
-                    <DirectMessages className="w-[30%] bg-slate-400" myInfo={myInfo} activeUsers={activeUsers} />
-                    <MessagesWinow className="w-[70%] bg-slate-500" currentUserInfo={myInfo} activeUsers={activeUsers} typying={typingMessage} />
+                    <DirectMessages className="w-[30%] bg-darkBgMain" myInfo={myInfo} activeUsers={activeUsers} />
+                    <MessagesWinow className="w-[70%] bg-darkBgMain" currentUserInfo={myInfo} activeUsers={activeUsers} typying={typingMessage} />
                 </main> 
             </>
 

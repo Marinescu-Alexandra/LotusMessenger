@@ -18,6 +18,8 @@ const config: Config = {
                 venetianRed: "#d8363a",
                 magneta: "#dd3675",
                 crayola: "#b44593",
+                darkBgMain: '#404040',
+                darkBgPrimary: '#262626'
             },
         },
     },

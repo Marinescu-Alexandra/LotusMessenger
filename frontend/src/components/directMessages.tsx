@@ -84,9 +84,9 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
 
     return (
         <>
-            <div className={` ${className}`}>
+            <div className={`border-r border-neutral-400 ${className}`}>
                 <div className="w-full h-screen flex flex-col gap-4 justify-start items-center shrink-0">
-                    <div className="topbar w-full min-h-[9%] flex flex-row justify-between items-center px-6 bg-gray-500">
+                    <div className="topbar w-full min-h-[9%] flex flex-row justify-between items-center px-6 border-b border-neutral-400">
                         <div className="flex flex-row gap-2 justify-center items-center">
                             <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={50} height={50} className="rounded-full"
                                 priority
@@ -94,7 +94,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                            (max-width: 1200px) 50vw,
                                            50vw"
                             />
-                            <h2 className="font-semibold text-2xl w-full text-center text-black">
+                            <h2 className="font-semibold text-2xl w-full text-center text-white">
                                 {isClient? myInfo?.username : " "}
                             </h2>
                         </div>
@@ -116,24 +116,24 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
 
                     </div>
                     
-                    <div className="searchBar w-[95%] min-h-[5%] flex flex-row justify-center items-center gap-4 bg-white rounded-full">
+                    <div className="searchBar w-[95%] min-h-[5%] flex flex-row justify-center items-center gap-4 bg-darkBgPrimary rounded-full">
                         <Image src={searchIcon} alt='serachIcon' width={30} height={30} className="ml-4"
                             priority
                             sizes="(max-width: 768px) 100vw,
                                            (max-width: 1200px) 50vw,
                                            50vw"
                         />
-                        <div className="text-md text-black w-[85%] mr-4">
-                            <input className="w-full" onChange={serachFriend} type="text">
+                        <div className="text-md text-white w-[85%] mr-4">
+                            <input className="w-full bg-transparent" onChange={serachFriend} type="text">
                             </input>
                         </div>
                     </div>
 
-                    <div className="contactsList w-[95%] bg-gray-500 flex-col justify-start items-center overflow-y-scroll no-scrollbar">
+                    <div className="contactsList w-[95%] flex-col justify-start items-center overflow-y-scroll no-scrollbar">
                         {
                             friendsList?.map((e:any, index: React.Key | null | undefined) => {
                                 return (
-                                    <button key={index} className=" w-full border-b-2 hover:bg-cyan-700 focus:bg-cyan-700">
+                                    <button key={index} className=" w-full border-b border-neutral-400 hover:bg-cyan-700 focus:bg-cyan-700">
                                         <div className="bg-transparent w-full flex flex-row justify-start 
                                     items-center px-4 py-4 gap-4"
                                             onClick={async () => await dispatch(getSelectedFriend(e))}
@@ -151,10 +151,10 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                                 }
                                             </div>
 
-                                            <div className="flex flex-row justify-between items-center w-full">
-                                                <div className="flex flex-col justify-center items-start">
+                                            <div className="flex flex-row gap-16 justify-between items-center w-full">
+                                                <div className="flex flex-col justify-center items-start w-[60%]">
                                                     <h2>{e.username}</h2>
-                                                    <p className={`${e.lastMessageInfo ? (e.lastMessageInfo.status === 'delivered' && myInfo && e.lastMessageInfo.senderId !== myInfo.id) ? 'font-extrabold' : 'font-normal' : '' }`}>
+                                                    <p className={`${e.lastMessageInfo ? (e.lastMessageInfo.status === 'delivered' && myInfo && e.lastMessageInfo.senderId !== myInfo.id) ? 'font-extrabold' : 'font-normal' : '' } line-clamp-1 text-left`}>
                                                         {
                                                         //(index && lastIndex === index && lastMessage)? console.log(lastMessages) :
                                                             e.lastMessageInfo && (e.lastMessageInfo.message !== undefined) ? e.lastMessageInfo.message.text : "No messages yet"

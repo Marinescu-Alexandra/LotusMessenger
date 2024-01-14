@@ -13,6 +13,7 @@ import LeftChatBubble from "./leftChatBubble";
 import RightChatBubble from "./rightChatBubble";
 import { Socket, io } from 'socket.io-client'
 import moment from 'moment'
+import img from '@/img.png'
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -36,7 +37,7 @@ interface MessagesWindowProps {
 
 const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, activeUsers, typying }) => {
 
-    const { selectedFriendData} = useAppSelector(state => state.selectedFriend)
+    const { selectedFriendData } = useAppSelector(state => state.selectedFriend)
     const { messages, messageSendSuccess, friends } = useAppSelector(state => state.messenger)
     const [newMessage, setNewMessage] = useState('')
     const [isContactInfoOpen, setContactInfoOpen] = useState(false)
@@ -55,7 +56,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                         setLastMessageIsSeen(false)
                     }
                 }
-            } 
+            }
         }
     }, [friends, selectedFriendData])
 
@@ -72,7 +73,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
         socketRef.current = socket
     }, [])
 
-    const inputHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    const inputHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setNewMessage(e.target.value)
         if (socketRef.current && currentUserInfo) {
             socketRef.current.emit('typingMessage', {
@@ -82,7 +83,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
             })
         }
     }
-    
+
     const sendMessage = () => {
         if (newMessage !== "") {
             const data = {
@@ -132,7 +133,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
             }
             formData.append('senderId', currentUserInfo?.id ? currentUserInfo.id : '');
             formData.append('receiverId', selectedFriendData._id);
-            
+
             for (let i = 0; i < length; i++) {
                 formData.append('fileToUpload[]', e.target.files[i]);
                 formData.append('imageName[]', Date.now() + e.target.files[i].name);
@@ -191,20 +192,20 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                         layout: { duration: 0.6 }
                     }}
                 >
-                    <div className="topbar w-full min-h-[9%] flex flex-row justify-between items-center px-6 bg-slate-300">
+                    <div className="topbar w-full min-h-[9%] flex flex-row justify-between items-center px-6 bg-darkBgMain border-b border-neutral-400">
                         <div className="flex flex-row gap-2 justify-center items-center">
-                            <div className="mt-2">
-                                <div className="flex flex-row justify-between items-center px-2 gap-2">
-                                    <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={50} height={50} className="rounded-full"
-                                        priority
-                                        sizes="(max-width: 768px) 100vw,
+
+                            <div className="flex flex-row justify-between items-center px-2 gap-3">
+                                <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={50} height={50} className="rounded-full"
+                                    priority
+                                    sizes="(max-width: 768px) 100vw,
                                            (max-width: 1200px) 50vw,
                                            50vw"
-                                    />
-                                    <h2 className="font-semibold text-xl w-full text-center text-black">
-                                        {selectedFriendData?.username ? selectedFriendData.username : 'Contact Username'}
-                                    </h2>
-                                </div>
+                                />
+                                <h2 className="font-semibold text-xl w-full text-center text-white">
+                                    {selectedFriendData?.username ? selectedFriendData.username : 'Contact Username'}
+                                </h2>
+
                                 {
                                     activeUsers && activeUsers.find((user: any) => user.userId === selectedFriendData._id) ?
                                         <div className="w-3 h-3 bg-green-500 rounded-full relative border-2 bottom-[14px] left-[45px]"></div> : ''
@@ -225,23 +226,23 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                         </button>
 
                     </div>
-                    <div className="chatWindow h-[82%] w-full flex flex-col overflow-y-scroll no-scrollbar">
+                    <div className="chatWindow h-[81%] w-full flex flex-col overflow-y-scroll no-scrollbar bg-darkBgMain">
                         {
-                            messages?.map((e: { senderId: any; message: { text: string; image:string[] }; createdAt: string}, index: React.Key | null | undefined) => {
+                            messages?.map((e: { senderId: any; message: { text: string; image: string[] }; createdAt: string }, index: React.Key | null | undefined) => {
                                 if (e.senderId === selectedFriendData._id) {
                                     return (
-                                        e.message?
-                                        <LeftChatBubble
-                                            scrollRef={scrollRefLeft}
-                                            key={index}
-                                            message={e.message.text}
-                                            deliverTime={moment(e.createdAt).startOf('minute').fromNow()}
-                                            sent={true}
-                                            seen={false}
-                                            imageUrl={e.message.image}
+                                        e.message ?
+                                            <LeftChatBubble
+                                                scrollRef={scrollRefLeft}
+                                                key={index}
+                                                message={e.message.text}
+                                                deliverTime={moment(e.createdAt).format('kk:mm')}
+                                                sent={true}
+                                                seen={false}
+                                                imageUrl={e.message.image}
                                             />
-                                        :
-                                        <></>
+                                            :
+                                            <></>
                                     )
                                 } else {
                                     return (
@@ -250,7 +251,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                                 scrollRef={scrollRefRight}
                                                 key={index}
                                                 message={e.message.text}
-                                                deliverTime={moment(e.createdAt).startOf('minute').fromNow()}
+                                                deliverTime={moment(e.createdAt).format('kk:mm')}
                                                 sent={true}
                                                 seen={lasMessageIsSeen}
                                                 imageUrl={e.message.image}
@@ -267,50 +268,64 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                     )
                                 }
                             })
-                        }                        
+                        }
                     </div>
                     {
-
                         typying && typying.message && typying.senderId == selectedFriendData._id ?
                             <p className="ml-14 mb-2 left-0 text-lg">Typing Message...</p> : ''
                     }
-                    <div className="writeMessage w-full min-h-[5%] flex flex-row justify-between items-center gap-4 px-4 my-4">
-                        <button onClick={() => selectInputMedia()}>
-                            <input onChange={mediaSelected} multiple={true} type="file" id="inputFile" ref={inputFile} style={{ display: "none" }} />
-                            <Image src={attachFileIcon} alt='attachFileIcon' width={30} height={30} className="ml-4"
-                                priority
-                                sizes="(max-width: 768px) 100vw,
+                    <div className="writeMessage w-full min-h-[10%] ">
+                        <div className="flex w-full h-full flex-row justify-center items-center border-t border-neutral-400">
+                            <button onClick={() => selectInputMedia()}>
+                                <input onChange={mediaSelected} multiple={true} type="file" id="inputFile" ref={inputFile} style={{ display: "none" }} />
+                                <Image src={img} alt='attachFileIcon' width={45} height={30} className="mr-4"
+                                    priority
+                                    sizes="(max-width: 768px) 100vw,
                                            (max-width: 1200px) 50vw,
                                            50vw"
-                            />
-                        </button>
+                                />
+                            </button>
 
-                        <div className="w-[88%] rounded-full bg-stone-400 h-[94%] flex flex-row justify-between items-center">
-                            <input className="w-full mx-4 bg-transparent"
-                                onChange={inputHandler}
-                                value={newMessage}
-                            >
-                            </input>
-                            <Image src={emojiIcon} alt='emojiIcon' width={30} height={30} className="mr-4"
-                                priority
-                                sizes="(max-width: 768px) 100vw,
+                            <button>
+                                <Image src={emojiIcon} alt='emojiIcon' width={40} height={30} className="mr-2"
+                                    priority
+                                    sizes="(max-width: 768px) 100vw,
                                            (max-width: 1200px) 50vw,
                                            50vw"
-                            />
+                                />
+                            </button>
+
+                            <div className="w-[88%] rounded-xl h-[60%] flex flex-row justify-between items-center">
+                                <textarea id="chat" rows={3} className="mx-4 p-2.5 w-full h-full resize-none text-md text-gray-900 rounded-lg border
+                                 border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-darkBgPrimary dark:border-gray-600
+                                  dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 no-scrollbar"
+                                    placeholder="Your message..."
+                                    onChange={inputHandler}
+                                    value={newMessage}
+                                >
+
+                                </textarea>
+                                {/* <input className="w-full bg-transparent"
+                                    onChange={inputHandler}
+                                    value={newMessage}
+                                >
+                                </input> */}
+                                <button
+                                    onClick={() => [sendMessage(), setNewMessage("")]}
+                                >
+                                    <Image src={sendIcon} alt='sendIcon' width={35} height={35} className="mr-4"
+                                        priority
+                                        sizes="(max-width: 768px) 100vw,
+                                           (max-width: 1200px) 50vw,
+                                           50vw"
+                                    />
+                                </button>
+
+                            </div>
+
                         </div>
-                        <button
-                            onClick={() => [sendMessage(), setNewMessage("")]}
-                        >
-                            <Image src={sendIcon} alt='sendIcon' width={30} height={30} className="mr-4"
-                                priority
-                                sizes="(max-width: 768px) 100vw,
-                                           (max-width: 1200px) 50vw,
-                                           50vw"
-                            />
-                        </button>
-
-
                     </div>
+
                 </motion.div>
 
                 <motion.div className="contactInfo h-screen bg-black"
