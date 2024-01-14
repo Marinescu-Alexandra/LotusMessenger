@@ -30,7 +30,7 @@ const userLogout = (userId) => {
 
 io.on('connection', (socket) => {
     socket.on('addUser', (userId, userInfo) => {
-        console.log('User added... with socket id', socket.id)
+        //console.log('User added... with socket id', socket.id)
         addUser(userId, socket.id, userInfo)
         io.emit('getUser', users)
 
@@ -41,8 +41,6 @@ io.on('connection', (socket) => {
     })
 
     socket.on('checkIfActiveInstance', (userData) => {
-        console.log(userData)
-        console.log(users)
         otherInstance = users.find(user => user.userId === userData.id)
         if (otherInstance) {
             socket.to(otherInstance.socketId).emit('removeOtherActiveInstance', userData.id)
@@ -55,7 +53,6 @@ io.on('connection', (socket) => {
     socket.on('removeSocketInstance', (userId) => {
         otherInstance = users.find(user => user.userId === userId)
         if (otherInstance) {
-            console.log('removing instance')
             userRemove(otherInstance.socketId);
         }
         
@@ -63,7 +60,7 @@ io.on('connection', (socket) => {
 
     socket.on('sendMessage', (data) => {
         const user = findFriend(data.receiverId)
-        console.log(data)
+        console.log('seenMessage ',data)
         if (user !== undefined) {
             socket.to(user.socketId).emit('getMessage', data)
         }
@@ -77,6 +74,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('deliverMessage', (data) => {
+        console.log('deliverMessage data', data)
         const user = findFriend(data.senderId)
         if (user !== undefined) {
             socket.to(user.socketId).emit('messageDeliverResponse', data)
@@ -100,7 +98,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('disconnect', () => {
-        console.log('User is removed... with socket id', socket.id)
+        //console.log('User is removed... with socket id', socket.id)
         userRemove(socket.id);
         io.emit('getUser', users);
     })

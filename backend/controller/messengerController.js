@@ -81,10 +81,7 @@ module.exports.getFriends = async (req, res) => {
                 }
                 newUsers.push(newUser)
             }
-            //console.log(friendGet[i].messageInfo)
         }
-        console.log(friendGet)
-        //const filter = friendGet.filter(e => e.id != myId)
         res.status(200).json({ success: true, friends: newUsers })
     } catch {
         res.status(500).json({

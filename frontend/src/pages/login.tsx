@@ -29,7 +29,6 @@ const Login = () => {
 
     const login = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log(state);
         dispatch(userLogin(state))
 
     }
@@ -41,7 +40,7 @@ const Login = () => {
             reconnectionDelay: 1000,
         });
         socketRef.current = socket
-        
+
         if (socketRef.current) {
             socketRef.current.emit('checkIfActiveInstance', myInfo)
         }

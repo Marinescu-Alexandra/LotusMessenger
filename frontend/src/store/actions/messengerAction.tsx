@@ -36,7 +36,6 @@ export const getSelectedFriend = (data: any) => {
 }
 
 export const messageSend = (data: any) => async (dispatch: any) => {
-    console.log(data)
     try {
         const response = await axios.post('http://localhost:5000/api/messenger/send-message', data, config);
         dispatch({
@@ -93,7 +92,6 @@ export const imageMessageSend = (data: any) => async (dispatch: any) => {
 export const seenMessage = (data: any) => async (dispatch: any) => {
     try {
         const response = await axios.post('http://localhost:5000/api/messenger/seen-message', data, config);
-        console.log(response.data)
     } catch (error) {
         console.log(error)
     }
@@ -102,7 +100,6 @@ export const seenMessage = (data: any) => async (dispatch: any) => {
 export const updateMessage = (data: any) => async (dispatch: any) => {
     try {
         const response = await axios.post('http://localhost:5000/api/messenger/deliver-message', data, config);
-        console.log(response.data)
     } catch (error) {
         console.log(error)
     }

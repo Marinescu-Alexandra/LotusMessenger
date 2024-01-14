@@ -81,7 +81,6 @@ export default function Home() {
         })
 
         socket.on('messageSeenResponse', (data: any) => {
-            console.log(data)
             dispatch({
                 type: 'SEEN_MESSAGE',
                 payload: {
@@ -91,7 +90,7 @@ export default function Home() {
         })
 
         socket.on('messageDeliverResponse', (data: any) => {
-            console.log(data)
+            console.log('messageDeliverResponse', data)
             dispatch({
                 type: 'DELIVER_MESSAGE',
                 payload: {
@@ -111,17 +110,17 @@ export default function Home() {
                     }
                 })
 
-                // dispatch(seenMessage(socketMessage))
+                dispatch(seenMessage(socketMessage))
 
-                // socketRef.current.emit('messageSeen', socketMessage)
+                socketRef.current.emit('messageSeen', socketMessage)
 
-                // dispatch({
-                //     type: 'UPDATE_FRIEND_MESSAGE',
-                //     payload: {
-                //         messageInfo: socketMessage,
-                //         status: 'seen'
-                //     }
-                // })
+                dispatch({
+                    type: 'UPDATE_FRIEND_MESSAGE',
+                    payload: {
+                        messageInfo: socketMessage,
+                        status: 'seen'
+                    }
+                })
             }
         }
     }, [socketMessage, selectedFriendData])

@@ -60,7 +60,6 @@ module.exports.userRegister = async (req, res) => {
                     })
 
                     const options = { expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000) }
-                    console.log(JSON.stringify(req.headers));
                     try {
                         res.status(201).cookie('authToken', token, options).json({
                             successMessage: 'Registration complete.', token
@@ -130,7 +129,7 @@ module.exports.userLogin = async (req, res) => {
                     }, process.env.SECRET, {
                         expiresIn: process.env.TOKEN_EXP
                     })
-                    console.log("pass check")
+           
                     const options = { expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000) }
 
                     try {

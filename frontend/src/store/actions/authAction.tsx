@@ -14,9 +14,7 @@ export const userRegister = (data: any) => {
     return async (dispatch: any) => {
 
         try {
-            console.log(data)
             const response = await axios.post('http://localhost:5000/api/messenger/user-register', data, config);
-            console.log(response)
             localStorage.setItem('authToken', response.data.token);
             dispatch({
                 type: REGISTER_SUCCESS,
@@ -27,7 +25,6 @@ export const userRegister = (data: any) => {
             })
         } catch (error) {
             if (error instanceof AxiosError) {
-                console.log(error)
                 dispatch({
                     type: REGISTER_FAIL,
                     payload: {
@@ -44,7 +41,6 @@ export const userLogin = (data: any) => {
     return async (dispatch: any) => {
         
         try {
-            console.log(data)
             const response = await axios.post('http://localhost:5000/api/messenger/user-login', data, config);
             localStorage.setItem('authToken', response.data.token);            
             dispatch({
@@ -56,7 +52,6 @@ export const userLogin = (data: any) => {
             })
         } catch (error) {
             if (error instanceof AxiosError) {
-                console.log(error)
                 dispatch({
                     type: LOGIN_FAIL,
                     payload: {
@@ -71,8 +66,6 @@ export const userLogin = (data: any) => {
 
 export const userLogout = () => async (dispatch: any) => {
     const data = {}
-
-    console.log('here')
     try {
         const response = await axios.post('http://localhost:5000/api/messenger/user-logout', data, config)
         if (response.data.success) {

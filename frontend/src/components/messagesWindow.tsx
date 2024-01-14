@@ -1,7 +1,6 @@
 import React, { ChangeEvent, FC, LegacyRef, RefObject, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import profilePicturePlaceholder from '@/profilePicturePlaceholder.png'
-import attachFileIcon from '@/attached.png'
 import sendIcon from '@/send.png'
 import emojiIcon from '@/happiness.png'
 import dots from '@/dots.png'
@@ -26,6 +25,15 @@ interface SocketTypyingMessage {
     message: string
 }
 
+interface Message {
+    senderId: string,
+    message: {
+        text: string,
+        image: string[]
+    },
+    createdAt: string
+}
+
 
 interface MessagesWindowProps {
     className?: string,
@@ -40,10 +48,11 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
     const { selectedFriendData } = useAppSelector(state => state.selectedFriend)
     const { messages, messageSendSuccess, friends } = useAppSelector(state => state.messenger)
+
     const [newMessage, setNewMessage] = useState('')
     const [isContactInfoOpen, setContactInfoOpen] = useState(false)
-
     const [lasMessageIsSeen, setLastMessageIsSeen] = useState(false)
+    const [isMediaSelected, setMediaSelected] = useState(false)
 
     useEffect(() => {
         if (selectedFriendData && friends) {
@@ -113,6 +122,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
     }
 
     const mediaSelected = (e: ChangeEvent<HTMLInputElement>) => {
+        setMediaSelected(true)
         // for real time image send return to lecture 313 min 7:52
         // if (socketRef.current && currentUserInfo) {
         //     socketRef.current.emit('sendMessage', {
@@ -126,21 +136,21 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
         //         }
         //     })
         // }
-        const formData = new FormData()
-        if (e.target.files) {
-            let length = e.target.files.length
-            if (e.target.files.length > 10) {
-                length = 10
-            }
-            formData.append('senderId', currentUserInfo?.id ? currentUserInfo.id : '');
-            formData.append('receiverId', selectedFriendData._id);
+        // const formData = new FormData()
+        // if (e.target.files) {
+        //     let length = e.target.files.length
+        //     if (e.target.files.length > 10) {
+        //         length = 10
+        //     }
+        //     formData.append('senderId', currentUserInfo?.id ? currentUserInfo.id : '');
+        //     formData.append('receiverId', selectedFriendData._id);
 
-            for (let i = 0; i < length; i++) {
-                formData.append('fileToUpload[]', e.target.files[i]);
-                formData.append('imageName[]', Date.now() + e.target.files[i].name);
-            }
-            dispatch(imageMessageSend(formData))
-        }
+        //     for (let i = 0; i < length; i++) {
+        //         formData.append('fileToUpload[]', e.target.files[i]);
+        //         formData.append('imageName[]', Date.now() + e.target.files[i].name);
+        //     }
+        //     dispatch(imageMessageSend(formData))
+        // }
     }
 
     useEffect(() => {
@@ -169,7 +179,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
         if (selectedFriendData) {
             dispatch(getMessages(selectedFriendData._id))
         }
-    }, [dispatch, selectedFriendData, selectedFriendData?._id])
+    }, [dispatch, selectedFriendData])
 
     const variantsMessagesWindow = {
         open: { width: '60%' },
@@ -184,10 +194,13 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
     return (
         <>
             <div className={`flex flex-row justify-start items-center ${className}`}>
-                <Image src={imgBg} className="fixed z-1 overflow-hidden" alt="bg" >
 
-                </Image>
-                <motion.div className="messageWindow  w-full h-screen flex flex-col justify-start items-center"
+                {/* BACKGROUND IMAGE */}
+                <Image src={imgBg} className="fixed z-1 overflow-hidden" alt="bg" />
+
+                {/* MAIN WINDOW */}
+                <motion.div
+                    className="messageWindow  w-full h-screen flex flex-col justify-start items-center"
                     initial={false}
                     animate={isContactInfoOpen ? "open" : "closed"}
                     variants={variantsMessagesWindow}
@@ -196,47 +209,46 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                         layout: { duration: 0.6 }
                     }}
                 >
-                    <div className="topbar z-20 w-full min-h-[7%] flex flex-row justify-between items-center px-6 bg-gradient-to-r from-orange via-magneta to-crayola border-b-2 border-darkBgPrimary">
+                    {/* TOP BAR */}
+                    <div className="topbar z-20 w-full min-h-[7%] flex flex-row justify-between items-center px-6 
+                                    bg-gradient-to-r from-orange via-magneta to-crayola border-b-2 border-darkBgPrimary">
 
                         <div className={`flex-row justify-center items-center px-2 gap-2 ${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'}`}>
+                           
+                            {/* USER AVATAR + ACTIVE STATUS */}
                             <div className="flex flex-row justify-center items-end -space-x-3.5">
-                                <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={50} height={50} className="rounded-full"
-                                    priority
-                                    sizes="(max-width: 768px) 100vw,
-                                            (max-width: 1200px) 50vw,
-                                            50vw"
-                                />
+                                <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={50} height={50} className="rounded-full" priority/>
                                 {
                                     activeUsers && activeUsers.find((user: any) => user.userId === selectedFriendData._id) ?
                                         <div className="w-4 h-4 bg-green-500 rounded-full border-2 border-orange"></div> : ''
                                 }
                             </div>
 
+                            {/* USERNAME */}
                             <h2 className="font-bold text-xl text-black">
                                 {selectedFriendData?.username ? selectedFriendData.username : 'Contact Username'}
                             </h2>
+
                         </div>
 
-                        <button className={`${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'}`}
+                        {/* OPEN CONTACT INFO BUTTON */}
+                        <button
+                            className={`${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'}`}
                             onClick={() => setContactInfoOpen(true)}
                             disabled={Object.keys(selectedFriendData).length !== 0 ? false : true}
                         >
-                            <Image src={dots} alt='dotsIcon' width={25} height={25} className="rounded-full"
-                                priority
-                                sizes="(max-width: 768px) 100vw,
-                                           (max-width: 1200px) 50vw,
-                                           50vw"
-
-                            />
+                            <Image src={dots} alt='dotsIcon' width={25} height={25} className="rounded-full" priority/>
                         </button>
 
                     </div>
+
+                    {/* CHAT WINDOW */}
                     <div className="chatWindow h-[83%] w-full flex flex-col overflow-y-scroll no-scrollbar bg-darkBgMain">
                         {
-                            messages?.map((e: { senderId: any; message: { text: string; image: string[] }; createdAt: string }, index: React.Key | null | undefined) => {
+                            messages?.map((e: Message, index: React.Key | null | undefined) => {
                                 if (e.senderId === selectedFriendData._id) {
                                     return (
-                                        e.message ?
+                                        e.message &&
                                             <LeftChatBubble
                                                 scrollRef={scrollRefLeft}
                                                 key={index}
@@ -246,8 +258,6 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                                 seen={false}
                                                 imageUrl={e.message.image}
                                             />
-                                            :
-                                            <></>
                                     )
                                 } else {
                                     return (
@@ -275,10 +285,14 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                             })
                         }
                     </div>
+
+                    {/* TYPING NOTICE */}
                     {
                         typying && typying.message && typying.senderId == selectedFriendData._id ?
-                            <p className="ml-14 mb-2 left-0 text-lg">Typing Message...</p> : ''
+                            <p className="mb-2 w-full text-semibold pl-6 text-lg text-left z-20">Typing Message...</p> : ''
                     }
+
+                    {/* MESSAGE TEXTAREA */}
                     <div className={`writeMessage w-full min-h-[10%] z-20 ${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'}`}>
                         <div className="flex w-full h-full flex-row justify-center items-center border-t-2 border-darkBgPrimary">
                             <button onClick={() => selectInputMedia()}>
@@ -310,11 +324,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                 >
 
                                 </textarea>
-                                {/* <input className="w-full bg-transparent"
-                                    onChange={inputHandler}
-                                    value={newMessage}
-                                >
-                                </input> */}
+
                                 <button
                                     onClick={() => [sendMessage(), setNewMessage("")]}
                                 >
@@ -333,7 +343,9 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
                 </motion.div>
 
-                <motion.div className="contactInfo z-20 h-screen border-l-2 border-darkBgPrimary"
+                {/* CONTACT INFO */}
+                <motion.div
+                    className="contactInfo z-20 h-screen border-l-2 border-darkBgPrimary"
                     initial={false}
                     animate={isContactInfoOpen ? "open" : "closed"}
                     variants={variantsContactInfo}
@@ -343,6 +355,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     }}
                 >
                     <div className="w-full h-screen flex flex-col justify-start items-center overflow-hidden">
+                        {/* TOP BAR */}
                         <div className="topbar w-full min-h-[7%] flex flex-row justify-start items-center px-6 gap-4 border-b-2 border-darkBgPrimary bg-gradient-to-l from-orange via-magneta to-crayola">
                             <Image src={close} alt='closeIcon' width={20} height={20} className="rounded-full"
                                 priority
@@ -353,6 +366,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                             />
 
                         </div>
+
+                        {/* AVATAR NAME AND SHARED MEDIA */}
                         <div className="w-full bg-darkBgMain min-h-[93%] flex flex-col justify-start items-center gap-4">
                             <div className="flex flex-row justify-center items-end -space-x-5 mt-10">
                                 <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={90} height={90} className="rounded-full"
