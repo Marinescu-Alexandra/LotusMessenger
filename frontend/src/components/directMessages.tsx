@@ -2,7 +2,7 @@ import React, { ChangeEvent, FC, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import profilePicturePlaceholder from '@/profilePicturePlaceholder.png'
 import dots from '@/dots.png'
-import editing from '@/editing.png'
+import editing from '@/edit.png'
 import delivered from '@/read.png'
 import searchIcon from '@/loupe.png'
 import { getSelectedFriend } from "@/store/actions/messengerAction"
@@ -12,6 +12,7 @@ import moment from 'moment'
 import seen from '@/seen.png'
 import defaultStatus from '@/default.png'
 import { Socket, io } from "socket.io-client";
+import logoutIcon from '@/logout.png'
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -98,19 +99,19 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                 {isClient? myInfo?.username : " "}
                             </h2>
                         </div>
-                        <div className="flex flex-row gap-2 justify-center items-center">
-                            <Image src={editing} alt='editingIcon' width={25} height={25} className=""
+                        <div className="flex flex-row gap-4 justify-center items-center">
+                            <Image src={editing} alt='dotsIcon' width={25} height={25} className="mb-1.5"
+                                priority
+                                sizes="(max-width: 768px) 100vw,
+                                           (max-width: 1200px) 50vw,
+                                           50vw"
+                            />
+                            <Image src={logoutIcon} alt='editingIcon' width={25} height={25} className=""
                                 priority
                                 sizes="(max-width: 768px) 100vw,
                                            (max-width: 1200px) 50vw,
                                            50vw"
                                 onClick={() => logout()}
-                            />
-                            <Image src={dots} alt='dotsIcon' width={25} height={25} className=""
-                                priority
-                                sizes="(max-width: 768px) 100vw,
-                                           (max-width: 1200px) 50vw,
-                                           50vw"
                             />
                         </div>
 

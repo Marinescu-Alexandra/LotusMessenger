@@ -198,7 +198,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                 >
                     <div className="topbar z-20 w-full min-h-[7%] flex flex-row justify-between items-center px-6 bg-gradient-to-r from-orange via-magneta to-crayola border-b-2 border-darkBgPrimary">
 
-                        <div className="flex flex-row justify-center items-center px-2 gap-2">
+                        <div className={`flex-row justify-center items-center px-2 gap-2 ${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'}`}>
                             <div className="flex flex-row justify-center items-end -space-x-3.5">
                                 <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={50} height={50} className="rounded-full"
                                     priority
@@ -217,7 +217,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                             </h2>
                         </div>
 
-                        <button
+                        <button className={`${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'}`}
                             onClick={() => setContactInfoOpen(true)}
                             disabled={Object.keys(selectedFriendData).length !== 0 ? false : true}
                         >
@@ -279,7 +279,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                         typying && typying.message && typying.senderId == selectedFriendData._id ?
                             <p className="ml-14 mb-2 left-0 text-lg">Typing Message...</p> : ''
                     }
-                    <div className="writeMessage w-full min-h-[10%] z-20">
+                    <div className={`writeMessage w-full min-h-[10%] z-20 ${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'}`}>
                         <div className="flex w-full h-full flex-row justify-center items-center border-t-2 border-darkBgPrimary">
                             <button onClick={() => selectInputMedia()}>
                                 <input onChange={mediaSelected} multiple={true} type="file" id="inputFile" ref={inputFile} style={{ display: "none" }} />
@@ -333,7 +333,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
                 </motion.div>
 
-                <motion.div className="contactInfo z-20 h-screen bg-black"
+                <motion.div className="contactInfo z-20 h-screen border-l-2 border-darkBgPrimary"
                     initial={false}
                     animate={isContactInfoOpen ? "open" : "closed"}
                     variants={variantsContactInfo}
@@ -343,7 +343,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     }}
                 >
                     <div className="w-full h-screen flex flex-col justify-start items-center overflow-hidden">
-                        <div className="topbar w-full min-h-[9%] flex flex-row justify-start items-center px-6 bg-slate-400 gap-4">
+                        <div className="topbar w-full min-h-[7%] flex flex-row justify-start items-center px-6 gap-4 border-b-2 border-darkBgPrimary bg-gradient-to-l from-orange via-magneta to-crayola">
                             <Image src={close} alt='closeIcon' width={20} height={20} className="rounded-full"
                                 priority
                                 sizes="(max-width: 768px) 100vw,
@@ -353,20 +353,20 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                             />
 
                         </div>
-                        <div className="w-full bg-slate-600 min-h-[91%] flex flex-col justify-start items-center">
-                            <div>
-                                <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={90} height={90} className="rounded-full mt-10"
+                        <div className="w-full bg-darkBgMain min-h-[93%] flex flex-col justify-start items-center gap-4">
+                            <div className="flex flex-row justify-center items-end -space-x-5 mt-10">
+                                <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={90} height={90} className="rounded-full"
                                     priority
                                     sizes="(max-width: 768px) 100vw,
-                                           (max-width: 1200px) 50vw,
-                                           50vw"
+                                            (max-width: 1200px) 50vw,
+                                            50vw"
                                 />
                                 {
                                     activeUsers && activeUsers.find((user: any) => user.userId === selectedFriendData._id) ?
-                                        <div className="w-5 h-5 bg-green-500 rounded-full relative bottom-6 left-[65px] border-2"></div> : ''
+                                        <div className="w-[18px] h-[18px] bg-green-500 rounded-full border-[2.5px] border-darkBgMain"></div> : ''
                                 }
                             </div>
-                            <p className="text-xl font-semibold text-white text-center">
+                            <p className="text-2xl font-semibold text-white text-center">
                                 {selectedFriendData?.username ? selectedFriendData.username : 'Contact Username'}
                             </p>
 
