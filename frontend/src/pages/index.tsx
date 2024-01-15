@@ -122,6 +122,16 @@ export default function Home() {
         })
     }, [socketMessage, typingMessage])
 
+    useEffect(() => {
+        setTimeout(() => {
+            if (socketRef.current && currentUserInfo) {
+                socketRef.current.emit('addUser', currentUserInfo.id, currentUserInfo)
+            }
+        }, 1000)
+
+    }, [])
+
+
     // GET SELECTED FRIEND MESSAGES
     useEffect(() => {
         if (selectedFriendData && friends) {
@@ -200,13 +210,21 @@ export default function Home() {
     }, [socketMessage, selectedFriendData])
 
     useEffect(() => {
-        setTimeout(() => {
-            if (socketRef.current && currentUserInfo) {
-                socketRef.current.emit('addUser', currentUserInfo.id, currentUserInfo)
+        if (messages.length > 1 && messages[messages.length - 1].status === "delivered") {
+            if (messages[messages.length - 1].receiverId === currentUserInfo.id) {
+                for (let i = messages.length - 1; i >= 0; i--) {
+                    if (messages[i].status === 'delivered') {
+                        dispatch(seenMessage(messages[i]))
+                    } else {
+                        break
+                    }
+                }
             }
-        }, 1000)
+            if(socketRef.current)
+            socketRef.current.emit('messageSeen', socketMessage)
+        }
+    }, [messages])
 
-    }, [])
 
     useEffect(() => {
         if (socketMessage && selectedFriendData && socketRef.current) {
@@ -231,7 +249,7 @@ export default function Home() {
     useEffect(() => {
         if (selectedFriendData && socketRef.current) {
             if (selectedFriendData.lastMessageInfo && (selectedFriendData.lastMessageInfo.status === 'delivered' || selectedFriendData.lastMessageInfo.status === 'unseen')) {
-                
+
                 dispatch(seenMessage(selectedFriendData.lastMessageInfo))
 
                 socketRef.current.emit('messageSeen', selectedFriendData.lastMessageInfo)
