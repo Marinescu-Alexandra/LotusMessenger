@@ -62,7 +62,6 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
     const [newMessage, setNewMessage] = useState('')
     const [isContactInfoOpen, setContactInfoOpen] = useState(false)
-    const [lasMessageIsSeen, setLastMessageIsSeen] = useState(false)
     const [isMediaSelected, setMediaSelected] = useState(false)
 
     const scrollRefLeft = useRef<HTMLDivElement | null>(null);
@@ -71,8 +70,6 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
     const dispatch = useAppDispatch()
     const socketRef = useRef<Socket | null>(null)
-
-    const [rightBubbleIsLast, setRightBubbleIsLast] = useState(false)
 
     useEffect(() => {
         const socket = io("ws://localhost:8000", {
@@ -178,14 +175,14 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
     return (
         <>
-            <div className={`flex flex-row justify-start items-center ${className}`}>
+            <div className={`flex flex-row justify-start items-center h-screen ${className}`}>
 
                 {/* BACKGROUND IMAGE */}
-                <Image src={imgBg} className="fixed z-1 overflow-hidden" alt="bg" />
+                <Image src={imgBg} className="fixed h-screen min-w-[100%] left-0 z-1 object-cover" alt="bg" />
 
                 {/* MAIN WINDOW */}
                 <motion.div
-                    className="messageWindow  w-full h-screen flex flex-col justify-start items-center"
+                    className="messageWindow w-full h-screen flex flex-col items-center"
                     initial={false}
                     animate={isContactInfoOpen ? "open" : "closed"}
                     variants={variantsMessagesWindow}
@@ -195,7 +192,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     }}
                 >
                     {/* TOP BAR */}
-                    <div className="topbar z-20 w-full min-h-[7%] flex flex-row justify-between items-center px-6 
+                    <div className="topbar z-20 w-full min-h-[65px] flex flex-row justify-between items-center px-6 
                                     bg-gradient-to-r from-orange via-magneta to-crayola border-b-2 border-darkBgPrimary">
 
                         <div className={`flex-row justify-center items-center px-2 gap-2 ${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'}`}>
@@ -228,7 +225,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     </div>
 
                     {/* CHAT WINDOW */}
-                    <div className="chatWindow h-[83%] w-full flex flex-col overflow-y-scroll no-scrollbar bg-darkBgMain">
+                    <div className="chatWindow w-full h-full flex flex-col top-0 overflow-y-scroll no-scrollbar bg-darkBgMain">
                         {
                             messages?.map((e: Message, index: React.Key | null | undefined) => {
                                 if (e.senderId === selectedFriendData._id) {
@@ -269,8 +266,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     }
 
                     {/* MESSAGE TEXTAREA */}
-                    <div className={`writeMessage w-full min-h-[10%] z-20 ${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'}`}>
-                        <div className="flex w-full h-full flex-row justify-center items-center border-t-2 border-darkBgPrimary">
+                    <div className={`writeMessage w-full min-h-[100px] z-20 ${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'}`}>
+                        <div className="flex w-full h-full flex-row justify-center items-center border-t-2 border-darkBgPrimary mx-4">
                             <button onClick={() => selectInputMedia()}>
                                 <input onChange={mediaSelected} multiple={true} type="file" id="inputFile" ref={inputFile} style={{ display: "none" }} />
                                 <Image src={img} alt='attachFileIcon' width={45} height={30} className="mr-4"
@@ -319,9 +316,11 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
                 </motion.div>
 
+                
+
                 {/* CONTACT INFO */}
                 <motion.div
-                    className="contactInfo z-20 h-screen border-l-2 border-darkBgPrimary"
+                    className="contactInfo z-20 h-full border-l-2 border-darkBgPrimary"
                     initial={false}
                     animate={isContactInfoOpen ? "open" : "closed"}
                     variants={variantsContactInfo}
@@ -330,9 +329,9 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                         layout: { duration: 0.3 }
                     }}
                 >
-                    <div className="w-full h-screen flex flex-col justify-start items-center overflow-hidden">
+                    <div className="w-full h-full flex flex-col justify-start items-center overflow-hidden">
                         {/* TOP BAR */}
-                        <div className="topbar w-full min-h-[7%] flex flex-row justify-start items-center px-6 gap-4 border-b-2 border-darkBgPrimary bg-gradient-to-l from-orange via-magneta to-crayola">
+                        <div className="topbar w-full min-h-[65px] flex flex-row justify-start items-center px-6 gap-4 border-b-2 border-darkBgPrimary bg-gradient-to-l from-orange via-magneta to-crayola">
                             <Image src={close} alt='closeIcon' width={20} height={20} className="rounded-full"
                                 priority
                                 sizes="(max-width: 768px) 100vw,

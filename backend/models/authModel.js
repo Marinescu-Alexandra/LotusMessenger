@@ -13,7 +13,7 @@ const registerSchema = new Schema({
     password: {
         type: String,
         required: true
-    }
+    },
 }, { timestamps: true });
 
 module.exports = model('user', registerSchema)

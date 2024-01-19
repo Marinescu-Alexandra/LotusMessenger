@@ -185,7 +185,7 @@ export default function Home() {
 
 
     useEffect(() => {
-        if (socketMessage && selectedFriendData && socketRef.current) {
+        if (socketMessage && Object.keys(selectedFriendData).length > 0 && socketRef.current) {
             if (socketMessage.senderId === selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
                 dispatch({
                     type: 'SOCKET_MESSAGE',
@@ -207,25 +207,25 @@ export default function Home() {
                 })
             }
         }
-    }, [socketMessage, selectedFriendData])
+    }, [socketMessage])
 
     useEffect(() => {
-        if (messages.length > 1 && messages[messages.length - 1].status === "delivered") {
+        if (messages.length >= 1 && messages[messages.length - 1].status === "delivered") {
             if (messages[messages.length - 1].receiverId === currentUserInfo.id) {
                 for (let i = messages.length - 1; i >= 0; i--) {
-                    if (messages[i].status === 'delivered') {
+                    if ((messages[i].status === 'delivered' || messages[i].status === 'unseen') && messages[i].receiverId === currentUserInfo.id) {
                         dispatch(seenMessage(messages[i]))
-                    } else {
+                    } else if (messages[i].status === 'seen' && messages[i].receiverId === currentUserInfo.id){
                         break
                     }
                 }
             }
             if(socketRef.current)
-            socketRef.current.emit('messageSeen', socketMessage)
+                socketRef.current.emit('messageSeen', messages[messages.length - 1])
         }
     }, [messages])
 
-
+    //Notify user of new unseen messages
     useEffect(() => {
         if (socketMessage && selectedFriendData && socketRef.current) {
             if (socketMessage.senderId !== selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
@@ -246,25 +246,35 @@ export default function Home() {
         }
     }, [socketMessage])
 
-    useEffect(() => {
-        if (selectedFriendData && socketRef.current) {
-            if (selectedFriendData.lastMessageInfo && (selectedFriendData.lastMessageInfo.status === 'delivered' || selectedFriendData.lastMessageInfo.status === 'unseen')) {
+    // useEffect(() => {
+    //     if (selectedFriendData && socketRef.current) {
+    //         if (selectedFriendData.lastMessageInfo && (selectedFriendData.lastMessageInfo.status === 'delivered' || selectedFriendData.lastMessageInfo.status === 'unseen')) {
 
-                dispatch(seenMessage(selectedFriendData.lastMessageInfo))
+    //             if (messages.length >= 1 && (messages[messages.length - 1].status === "delivered" || messages[messages.length - 1].status === "unseen")) {
+    //                 if (messages[messages.length - 1].receiverId === currentUserInfo.id) {
+    //                     for (let i = messages.length - 1; i >= 0; i--) {
+    //                         if ((messages[i].status === 'delivered' || messages[i].status === 'unseen') && messages[i].receiverId === currentUserInfo.id) {
+    //                             dispatch(seenMessage(messages[i]))
+    //                         } else if (messages[i].status === 'seen' && messages[i].receiverId === currentUserInfo.id) {
+    //                             break
+    //                         }
+    //                     }
+    //                 }
+    //                 if (socketRef.current)
+    //                     socketRef.current.emit('messageSeen', selectedFriendData.lastMessageInfo)
+    //             }
 
-                socketRef.current.emit('messageSeen', selectedFriendData.lastMessageInfo)
-
-                dispatch({
-                    type: 'UPDATE_FRIEND_MESSAGE',
-                    payload: {
-                        messageInfo: selectedFriendData.lastMessageInfo,
-                        status: 'seen'
-                    }
-                })
-            }
-        }
+    //             dispatch({
+    //                 type: 'UPDATE_FRIEND_MESSAGE',
+    //                 payload: {
+    //                     messageInfo: selectedFriendData.lastMessageInfo,
+    //                     status: 'seen'
+    //                 }
+    //             })
+    //         }
+    //     }
             
-    }, [selectedFriendData])
+    // }, [selectedFriendData])
     
 
     useEffect(() => {
@@ -283,7 +293,7 @@ export default function Home() {
                     <title>Messenger</title>
                     <meta name="login page" content="content" />
                 </Head>
-                <main className="w-full min-h-[700px] min-w-[1280px] bg-neutral-800 flex flex-row ">
+                <main className="w-full min-h-[100px] min-w-[1280px] bg-neutral-800 flex flex-row ">
                     <Toaster
                         position={'top-right'}
                         reverseOrder={false}
@@ -293,8 +303,8 @@ export default function Home() {
                             }
                         }}
                     />
-                    <DirectMessages className="w-[30%] bg-darkBgMain" myInfo={myInfo} activeUsers={activeUsers} />
-                    <MessagesWinow className="w-[70%] bg-darkBgMain" currentUserInfo={myInfo} activeUsers={activeUsers} typying={typingMessage} />
+                    <DirectMessages className="w-[30%] min-h-[100%] bg-darkBgMain" myInfo={myInfo} activeUsers={activeUsers} />
+                    <MessagesWinow className="w-[70%] min-h-[100%] bg-darkBgMain" currentUserInfo={myInfo} activeUsers={activeUsers} typying={typingMessage} />
                 </main> 
             </>
 

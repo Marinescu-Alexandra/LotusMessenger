@@ -85,9 +85,9 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
 
     return (
         <>
-            <div className={`border-r-2 border-darkBgPrimary ${className}`}>
-                <div className="w-full h-screen flex flex-col gap-4 justify-start items-center shrink-0">
-                    <div className="topbar w-full min-h-[7%] flex flex-row justify-between items-center px-6 border-b-2 border-darkBgPrimary bg-gradient-to-l from-orange via-magneta to-crayola">
+            <div className={`border-r-2 border-darkBgPrimary z-20 bg-darkBgMain ${className}`}>
+                <div className="w-full h-screen flex flex-col gap-4 justify-start items-center shrink-0 z-20 bg-darkBgMain">
+                    <div className="topbar z-20 w-full min-h-[65px] flex flex-row justify-between items-center px-6 border-b-2 border-darkBgPrimary bg-gradient-to-l from-orange via-magneta to-crayola">
                         <div className="flex flex-row gap-2 justify-center items-center">
                             <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={50} height={50} className="rounded-full"
                                 priority
@@ -117,7 +117,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
 
                     </div>
                     
-                    <div className="searchBar w-[95%] min-h-[5%] mt-4 mb-2 flex flex-row justify-center items-center gap-4  bg-darkBgPrimary rounded-full">
+                    <div className="searchBar z-20 w-[95%] min-h-[50px] mt-4 mb-2 flex flex-row justify-center items-center gap-4  bg-darkBgPrimary rounded-full">
                         <Image src={searchIcon} alt='serachIcon' width={30} height={30} className="ml-4"
                             priority
                             sizes="(max-width: 768px) 100vw,
@@ -130,7 +130,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                         </div>
                     </div>
 
-                    <div className="contactsList w-[95%] flex-col justify-start items-center overflow-y-scroll no-scrollbar">
+                    <div className="contactsList z-20 w-[95%] min-h-fit flex-col justify-start items-center overflow-y-scroll no-scrollbar">
                         {
                             friendsList?.map((e:any, index: React.Key | null | undefined) => {
                                 return (
