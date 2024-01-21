@@ -97,7 +97,8 @@ module.exports.messageUploadDB = async (req, res) => {
         senderId,
         receiverId,
         message,
-        senderName
+        senderName,
+        images
     } = req.body
 
     try {
@@ -106,7 +107,7 @@ module.exports.messageUploadDB = async (req, res) => {
             receiverId: receiverId,
             message: {
                 text: message,
-                image: []
+                image: images
             },
             senderName: senderName
         })
@@ -203,7 +204,7 @@ module.exports.undeliveredMessagesGet = async (req, res) => {
     
 }
 
-module.exports.imageMessageSend = async (req, res) => {
+module.exports.imagesUpload = async (req, res) => {
     const form = new formidable.IncomingForm();
 
     form.parse(req, async (err, fields, files) => {
@@ -211,8 +212,6 @@ module.exports.imageMessageSend = async (req, res) => {
             next(err);
             return;
         }
-        const senderId = fields['senderId']
-        const receiverId = fields['receiverId']
         const imageNames = fields['imageName[]']
 
         const paths = []
@@ -232,17 +231,9 @@ module.exports.imageMessageSend = async (req, res) => {
             })
         })
         try {
-            const insertMessage = await messageModel.create({
-                senderId: senderId[0],
-                receiverId: receiverId[0],
-                message: {
-                    text: '',
-                    image: paths
-                }
-            })
-            res.status(201).json({
+            res.status(200).json({
                 success: true,
-                message: insertMessage
+                paths: paths
             })
             
         } catch (error) {

@@ -66,6 +66,17 @@ export default function Home() {
     const dispatch = useAppDispatch()
 
     useEffect(() => {
+        setIsClient(true)
+    }, [])
+
+
+    useEffect(() => {
+        if (!authenticate) {
+            router.push('/login')
+        }
+    })
+
+    useEffect(() => {
         const socket = io("ws://localhost:8000", {
             reconnection: true,
             reconnectionAttempts: Infinity,
@@ -172,18 +183,9 @@ export default function Home() {
         }
     }, [undeliveredMessages])
 
-    useEffect(() => {
-        setIsClient(true)
-    }, [])
 
 
-    useEffect(() => {
-        if (!authenticate) {
-            router.push('/login')
-        }
-    })
-
-
+    //Update real time message
     useEffect(() => {
         if (socketMessage && Object.keys(selectedFriendData).length > 0 && socketRef.current) {
             if (socketMessage.senderId === selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
@@ -209,6 +211,7 @@ export default function Home() {
         }
     }, [socketMessage])
 
+    //Update chunk of unseen and delivered messages as seen
     useEffect(() => {
         if (messages.length >= 1 && messages[messages.length - 1].status === "delivered") {
             if (messages[messages.length - 1].receiverId === currentUserInfo.id) {
@@ -222,10 +225,18 @@ export default function Home() {
             }
             if(socketRef.current)
                 socketRef.current.emit('messageSeen', messages[messages.length - 1])
+
+            dispatch({
+                type: 'UPDATE_FRIEND_MESSAGE',
+                payload: {
+                    messageInfo: messages[messages.length - 1],
+                    status: 'seen'
+                }
+            })
         }
     }, [messages])
 
-    //Notify user of new unseen messages
+    //Notify user of new unseen messages when online
     useEffect(() => {
         if (socketMessage && selectedFriendData && socketRef.current) {
             if (socketMessage.senderId !== selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
@@ -245,38 +256,7 @@ export default function Home() {
             }
         }
     }, [socketMessage])
-
-    // useEffect(() => {
-    //     if (selectedFriendData && socketRef.current) {
-    //         if (selectedFriendData.lastMessageInfo && (selectedFriendData.lastMessageInfo.status === 'delivered' || selectedFriendData.lastMessageInfo.status === 'unseen')) {
-
-    //             if (messages.length >= 1 && (messages[messages.length - 1].status === "delivered" || messages[messages.length - 1].status === "unseen")) {
-    //                 if (messages[messages.length - 1].receiverId === currentUserInfo.id) {
-    //                     for (let i = messages.length - 1; i >= 0; i--) {
-    //                         if ((messages[i].status === 'delivered' || messages[i].status === 'unseen') && messages[i].receiverId === currentUserInfo.id) {
-    //                             dispatch(seenMessage(messages[i]))
-    //                         } else if (messages[i].status === 'seen' && messages[i].receiverId === currentUserInfo.id) {
-    //                             break
-    //                         }
-    //                     }
-    //                 }
-    //                 if (socketRef.current)
-    //                     socketRef.current.emit('messageSeen', selectedFriendData.lastMessageInfo)
-    //             }
-
-    //             dispatch({
-    //                 type: 'UPDATE_FRIEND_MESSAGE',
-    //                 payload: {
-    //                     messageInfo: selectedFriendData.lastMessageInfo,
-    //                     status: 'seen'
-    //                 }
-    //             })
-    //         }
-    //     }
-            
-    // }, [selectedFriendData])
     
-
     useEffect(() => {
         dispatch(getFriends())
         if (newUserAdded === true) {

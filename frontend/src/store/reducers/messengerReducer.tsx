@@ -1,5 +1,5 @@
 import {
-    FRIEND_GET_SUCCESS, MESSAGE_GET_SUCCESS, SEND_MESSAGE_SUCCESS, SOCKET_MESSAGE, UPDATE_FRIEND_MESSAGE,
+    FRIEND_GET_SUCCESS, MESSAGE_GET_SUCCESS, SEND_MESSAGE_SUCCESS, SOCKET_MESSAGE, UPDATE_FRIEND_MESSAGE, UPLOAD_IMAGES_SUCCESS, UPLOAD_IMAGES_SUCCESS_CLEAR,
     MESSAGE_SEND_SUCCESS_CLEAR, SEEN_MESSAGE, DELIVER_MESSAGE, NEW_USER_ADDED, NEW_USER_ADDED_CLEAR, UNDELIVERED_GET_SUCCESS, UNDELIVERED_GET_SUCCESS_CLEAR
 } from '../types/messengerType'
 import { LOGOUT_SUCCESS } from '../types/authType'
@@ -13,7 +13,8 @@ interface MessengerState {
     messages: Dictionary<string>[],
     messageSendSuccess: boolean,
     newUserAdded: boolean,
-    undeliveredMessages: Dictionary<string>[]
+    undeliveredMessages: Dictionary<string>[],
+    imagePaths: string[]
 }
 
 const messengerState: MessengerState = {
@@ -21,7 +22,8 @@ const messengerState: MessengerState = {
     messages: [],
     messageSendSuccess: false,
     newUserAdded: false,
-    undeliveredMessages: []
+    undeliveredMessages: [],
+    imagePaths: []
 }
 
 export const messengerReducer = (state = messengerState, action: any) => {
@@ -48,6 +50,18 @@ export const messengerReducer = (state = messengerState, action: any) => {
             ...state,
             messageSendSuccess: true,
             messages: [...state.messages, action.payload.message],
+        }
+    }
+    if (action.type === UPLOAD_IMAGES_SUCCESS) {
+        return {
+            ...state,
+            imagePaths: state.imagePaths.concat(action.payload.paths)
+        }
+    }
+    if (action.type === UPLOAD_IMAGES_SUCCESS_CLEAR) {
+        return {
+            ...state,
+            imagePaths: []
         }
     }
     if (action.type === SOCKET_MESSAGE) {
