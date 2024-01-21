@@ -126,7 +126,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
     }
 
     const sendMessage = () => {
-        if (newMessage !== " ") {
+        newMessage.trim()
+        if (newMessage !== "" || imagePaths.length > 0) {
             const data = {
                 senderName: currentUserInfo?.username,
                 senderId: currentUserInfo?.id,
