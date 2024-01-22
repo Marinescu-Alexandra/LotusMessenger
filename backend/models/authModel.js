@@ -14,6 +14,10 @@ const registerSchema = new Schema({
         type: String,
         required: true
     },
+    profileImage: {
+        type: String,
+        required: false
+    }
 }, { timestamps: true });
 
 module.exports = model('user', registerSchema)

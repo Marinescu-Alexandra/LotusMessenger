@@ -2,57 +2,65 @@
 import React, { FC } from "react"
 import Image from "next/image"
 import profilePlaceholder from '@/profilePicturePlaceholder.png'
-import seenIcon from '@/seen.png'
-
-interface Dictionary<T> {
-    [Key: string]: T;
-}
 
 interface LeftChatBubble {
     className?: string,
     message: string,
     deliverTime: string,
     scrollRef: any
-    imageUrl?: string[]
-    status: string
+    imageUrl: string[]
+    handleImageGalleryClick: (a: number, b: string[]) => void
 }
 
-const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, scrollRef, imageUrl, status }) => {
+const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, scrollRef, imageUrl, handleImageGalleryClick }) => {
     return (
         <div ref={scrollRef} className="flex items-start gap-2.5 ml-4 mt-4 mb-4 z-20">
             <Image className="w-8 h-8 rounded-full" src={profilePlaceholder} alt="profilePicPlaceholder" />
-            
-            <div className="flex flex-col min-w-[30px] max-w-[580px] leading-1.5 p-4 border-gray-200 bg-darkBgPrimary rounded-e-xl rounded-es-xl">
+
+            <div className={`min-w-[30px] ${imageUrl && imageUrl.length <= 4 ? 'max-w-[380px]' : 'max-w-[580px]'}  leading-1.5 p-4 border-gray-200 bg-darkBgPrimary rounded-l-xl rounded-b-xl rounded-es-xl`}>
                 <p className="text-normal font-normal pb-2.5 text-textLeftBubble break-words">{message}</p>
                 {
-                    (imageUrl && imageUrl.length === 1) &&
-                    <div className="group relative my-2.5">
-                        <div className="absolute w-full h-full bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
-                            <button data-tooltip-target="download-image" className="inline-flex items-center justify-center rounded-full h-10 w-10 bg-white/30 hover:bg-white/50 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50">
-                                <svg className="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 18">
-                                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 1v11m0 0 4-4m-4 4L4 8m11 4v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-3" />
-                                </svg>
+                    (imageUrl && imageUrl.length <= 4) &&
+
+                    imageUrl.map((url, index) => {
+                        return (
+                            <button onClick={() => handleImageGalleryClick(index, imageUrl)} key={index} className="">
+                                <div className="group relative my-2.5" key={index}>
+                                    <div className="absolute w-full h-full bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center" />
+                                    <img src={`/userImages/${url}`} alt="messageImage" className="rounded-lg w-[350px] h-[400px] object-cover" />
+                                </div>
                             </button>
-                        </div>
-                        <img src={`/userImages/${imageUrl[0]}`} alt="messageImage" className="rounded-lg" />
-                    </div>
+                        )
+                    })
                 }
                 {
-                    (imageUrl && imageUrl.length > 1) &&
+                    (imageUrl && imageUrl.length > 4) &&
                     <div className="grid gap-4 grid-cols-2 my-2.5">
-                        {imageUrl.map((url) => {
-                            return (
-                                <div className="group relative">
-                                    <div className="absolute w-full h-full bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
-                                        <button data-tooltip-target="download-image" className="inline-flex items-center justify-center rounded-full h-10 w-10 bg-white/30 hover:bg-white/50 focus:ring-4 focus:outline-none dark:text-white focus:ring-gray-50">
-                                            <svg className="w-5 h-5 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 16 18">
-                                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 1v11m0 0 4-4m-4 4L4 8m11 4v3a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-3" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                    <img src={`/userImages/${url}`} alt="messageImage" className="rounded-lg w-[50px] h-[50px]" />
-                                </div>
-                            )
+                        {/* Aici ar trb un for cu break in loc de map, dar nu stiu dc nu merge for ul :) */}
+                        {imageUrl.map((url, index) => {
+                            if (index <= 2) {
+                                return (
+                                    <button onClick={() => handleImageGalleryClick(index, imageUrl)} key={index}>
+                                        <div className="group relative">
+                                            <div className="absolute w-full h-full bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
+                                            </div>
+                                            <img src={`/userImages/${url}`} alt="messageImage" className="rounded-lg object-cover w-[240px] h-[240px]" />
+                                        </div>
+                                    </button>
+
+                                )
+                            } else if (index === 3) {
+                                return (
+                                    <button onClick={() => handleImageGalleryClick(index, imageUrl)} key={index}>
+                                        <div className="group relative">
+                                            <div className="absolute w-full h-full bg-gray-900/90 hover:bg-gray-900/50 transition-all duration-300 rounded-lg flex items-center justify-center">
+                                                <span className="text-3xl font-medium text-white">+{imageUrl.length - 4}</span>
+                                            </div>
+                                            <img src={`/userImages/${url}`} alt="messageImage" className="rounded-lg object-cover w-[240px] h-[240px]" />
+                                        </div>
+                                    </button>
+                                )
+                            }
                         })}
                     </div>
                 }

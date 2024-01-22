@@ -46,6 +46,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
 
     const [isClient, setIsClient] = useState(false)
 
+    const inputProfileImage = useRef<HTMLInputElement | null>(null);
     const socketRef = useRef<Socket | null>(null)
 
     useEffect(() => {
@@ -56,6 +57,22 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
         });
         socketRef.current = socket
     }, [])
+
+    const selectInputMedia = () => {
+        if (inputProfileImage.current) {
+            inputProfileImage.current.click()
+        }
+    }
+
+    const mediaSelected = (e: ChangeEvent<HTMLInputElement>) => {
+
+        const formData = new FormData()
+        if (e.target.files) {
+            formData.append('profileImage', Date.now() + e.target.name);
+            //dispatch(uploadImages(formData))
+        }
+
+    }
 
     const logout = () => {
         dispatch(userLogout());
@@ -100,19 +117,27 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                             </h2>
                         </div>
                         <div className="flex flex-row gap-4 justify-center items-center">
-                            <Image src={editing} alt='dotsIcon' width={25} height={25} className="mb-1.5"
-                                priority
-                                sizes="(max-width: 768px) 100vw,
-                                           (max-width: 1200px) 50vw,
-                                           50vw"
-                            />
-                            <Image src={logoutIcon} alt='editingIcon' width={25} height={25} className=""
-                                priority
-                                sizes="(max-width: 768px) 100vw,
-                                           (max-width: 1200px) 50vw,
-                                           50vw"
-                                onClick={() => logout()}
-                            />
+                            <button onClick={() => selectInputMedia()}>
+                                <Image
+                                    src={editing}
+                                    alt='changeAvatarIcon'
+                                    width={25}
+                                    height={25}
+                                    className="mb-1.5"
+                                    priority
+                                />
+                                <input onChange={mediaSelected} multiple={false} type="file" id="inputFile" ref={inputProfileImage} style={{ display: "none" }} />
+                            </button>
+                            <button onClick={() => logout()}>
+                                <Image
+                                    src={logoutIcon}
+                                    alt='logoutIcon'
+                                    width={25}
+                                    height={25}
+                                    priority
+                                />
+                            </button>
+
                         </div>
 
                     </div>

@@ -253,8 +253,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                                 key={index}
                                                 message={e.message.text}
                                                 deliverTime={moment(e.createdAt).format('kk:mm')}
-                                                status={e.status}
                                                 imageUrl={e.message.image}
+                                                handleImageGalleryClick={handleImageGalleryClick}
                                             />
                                     )
                                 } else {
