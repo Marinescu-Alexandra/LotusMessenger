@@ -1,5 +1,5 @@
 
-import { REGISTER_FAIL, REGISTER_SUCCESS, SUCCESS_MESSAGE_CLEAR, ERRORS_CLEAR, LOGIN_FAIL, LOGIN_SUCCESS, LOGOUT_SUCCESS } from "../types/authType"
+import { REGISTER_FAIL, REGISTER_SUCCESS, SUCCESS_MESSAGE_CLEAR, ERRORS_CLEAR, LOGIN_FAIL, LOGIN_SUCCESS, LOGOUT_SUCCESS, UPLOAD_PROFILE_IMAGE_SUCCESS } from "../types/authType"
 import { jwtDecode } from "jwt-decode";
 
 interface Dictionary<T> {
@@ -99,6 +99,14 @@ export default function authReducer(state = authState, action: any) {
                 authenticate: false,
                 myInfo: {},
                 successMessage: 'Logout Successfull'
+            }
+        case UPLOAD_PROFILE_IMAGE_SUCCESS:
+            return {
+                ...state,
+                myInfo: {
+                    ...state.myInfo,
+                    profileImage: String(action.payload.profileImagePath)
+                }
             }
 
         default:

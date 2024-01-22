@@ -1,4 +1,3 @@
-const formidable = require('formidable');
 const validator = require('validator')
 const registerModel = require('../models/authModel')
 const bycrypt = require('bcrypt')
@@ -47,14 +46,15 @@ module.exports.userRegister = async (req, res) => {
                     const userCreate = await registerModel.create({
                         username,
                         email,
-                        password: await bycrypt.hash(password, 10)
+                        password: await bycrypt.hash(password, 10),
                     });
 
                     const token = jwt.sign({
                         id: userCreate._id,
                         email: userCreate.email,
                         username: userCreate.username,
-                        registerTimer: userCreate.createdAt
+                        registerTimer: userCreate.createdAt,
+                        profileImage: checkUser.profileImage,
                     }, process.env.SECRET, {
                         expiresIn: process.env.TOKEN_EXP
                     })
@@ -125,7 +125,8 @@ module.exports.userLogin = async (req, res) => {
                         id: checkUser._id,
                         email: checkUser.email,
                         username: checkUser.username,
-                        registerTimer: checkUser.createdAt
+                        registerTimer: checkUser.createdAt,
+                        profileImage: checkUser.profileImage,
                     }, process.env.SECRET, {
                         expiresIn: process.env.TOKEN_EXP
                     })

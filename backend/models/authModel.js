@@ -16,7 +16,7 @@ const registerSchema = new Schema({
     },
     profileImage: {
         type: String,
-        required: false
+        default: ''
     }
 }, { timestamps: true });
 

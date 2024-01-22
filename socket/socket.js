@@ -44,9 +44,6 @@ io.on('connection', (socket) => {
         otherInstance = users.find(user => user.userId === userData.id)
         if (otherInstance) {
             socket.to(otherInstance.socketId).emit('removeOtherActiveInstance', userData.id)
-            console.log('yes')
-        } else {
-            console.log('no')
         }
     })
 
@@ -67,8 +64,6 @@ io.on('connection', (socket) => {
 
     socket.on('sendMessage', (data) => {
         const user = findFriend(data.receiverId)
-        console.log('sendMessage ', data)
-        console.log('user')
         if (user !== undefined) {
             socket.to(user.socketId).emit('getMessage', data)
         }
@@ -82,9 +77,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('deliverMessage', (data) => {
-        console.log('deliverMessage data', data)
         const user = findFriend(data.senderId)
-        console.log(user)
         if (user !== undefined) {
             socket.to(user.socketId).emit('messageDeliverResponse', data)
         }

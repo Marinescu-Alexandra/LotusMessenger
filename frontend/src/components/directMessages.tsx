@@ -5,7 +5,7 @@ import dots from '@/dots.png'
 import editing from '@/edit.png'
 import searchIcon from '@/loupe.png'
 import { getSelectedFriend } from "@/store/actions/messengerAction"
-import { userLogout } from "@/store/actions/authAction";
+import { userLogout, uploadUserProfileImage } from "@/store/actions/authAction";
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import moment from 'moment'
 import seen from '@/seen.png'
@@ -68,8 +68,9 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
 
         const formData = new FormData()
         if (e.target.files) {
-            formData.append('profileImage', Date.now() + e.target.name);
-            //dispatch(uploadImages(formData))
+            formData.append('profileImage', e.target.files[0]);
+            formData.append('profileImageName', Date.now() + e.target.files[0].name);
+            dispatch(uploadUserProfileImage(formData))
         }
 
     }
@@ -106,12 +107,20 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                 <div className="w-full h-screen flex flex-col gap-4 justify-start items-center shrink-0 z-20 bg-darkBgMain">
                     <div className="topbar z-20 w-full min-h-[65px] flex flex-row justify-between items-center px-6 border-b-2 border-darkBgPrimary bg-gradient-to-l from-orange via-magneta to-crayola">
                         <div className="flex flex-row gap-2 justify-center items-center">
-                            <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={50} height={50} className="rounded-full"
-                                priority
-                                sizes="(max-width: 768px) 100vw,
-                                           (max-width: 1200px) 50vw,
-                                           50vw"
-                            />
+                            {
+                                myInfo ? 
+                                    <img
+                                        src={`/userProfileImages/${myInfo.profileImage}`}
+                                        alt="profilePicturePlaceholder"
+                                        className="object-contain rounded-full w-[50px] h-[50px]" />
+                                :
+                                    <Image
+                                        src={profilePicturePlaceholder}
+                                        alt='profilePicturePlaceholder'
+                                        width={50} height={50}
+                                        className="rounded-full"
+                                        priority />
+                            }
                             <h2 className="font-semibold text-2xl w-full text-center text-black">
                                 {isClient? myInfo?.username : " "}
                             </h2>

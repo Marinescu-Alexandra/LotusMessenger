@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import { REGISTER_FAIL, REGISTER_SUCCESS, LOGIN_SUCCESS, LOGIN_FAIL } from '../types/authType';
+import { REGISTER_FAIL, REGISTER_SUCCESS, LOGIN_SUCCESS, LOGIN_FAIL, UPLOAD_PROFILE_IMAGE_SUCCESS } from '../types/authType';
 
 const config = {
     withCredentials: true,
@@ -75,6 +75,30 @@ export const userLogout = () => async (dispatch: any) => {
             })
         }
     } catch(error) {
+        console.log(error)
+    }
+}
+
+export const uploadUserProfileImage = (data: any) => async (dispatch: any) => {
+    const newConfig = {
+        withCredentials: true,
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            'Access-Control-Allow-Origin': '*'
+        },
+        api: {
+            bodyParser: false,
+        },
+    }
+    try {
+        const response = await axios.post('http://localhost:5000/api/messenger/update-user-profile-picture', data, newConfig);
+        dispatch({
+            type: UPLOAD_PROFILE_IMAGE_SUCCESS,
+            payload: {
+                profileImagePath: response.data.profileImagePath
+            }
+        })
+    } catch (error) {
         console.log(error)
     }
 }

@@ -48,9 +48,7 @@ type SocketTypyingMessage = {
 
 export default function Home() {
     const { friends, messages, newUserAdded, undeliveredMessages } = useAppSelector(state => state.messenger)
-    const { authenticate } = useAppSelector(state => state.auth);
-    const router = useRouter()
-    const { myInfo } = useAppSelector(state => state.auth)
+    const { authenticate, myInfo } = useAppSelector(state => state.auth);
     const { selectedFriendData } = useAppSelector(state => state.selectedFriend)
 
     const currentUserInfo: Dictionary<string> = myInfo
@@ -64,6 +62,7 @@ export default function Home() {
     const [isClient, setIsClient] = useState(false)
 
     const dispatch = useAppDispatch()
+    const router = useRouter()
 
     useEffect(() => {
         setIsClient(true)
