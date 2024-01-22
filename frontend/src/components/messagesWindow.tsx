@@ -15,6 +15,7 @@ import moment from 'moment'
 import img from '@/img.png'
 import imgBg from '@/bg.png'
 import plus from '@/plus.png'
+import GalleryView from "./galleryView";
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -64,8 +65,10 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
     const [newMessage, setNewMessage] = useState('')
     const [isContactInfoOpen, setContactInfoOpen] = useState(false)
     const [isMediaSelected, setMediaSelected] = useState(false)
-    const [formData, setFormData] = useState({})
     const [imageIndex, setImageIndex] = useState(0)
+    const [isGalleryImageSelected, setGalleryImageSelected] = useState(false)
+    const [galleryIndex, setGalleryIndex] = useState(0)
+    const [galleryImages, setGalleryImages] = useState<string[]>([])
 
     const scrollRefLeft = useRef<HTMLDivElement | null>(null);
     const scrollRefRight = useRef<HTMLDivElement | null>(null);
@@ -113,6 +116,11 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
         }
     }, [imagePaths])
 
+    useEffect(() => {
+        setGalleryImageSelected(false)
+        setMediaSelected(false)
+    }, [selectedFriendData])
+
 
     const inputHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setNewMessage(e.target.value)
@@ -149,10 +157,19 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
     }
 
     const selectInputMedia = () => {
-        //setMediaSelected(true)
         if (inputFile.current) {
             inputFile.current.click()
         }
+    }
+
+    const handleImageGalleryClick = (index: number, paths: string[]) => {
+        setGalleryIndex(index)
+        setGalleryImages(paths)
+        setGalleryImageSelected(true)
+    }
+
+    const handleGalleryClose = () => {
+        setGalleryImageSelected(false)
     }
 
     const mediaSelected = (e: ChangeEvent<HTMLInputElement>) => {
@@ -225,7 +242,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     </div>
 
                     {/* CHAT WINDOW */}
-                    <div className={`chatWindow w-full h-full flex flex-col top-0 overflow-y-scroll no-scrollbar bg-darkBgMain ${isMediaSelected ? 'hidden' : 'flex'}`}>
+                    <div className={`chatWindow w-full h-full flex flex-col top-0 overflow-y-scroll no-scrollbar bg-darkBgMain ${isMediaSelected || isGalleryImageSelected ? 'hidden' : 'flex'}`}>
                         {
                             messages?.map((e: Message, index: React.Key | null | undefined) => {
                                 if (e.senderId === selectedFriendData._id) {
@@ -250,6 +267,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                                 deliverTime={moment(e.createdAt).format('kk:mm')}
                                                 status={e.status}
                                                 imageUrl={e.message.image}
+                                                handleImageGalleryClick={handleImageGalleryClick}
                                             />
                                         </>
 
@@ -262,11 +280,11 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     {/* TYPING NOTICE */}
                     {
                         typying && typying.message && typying.senderId == selectedFriendData._id ?
-                            <p className={`mb-2 w-full text-semibold pl-6 text-lg text-left z-20 ${isMediaSelected ? 'hidden' : 'flex'}`}>Typing Message...</p> : ''
+                            <p className={`mb-2 w-full text-semibold pl-6 text-lg text-left z-20 ${isMediaSelected || isGalleryImageSelected ? 'hidden' : 'flex'}`}>Typing Message...</p> : ''
                     }
 
                     {/* MESSAGE TEXTAREA */}
-                    <div className={`writeMessage w-full min-h-[100px] z-20 ${Object.keys(selectedFriendData).length === 0 || isMediaSelected ? 'hidden' : 'flex'}`}>
+                    <div className={`writeMessage w-full min-h-[100px] z-20 ${Object.keys(selectedFriendData).length === 0 || isMediaSelected || isGalleryImageSelected ? 'hidden' : 'flex'}`}>
                         <div className="flex w-full h-full flex-row justify-center items-center border-t-2 border-darkBgPrimary mx-4">
                             <button onClick={() => selectInputMedia()}>
                                 <input onChange={mediaSelected} multiple={true} type="file" id="inputFile" ref={inputFile} style={{ display: "none" }} />
@@ -313,8 +331,9 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                             </div>
 
                         </div>
-                    </div>
+                    </div> 
 
+                    {/* GALLERY UPLOAD VIEW */}
                     <div className={`${isMediaSelected ? 'flex' : 'hidden'} z-20 w-full h-full bg-darkBgMain overflow-y-scroll no-scrollbar`}>
 
                         <div className="flex flex-col justify-between items-center w-full min-h-[800px] gap-10">
@@ -340,7 +359,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
                                     {imagePaths.map((image: string, index: React.Key | null | undefined) => {
                                         return (
-                                            <button onClick={() => setImageIndex(Number(index))} className={`w-[60px] h-[60px] flex items-center justify-center rounded-lg ${imageIndex === Number(index) ? 'border-2 border-green-500' : 'border border-black'} `} id={String(index)}>
+                                            <button key={index} onClick={() => setImageIndex(Number(index))} className={`w-[60px] h-[60px] flex items-center justify-center rounded-lg ${imageIndex === Number(index) ? 'border-2 border-green-500' : 'border border-black'} `} id={String(index)}>
                                                 <img src={`/userImages/${image}`} alt="messageImage" className="object-cover w-full h-full rounded-lg" />
                                             </button>
                                         )
@@ -366,6 +385,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                             </div>
                         </div>
                     </div>
+
+                    <GalleryView imagePaths={galleryImages} handleGalleryClose={handleGalleryClose} index={galleryIndex} mediaSelected={isGalleryImageSelected} />
 
                 </motion.div>
 
