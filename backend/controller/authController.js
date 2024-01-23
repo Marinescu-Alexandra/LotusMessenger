@@ -56,14 +56,15 @@ module.exports.userRegister = async (req, res) => {
                         email: userCreate.email,
                         username: userCreate.username,
                         registerTimer: userCreate.createdAt,
-                        profileImage: checkUser.profileImage,
+                        profileImage: userCreate.profileImage,
                     }, process.env.SECRET, {
                         expiresIn: process.env.TOKEN_EXP
                     })
 
                     const options = { expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000) }
+
                     try {
-                        res.status(201).cookie('authToken', token, options).json({
+                        res.status(200).cookie('authToken', token, options).json({
                             successMessage: 'Registration complete.', token
                         })
                     } catch (error) {

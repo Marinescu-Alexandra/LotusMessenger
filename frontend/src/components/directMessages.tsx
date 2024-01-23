@@ -56,10 +56,6 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
             reconnectionDelay: 1000,
         });
         socketRef.current = socket
-
-        socket.on('updateFriendList', (data: any) => {
-            dispatch(getFriends())
-        })
     }, [])
 
     const selectInputMedia = () => {
@@ -102,16 +98,11 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
         if (myInfo) {
             setIsClient(true)
         }
-    }, [myInfo])
 
-    useEffect(() => {
-   
         if (socketRef.current && myInfo) {
             socketRef.current.emit('userProfilePictureUpdate', myInfo.id)
         }
-        
-    }, [myInfo?.profileImage])
-
+    }, [myInfo])
 
     return (
         <>
@@ -120,11 +111,13 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                     <div className="topbar z-20 w-full min-h-[65px] flex flex-row justify-between items-center px-6 border-b-2 border-darkBgPrimary bg-gradient-to-l from-orange via-magneta to-crayola">
                         <div className="flex flex-row gap-2 justify-center items-center">
                             {
-                                myInfo ? 
+                                myInfo && myInfo.profileImage ?
                                     <img
                                         src={`/userProfileImages/${myInfo.profileImage}`}
                                         alt="profilePicturePlaceholder"
-                                        className="object-contain rounded-full w-[50px] h-[50px]" />
+                                        className="object-cover rounded-full"
+                                        width={55}
+                                        height={55}/>
                                 :
                                     <Image
                                         src={profilePicturePlaceholder}
@@ -187,17 +180,19 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                         >
                                             <div className="flex flex-row justify-center items-end -space-x-4">
                                                 {
-                                                    e.profileImage ?
+                                                    e.profileImage !== '' ?
                                                         <img
                                                             src={`/userProfileImages/${e.profileImage}`}
                                                             alt="profilePicturePlaceholder"
-                                                            className="rounded-full w-[70px]" />
+                                                            className="object-cover rounded-full"
+                                                            width={65}
+                                                            height={65} />
                                                         :
                                                         <Image
                                                             src={profilePicturePlaceholder}
                                                             alt='profilePicturePlaceholder'
-                                                            width={70}
-                                                            height={70}
+                                                            width={65}
+                                                            height={65}
                                                             className="rounded-full"
                                                             priority />
                                                 }

@@ -83,6 +83,11 @@ export default function Home() {
         });
 
         socketRef.current = socket
+
+        socket.on('updateFriendList', (data: any) => {
+            dispatch(getFriends())
+        })
+
         socket.on('getMessage', (data: any) => {
             setSocketMessage(data)
         })

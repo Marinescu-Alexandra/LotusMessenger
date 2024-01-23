@@ -7,7 +7,6 @@ const config = {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
     },
-
 }
 
 export const userRegister = (data: any) => {

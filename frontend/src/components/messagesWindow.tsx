@@ -442,7 +442,9 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                         <img
                                             src={`/userProfileImages/${selectedFriendData.profileImage}`}
                                             alt="profilePicturePlaceholder"
-                                            className="rounded-full w-[120px]"
+                                            className="object-cover rounded-full"
+                                            width={65}
+                                            height={65} 
                                         />
                                         :
                                         <Image
