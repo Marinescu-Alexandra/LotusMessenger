@@ -216,7 +216,24 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                            
                             {/* USER AVATAR + ACTIVE STATUS */}
                             <div className="flex flex-row justify-center items-end -space-x-3.5">
-                                <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={50} height={50} className="rounded-full" priority/>
+                                {
+                                    selectedFriendData.profileImage ?
+                                        <img
+                                            src={`/userProfileImages/${selectedFriendData.profileImage}`}
+                                            alt="profilePicturePlaceholder"
+                                            className="rounded-full w-[50px]"
+                                        />
+                                        :
+                                        <Image
+                                            src={profilePicturePlaceholder}
+                                            alt='profilePicturePlaceholder'
+                                            width={50}
+                                            height={50}
+                                            className="rounded-full"
+                                            priority
+                                        />
+                                }
+                                
                                 {
                                     activeUsers && activeUsers.find((user: any) => user.userId === selectedFriendData._id) ?
                                         <div className="w-4 h-4 bg-green-500 rounded-full border-2 border-orange"></div> : ''
@@ -255,6 +272,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                                 deliverTime={moment(e.createdAt).format('kk:mm')}
                                                 imageUrl={e.message.image}
                                                 handleImageGalleryClick={handleImageGalleryClick}
+                                                userProfileImage={selectedFriendData.profileImage}
                                             />
                                     )
                                 } else {
@@ -419,12 +437,23 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                         {/* AVATAR NAME AND SHARED MEDIA */}
                         <div className="w-full bg-darkBgMain min-h-[93%] flex flex-col justify-start items-center gap-4">
                             <div className="flex flex-row justify-center items-end -space-x-5 mt-10">
-                                <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={90} height={90} className="rounded-full"
-                                    priority
-                                    sizes="(max-width: 768px) 100vw,
-                                            (max-width: 1200px) 50vw,
-                                            50vw"
-                                />
+                                {
+                                    selectedFriendData.profileImage ?
+                                        <img
+                                            src={`/userProfileImages/${selectedFriendData.profileImage}`}
+                                            alt="profilePicturePlaceholder"
+                                            className="rounded-full w-[120px]"
+                                        />
+                                        :
+                                        <Image
+                                            src={profilePicturePlaceholder}
+                                            alt='profilePicturePlaceholder'
+                                            width={120}
+                                            height={120}
+                                            className="rounded-full"
+                                            priority
+                                        />
+                                }
                                 {
                                     activeUsers && activeUsers.find((user: any) => user.userId === selectedFriendData._id) ?
                                         <div className="w-[18px] h-[18px] bg-green-500 rounded-full border-[2.5px] border-darkBgMain"></div> : ''

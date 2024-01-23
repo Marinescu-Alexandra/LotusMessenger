@@ -174,12 +174,22 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                             onClick={async () => await dispatch(getSelectedFriend(e))}
                                         >
                                             <div className="flex flex-row justify-center items-end -space-x-4">
-                                                <Image src={profilePicturePlaceholder} alt='profilePicturePlaceholder' width={60} height={60} className="rounded-full"
-                                                    priority
-                                                    sizes="(max-width: 768px) 100vw,
-                                                        (max-width: 1200px) 50vw,
-                                                        50vw"
-                                                />
+                                                {
+                                                    e.profileImage ?
+                                                        <img
+                                                            src={`/userProfileImages/${e.profileImage}`}
+                                                            alt="profilePicturePlaceholder"
+                                                            className="rounded-full w-[70px]" />
+                                                        :
+                                                        <Image
+                                                            src={profilePicturePlaceholder}
+                                                            alt='profilePicturePlaceholder'
+                                                            width={70}
+                                                            height={70}
+                                                            className="rounded-full"
+                                                            priority />
+                                                }
+                                                
                                                 {
                                                     activeUsers && activeUsers.find((user: any) => user.userId === e._id) ?
                                                         <div className="w-4 h-4 bg-green-500 rounded-full relative border-2 border-darkBgMain"></div> : ''

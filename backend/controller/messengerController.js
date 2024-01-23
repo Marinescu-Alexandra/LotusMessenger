@@ -46,43 +46,19 @@ module.exports.getFriends = async (req, res) => {
         })
         for (let i = 0; i < friendGet.length; i++){
             let lastMessage = await getLastMessage(myId, friendGet[i].id)
+            var newUser = friendGet[i]
             if (lastMessage !== null) {
-                const newUser = {
-                    _id: friendGet[i]._id,
-                    username: friendGet[i].username,
-                    password: friendGet[i].password,
-                    createdAt: friendGet[i].createdAt,
-                    updatedAt: friendGet[i].updatedAt,
-                    profileImage: friendGet[i].profileImage,
-                    __v: friendGet[i].__v,
-                    lastMessageInfo: {
-                        message: {
-                            text: lastMessage.message.text,
-                            image: lastMessage.message.image
-                        },
-                        _id: lastMessage.id,
-                        senderId: lastMessage.senderId,
-                        receiverId: lastMessage.receiverId,
-                        status: lastMessage.status,
-                        createdAt: lastMessage.createdAt,
-                        updatedAt: lastMessage.updatedAt,
-                        __v: lastMessage.__v
-                    }
+                newUser = {
+                    ...newUser._doc,
+                    lastMessageInfo: lastMessage
                 }
-                newUsers.push(newUser)
             } else {
-                const newUser = {
-                    "_id": friendGet[i]._id,
-                    "username": friendGet[i].username,
-                    "password": friendGet[i].password,
-                    "createdAt": friendGet[i].createdAt,
-                    "updatedAt": friendGet[i].updatedAt,
-                    "profileImage": friendGet[i].profileImage,
-                    "__v": friendGet[i].__v,
-                    "lastMessageInfo": null
+                newUser = {
+                    ...newUser._doc,
+                    lastMessageInfo: null
                 }
-                newUsers.push(newUser)
             }
+            newUsers.push(newUser)
         }
         res.status(200).json({ success: true, friends: newUsers })
     } catch {

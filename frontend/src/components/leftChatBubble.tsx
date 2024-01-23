@@ -9,13 +9,23 @@ interface LeftChatBubble {
     deliverTime: string,
     scrollRef: any
     imageUrl: string[]
-    handleImageGalleryClick: (a: number, b: string[]) => void
+    handleImageGalleryClick: (a: number, b: string[]) => void,
+    userProfileImage?: string
 }
 
-const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, scrollRef, imageUrl, handleImageGalleryClick }) => {
+const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, scrollRef, imageUrl, handleImageGalleryClick, userProfileImage }) => {
     return (
         <div ref={scrollRef} className="flex items-start gap-2.5 ml-4 mt-4 mb-4 z-20">
-            <Image className="w-8 h-8 rounded-full" src={profilePlaceholder} alt="profilePicPlaceholder" />
+            {
+                userProfileImage ?
+                    <img
+                        src={`/userProfileImages/${userProfileImage}`}
+                        alt="profilePicturePlaceholder"
+                        className="rounded-full w-10 h-10" />
+                    :
+                    <Image className="w-8 h-8 rounded-full" src={profilePlaceholder} alt="profilePicPlaceholder" />
+            }
+            
 
             <div className={`min-w-[30px] ${imageUrl && imageUrl.length <= 4 ? 'max-w-[380px]' : 'max-w-[580px]'}  leading-1.5 p-4 border-gray-200 bg-darkBgPrimary rounded-l-xl rounded-b-xl rounded-es-xl`}>
                 <p className="text-normal font-normal pb-2.5 text-textLeftBubble break-words">{message}</p>
