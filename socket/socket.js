@@ -39,6 +39,13 @@ io.on('connection', (socket) => {
             socket.to(filteredUsers[i].socketId).emit('newUserAdded', true)
         }
     })
+    
+    socket.on('userProfilePictureUpdate', (userId) => {
+        const filteredUsers = users.filter(user => user.userId !== userId)
+        for (var i = 0; i < filteredUsers.length; i++) {
+            socket.to(filteredUsers[i].socketId).emit('updateFriendList', true)
+        }
+    })
 
     socket.on('checkIfActiveInstance', (userData) => {
         otherInstance = users.find(user => user.userId === userData.id)

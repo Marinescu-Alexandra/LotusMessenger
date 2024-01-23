@@ -70,48 +70,6 @@ module.exports.getFriends = async (req, res) => {
     }
 }
 
-module.exports.updateUserProfileImage = async (req, res) => {
-    const currentUserId = req.myId;
-    const form = new formidable.IncomingForm();
-
-    form.parse(req, async (err, fields, files) => {
-        if (err) {
-            next(err);
-            return;
-        }
-        const profileImageName = fields['profileImageName']
-
-        const newPath = path.join(__dirname + `../../../frontend/public/userProfileImages/${profileImageName}`)
-        files['profileImage'][0].originalFilename = profileImageName
-        fs.copyFile(files['profileImage'][0].filepath, newPath, (err) => {
-            if (err) {
-                res.status(500).json({
-                    error: {
-                        errorMessage: 'Profile image upload fail.'
-                    }
-                })
-                return
-            }
-        })
-
-        await User.findByIdAndUpdate(currentUserId, {
-            profileImage: String(profileImageName)
-        })
-        .then(() => {
-            res.status(200).json({
-                success: true,
-                profileImagePath: profileImageName
-            })
-        }).catch(() => {
-            res.status(500).json({
-                error: {
-                    errorMessage: 'Internal server error'
-                }
-            })
-        })
-    });
-}
-
 module.exports.messageUploadDB = async (req, res) => {
     const {
         senderId,

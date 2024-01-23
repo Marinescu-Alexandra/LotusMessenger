@@ -92,6 +92,7 @@ export const uploadUserProfileImage = (data: any) => async (dispatch: any) => {
     }
     try {
         const response = await axios.post('http://localhost:5000/api/messenger/update-user-profile-picture', data, newConfig);
+        localStorage.setItem('authToken', response.data.token);
         dispatch({
             type: UPLOAD_PROFILE_IMAGE_SUCCESS,
             payload: {

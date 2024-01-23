@@ -4,7 +4,7 @@ import profilePicturePlaceholder from '@/profilePicturePlaceholder.png'
 import dots from '@/dots.png'
 import editing from '@/edit.png'
 import searchIcon from '@/loupe.png'
-import { getSelectedFriend } from "@/store/actions/messengerAction"
+import { getSelectedFriend, getFriends } from "@/store/actions/messengerAction"
 import { userLogout, uploadUserProfileImage } from "@/store/actions/authAction";
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import moment from 'moment'
@@ -56,6 +56,10 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
             reconnectionDelay: 1000,
         });
         socketRef.current = socket
+
+        socket.on('updateFriendList', (data: any) => {
+            dispatch(getFriends())
+        })
     }, [])
 
     const selectInputMedia = () => {
@@ -99,6 +103,14 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
             setIsClient(true)
         }
     }, [myInfo])
+
+    useEffect(() => {
+   
+        if (socketRef.current && myInfo) {
+            socketRef.current.emit('userProfilePictureUpdate', myInfo.id)
+        }
+        
+    }, [myInfo?.profileImage])
 
 
     return (

@@ -2,7 +2,9 @@ const validator = require('validator')
 const registerModel = require('../models/authModel')
 const bycrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-var Cookies = require('cookies')
+const formidable = require('formidable')
+const path = require('path')
+const fs = require('fs')
 
 module.exports.userRegister = async (req, res) => {
     console.log(req.body)
@@ -130,7 +132,7 @@ module.exports.userLogin = async (req, res) => {
                     }, process.env.SECRET, {
                         expiresIn: process.env.TOKEN_EXP
                     })
-           
+
                     const options = { expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000) }
 
                     try {
@@ -174,4 +176,63 @@ module.exports.userLogout = (req, res) => {
     res.status(201).cookie('authToken', '').json({
         success: true
     })
+}
+
+module.exports.updateUserProfileImage = async (req, res) => {
+    const currentUserId = req.myId;
+    const form = new formidable.IncomingForm();
+
+    form.parse(req, async (err, fields, files) => {
+        if (err) {
+            next(err);
+            return;
+        }
+        const profileImageName = fields['profileImageName']
+
+        const newPath = path.join(__dirname + `../../../frontend/public/userProfileImages/${profileImageName}`)
+        files['profileImage'][0].originalFilename = profileImageName
+        fs.copyFile(files['profileImage'][0].filepath, newPath, (err) => {
+            if (err) {
+                res.status(500).json({
+                    error: {
+                        errorMessage: 'Profile image upload fail.'
+                    }
+                })
+                return
+            }
+        })
+
+        await registerModel.findByIdAndUpdate(currentUserId, {
+            profileImage: String(profileImageName)
+        })
+            .then((user) => {
+                try {
+                    const token = jwt.sign({
+                        id: user._id,
+                        email: user.email,
+                        username: user.username,
+                        registerTimer: user.createdAt,
+                        profileImage: String(profileImageName),
+                    }, process.env.SECRET, {
+                        expiresIn: process.env.TOKEN_EXP
+                    })
+
+                    const options = { expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000) }
+
+                    res.status(200).cookie('authToken', token, options).json({
+                        successMessage: 'Cookie update successful',
+                        profileImagePath: profileImageName,
+                        token: token
+                    })
+                } catch (error) {
+                    console.log(error)
+                    res.status(500).json({
+                        error: {
+                            errorMessage: error
+                        }
+                    })
+                }
+
+            })
+    });
 }
