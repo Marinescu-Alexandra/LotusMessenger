@@ -16,6 +16,9 @@ import img from '@/img.png'
 import imgBg from '@/bg.png'
 import plus from '@/plus.png'
 import GalleryView from "./galleryView";
+import { RiSendPlaneFill } from "react-icons/ri";
+import { PiSmileyLight } from "react-icons/pi";
+import { GoPaperclip } from "react-icons/go";
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -209,7 +212,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     }}
                 >
                     {/* TOP BAR */}
-                    <div className="topbar z-20 w-full min-h-[65px] flex flex-row justify-between items-center px-6 
+                    <div className="topbar z-20 w-full min-h-[70px] flex flex-row justify-between items-center px-6 
                                     bg-gradient-to-r from-orange via-magneta to-crayola border-b-2 border-darkBgPrimary">
 
                         <div className={`flex-row justify-center items-center px-2 gap-2 ${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'}`}>
@@ -304,46 +307,35 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     {/* MESSAGE TEXTAREA */}
                     <div className={`writeMessage w-full min-h-[100px] z-20 ${Object.keys(selectedFriendData).length === 0 || isMediaSelected || isGalleryImageSelected ? 'hidden' : 'flex'}`}>
                         <div className="flex w-full h-full flex-row justify-center items-center border-t-2 border-darkBgPrimary mx-4">
-                            <button onClick={() => selectInputMedia()}>
-                                <input onChange={mediaSelected} multiple={true} type="file" id="inputFile" ref={inputFile} style={{ display: "none" }} />
-                                <Image src={img} alt='attachFileIcon' width={45} height={30} className="mr-4"
-                                    priority
-                                    sizes="(max-width: 768px) 100vw,
-                                           (max-width: 1200px) 50vw,
-                                           50vw"
-                                />
-                            </button>
 
-                            <button>
-                                <Image src={emojiIcon} alt='emojiIcon' width={40} height={30} className="mr-2"
-                                    priority
-                                    sizes="(max-width: 768px) 100vw,
-                                           (max-width: 1200px) 50vw,
-                                           50vw"
-                                />
-                            </button>
+                            <div className="w-[95%] rounded-xl h-[75%] flex flex-row justify-between items-center">
+                                <div className="w-full h-full flex flex-row mx-4 rounded-lg border justify-center items-center gap-2 bg-darkBgPrimary border-gray-600 focus-within:ring-2 focus-within:ring-white">
+                                    
+                                    <button onClick={() => selectInputMedia()}>
+                                        <input onChange={mediaSelected} multiple={true} type="file" id="inputFile" ref={inputFile} style={{ display: "none" }} />
+                                        <GoPaperclip className="h-[30px] w-[30px] text-neutral-400 ml-2" />
+                                    </button>
+                                    <button>
+                                        <PiSmileyLight className="h-[35px] w-[35px] text-neutral-400" />
+                                    </button>
+                                    
+                                    <textarea id="chat" rows={3} className="w-full h-full mr-2 pt-6 flex items-center justify-start align-middle resize-none text-md rounded-lg ml-2 bg-darkBgPrimary placeholder-gray-400 text-white no-scrollbar outline-none"
+                                        placeholder="Your message..."
+                                        onChange={inputHandler}
+                                        value={newMessage}
+                                        
+                                    />
 
-                            <div className="w-[88%] rounded-xl h-[60%] flex flex-row justify-between items-center">
-                                <textarea id="chat" rows={3} className="mx-4 p-2.5 w-full h-full resize-none text-md text-gray-900 rounded-lg border
-                                 border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-darkBgPrimary dark:border-gray-600
-                                  dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 no-scrollbar"
-                                    placeholder="Your message..."
-                                    onChange={inputHandler}
-                                    value={newMessage}
-                                >
+                                </div>
 
-                                </textarea>
 
                                 <button
                                     onClick={() => [sendMessage(), setNewMessage("")]}
                                 >
+                                    <div className="w-[50px] h-[50px] flex justify-center items-center rounded-full rotate-45 bg-gradient-to-r from-orange via-magneta to-crayola  border-darkBgPrimary">
+                                        <RiSendPlaneFill className="w-[45px] h-[45px] mr-[6px] mt-[6px] text-darkBgPrimary" />
+                                    </div>
                                     
-                                    <Image src={sendIcon} alt='sendIcon' width={35} height={35} className="mr-4"
-                                        priority
-                                        sizes="(max-width: 768px) 100vw,
-                                           (max-width: 1200px) 50vw,
-                                           50vw"
-                                    />
                                 </button>
 
                             </div>
@@ -423,7 +415,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                 >
                     <div className="w-full h-full flex flex-col justify-start items-center overflow-hidden">
                         {/* TOP BAR */}
-                        <div className="topbar w-full min-h-[65px] flex flex-row justify-start items-center px-6 gap-4 border-b-2 border-darkBgPrimary bg-gradient-to-l from-orange via-magneta to-crayola">
+                        <div className="topbar w-full min-h-[70px] flex flex-row justify-start items-center px-6 gap-4 border-b-2 border-darkBgPrimary bg-gradient-to-l from-orange via-magneta to-crayola">
                             <Image src={close} alt='closeIcon' width={20} height={20} className="rounded-full"
                                 priority
                                 sizes="(max-width: 768px) 100vw,
@@ -436,15 +428,15 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
                         {/* AVATAR NAME AND SHARED MEDIA */}
                         <div className="w-full bg-darkBgMain min-h-[93%] flex flex-col justify-start items-center gap-4">
-                            <div className="flex flex-row justify-center items-end -space-x-5 mt-10">
+                            <div className="flex flex-row justify-center items-end -space-x-9 mt-10">
                                 {
                                     selectedFriendData.profileImage ?
                                         <img
                                             src={`/userProfileImages/${selectedFriendData.profileImage}`}
                                             alt="profilePicturePlaceholder"
                                             className="object-cover rounded-full"
-                                            width={65}
-                                            height={65} 
+                                            width={140}
+                                            height={140} 
                                         />
                                         :
                                         <Image
@@ -458,13 +450,18 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                 }
                                 {
                                     activeUsers && activeUsers.find((user: any) => user.userId === selectedFriendData._id) ?
-                                        <div className="w-[18px] h-[18px] bg-green-500 rounded-full border-[2.5px] border-darkBgMain"></div> : ''
+                                        <div className="w-[20px] h-[20px] bg-green-500 rounded-full border-[3px] border-darkBgMain"></div> : ''
                                 }
                             </div>
-                            <p className="text-2xl font-semibold text-white text-center">
+                            <p className="text-2xl font-semibold text-white text-center ml-4">
                                 {selectedFriendData?.username ? selectedFriendData.username : 'Contact Username'}
                             </p>
-
+                            <div className="grid grid-cols-3 gap-4 overflow-scroll no-scrollbar mb-4">
+                                {[...Array(15)].map((x, i) =>
+                                    <div className="w-[150px] h-[150px] bg-darkBgPrimary rounded-md"/>
+                                    
+                                )}
+                            </div>
                         </div>
                     </div>
 

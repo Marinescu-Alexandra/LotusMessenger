@@ -287,8 +287,8 @@ export default function Home() {
                             }
                         }}
                     />
-                    <DirectMessages className="w-[30%] min-h-[100%] bg-darkBgMain" myInfo={myInfo} activeUsers={activeUsers} />
-                    <MessagesWinow className="w-[70%] min-h-[100%] bg-darkBgMain" currentUserInfo={myInfo} activeUsers={activeUsers} typying={typingMessage} />
+                    <DirectMessages className="w-[28%] min-h-[100%] bg-darkBgMain" myInfo={myInfo} activeUsers={activeUsers} />
+                    <MessagesWinow className="w-[72%] min-h-[100%] bg-darkBgMain" currentUserInfo={myInfo} activeUsers={activeUsers} typying={typingMessage} />
                 </main> 
             </>
 
