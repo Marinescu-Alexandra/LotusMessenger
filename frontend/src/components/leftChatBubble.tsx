@@ -15,7 +15,7 @@ interface LeftChatBubble {
 
 const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, scrollRef, imageUrl, handleImageGalleryClick, userProfileImage }) => {
     return (
-        <div ref={scrollRef} className="flex items-start gap-2.5 ml-4 mt-4 mb-4 z-20">
+        <div className="flex items-start gap-2.5 ml-4 mt-4 mb-4 z-20">
             {
                 userProfileImage ?
                     <img
@@ -27,7 +27,7 @@ const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, s
             }
             
 
-            <div className={`min-w-[30px] ${imageUrl && imageUrl.length <= 4 ? 'max-w-[380px]' : 'max-w-[580px]'}  leading-1.5 p-4 border-gray-200 bg-darkBgPrimary rounded-l-xl rounded-b-xl rounded-es-xl`}>
+            <div className={`min-w-[30px] ${imageUrl && imageUrl.length <= 4 ? 'max-w-[380px]' : 'max-w-[580px]'}  leading-1.5 p-4 border-gray-200 bg-darkBgPrimary rounded-r-xl rounded-b-xl rounded-es-xl`}>
                 <p className="text-normal font-normal pb-2.5 text-textLeftBubble break-words">{message}</p>
                 {
                     (imageUrl && imageUrl.length <= 4) &&
@@ -74,7 +74,7 @@ const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, s
                         })}
                     </div>
                 }
-                <div className="flex flex-row justify-start items-center">
+                <div ref={scrollRef} className="flex flex-row justify-start items-center">
                     <span className="text-sm font-normal text-gray-500 dark:text-gray-400">{deliverTime}</span>
                 </div>
             </div>

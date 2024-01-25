@@ -217,19 +217,19 @@ export default function Home() {
 
     //Update chunk of unseen and delivered messages as seen
     useEffect(() => {
-        if (messages.length >= 1 && messages[messages.length - 1].status === "delivered") {
-            if (messages[messages.length - 1].receiverId === currentUserInfo.id) {
-                for (let i = messages.length - 1; i >= 0; i--) {
-                    if ((messages[i].status === 'delivered' || messages[i].status === 'unseen') && messages[i].receiverId === currentUserInfo.id) {
-                        dispatch(seenMessage(messages[i]))
-                    } else if (messages[i].status === 'seen' && messages[i].receiverId === currentUserInfo.id){
-                        break
-                    }
+        if (messages.length >= 1 && messages[messages.length - 1].status === "delivered" && messages[messages.length - 1].receiverId === currentUserInfo.id) {
+            
+            for (let i = messages.length - 1; i >= 0; i--) {
+                if ((messages[i].status === 'delivered' || messages[i].status === 'unseen') && messages[i].receiverId === currentUserInfo.id) {
+                    dispatch(seenMessage(messages[i]))
+                } else if (messages[i].status === 'seen' && messages[i].receiverId === currentUserInfo.id){
+                    break
                 }
             }
-            if(socketRef.current)
+            
+            if (socketRef.current) {
                 socketRef.current.emit('messageSeen', messages[messages.length - 1])
-
+            }
             dispatch({
                 type: 'UPDATE_FRIEND_MESSAGE',
                 payload: {

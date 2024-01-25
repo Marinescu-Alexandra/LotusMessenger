@@ -204,17 +204,20 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                                 }
                                             </div>
 
-                                            <div className="flex flex-row gap-2 justify-between items-start w-full">
-                                                <div className="flex flex-col gap-2 justify-center items-start w-[68%]">
+                                            <div className="flex flex-col gap-2 justify-center items-start w-full">
+
+                                                <div className="flex flex-row gap-2 justify-between items-start w-[100%]">
                                                     <h2 className="text-xl font-normal text-white">{e.username}</h2>
-                                                    <p className={`${e.lastMessageInfo ? (e.lastMessageInfo.status === 'delivered' && myInfo && e.lastMessageInfo.senderId !== myInfo.id) ? 'font-extrabold' : 'font-normal' : '' } line-clamp-1 break-all text-left`}>
+                                                    <p className="text-gray-400">{e.lastMessageInfo ? moment(e.lastMessageInfo.createdAt).startOf('minute').fromNow() : "-"}</p>
+
+                                                </div>
+                                                
+                                                <div className="flex flex-row gap-6 justify-between items-start w-[100%]">
+                                                    <p className={`${e.lastMessageInfo ? (e.lastMessageInfo.status === 'delivered' && myInfo && e.lastMessageInfo.senderId !== myInfo.id) ? 'font-extrabold' : 'font-normal' : ''} line-clamp-1 break-all text-left`}>
                                                         {
-                                                            e.lastMessageInfo && (e.lastMessageInfo.message !== undefined) ? (e.lastMessageInfo.message.text === '' ? <div className="flex-row flex gap-2"><BsImage className="w-5 h-5" /><p>Media</p></div>  : e.lastMessageInfo.message.text) : "No messages yet"
+                                                            e.lastMessageInfo && (e.lastMessageInfo.message !== undefined) ? (e.lastMessageInfo.message.text === '' ? <div className="flex-row flex gap-2"><BsImage className="w-5 h-5" /><p>Media</p></div> : e.lastMessageInfo.message.text) : "No messages yet"
                                                         }
                                                     </p>
-                                                </div>
-                                                <div className="flex flex-col gap-[5px] justify-center items-end">
-                                                    <p className="text-gray-400">{e.lastMessageInfo ? moment(e.lastMessageInfo.createdAt).startOf('minute').fromNow() : "-"}</p>
                                                     {
                                                         (isClient && e.lastMessageInfo) ? myInfo?.id === e.lastMessageInfo.senderId ?
                                                             

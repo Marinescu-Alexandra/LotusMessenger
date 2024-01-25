@@ -24,6 +24,18 @@ const config: Config = {
                 textLeftBubble: '#00000'
             },
         },
+        screens: {
+            'desktop': { max: '1780px' },
+            // => @media (max-width: 1560px) { ... }
+            'sm-desktop': { max: '1270px' },
+            // => @media (max-width: 1280px) { ... }
+            'laptop': { max: '1024px' },
+            // => @media (max-width: 1024px) { ... }
+            'tablet': { max: '860px' },
+            // => @media (max-width: 640px) { ... }
+            'phone': { max: '640px' },
+            // => @media (max-width: 640px) { ... }
+        },
     },
     plugins: [],
 }

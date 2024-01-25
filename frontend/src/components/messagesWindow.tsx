@@ -19,6 +19,7 @@ import GalleryView from "./galleryView";
 import { RiSendPlaneFill } from "react-icons/ri";
 import { PiSmileyLight } from "react-icons/pi";
 import { GoPaperclip } from "react-icons/go";
+import { IoMdArrowDropright } from "react-icons/io";
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -176,7 +177,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
     }
 
     const mediaSelected = (e: ChangeEvent<HTMLInputElement>) => {
-        
+
         const formData = new FormData()
         if (e.target.files) {
             let length = e.target.files.length
@@ -190,7 +191,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
             }
             dispatch(uploadImages(formData))
         }
-        
+
     }
 
     return (
@@ -216,7 +217,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                     bg-gradient-to-r from-orange via-magneta to-crayola border-b-2 border-darkBgPrimary">
 
                         <div className={`flex-row justify-center items-center px-2 gap-2 ${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'}`}>
-                           
+
                             {/* USER AVATAR + ACTIVE STATUS */}
                             <div className="flex flex-row justify-center items-end -space-x-3.5">
                                 {
@@ -236,7 +237,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                             priority
                                         />
                                 }
-                                
+
                                 {
                                     activeUsers && activeUsers.find((user: any) => user.userId === selectedFriendData._id) ?
                                         <div className="w-4 h-4 bg-green-500 rounded-full border-2 border-orange"></div> : ''
@@ -256,7 +257,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                             onClick={() => setContactInfoOpen(true)}
                             disabled={Object.keys(selectedFriendData).length !== 0 ? false : true}
                         >
-                            <Image src={dots} alt='dotsIcon' width={25} height={25} className="rounded-full" priority/>
+                            <Image src={dots} alt='dotsIcon' width={25} height={25} className="rounded-full" priority />
                         </button>
 
                     </div>
@@ -268,15 +269,15 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                 if (e.senderId === selectedFriendData._id) {
                                     return (
                                         e.message &&
-                                            <LeftChatBubble
-                                                scrollRef={scrollRefLeft}
-                                                key={index}
-                                                message={e.message.text}
-                                                deliverTime={moment(e.createdAt).format('kk:mm')}
-                                                imageUrl={e.message.image}
-                                                handleImageGalleryClick={handleImageGalleryClick}
-                                                userProfileImage={selectedFriendData.profileImage}
-                                            />
+                                        <LeftChatBubble
+                                            scrollRef={scrollRefLeft}
+                                            key={index}
+                                            message={e.message.text}
+                                            deliverTime={moment(e.createdAt).format('kk:mm')}
+                                            imageUrl={e.message.image}
+                                            handleImageGalleryClick={handleImageGalleryClick}
+                                            userProfileImage={selectedFriendData.profileImage}
+                                        />
                                     )
                                 } else {
                                     return (
@@ -310,7 +311,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
                             <div className="w-[95%] rounded-xl h-[75%] flex flex-row justify-between items-center">
                                 <div className="w-full h-full flex flex-row mx-4 rounded-lg border justify-center items-center gap-2 bg-darkBgPrimary border-gray-600 focus-within:ring-2 focus-within:ring-white">
-                                    
+
                                     <button onClick={() => selectInputMedia()}>
                                         <input onChange={mediaSelected} multiple={true} type="file" id="inputFile" ref={inputFile} style={{ display: "none" }} />
                                         <GoPaperclip className="h-[30px] w-[30px] text-neutral-400 ml-2" />
@@ -318,12 +319,12 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                     <button>
                                         <PiSmileyLight className="h-[35px] w-[35px] text-neutral-400" />
                                     </button>
-                                    
+
                                     <textarea id="chat" rows={3} className="w-full h-full mr-2 pt-6 flex items-center justify-start align-middle resize-none text-md rounded-lg ml-2 bg-darkBgPrimary placeholder-gray-400 text-white no-scrollbar outline-none"
                                         placeholder="Your message..."
                                         onChange={inputHandler}
                                         value={newMessage}
-                                        
+
                                     />
 
                                 </div>
@@ -335,13 +336,13 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                     <div className="w-[50px] h-[50px] flex justify-center items-center rounded-full rotate-45 bg-gradient-to-r from-orange via-magneta to-crayola  border-darkBgPrimary">
                                         <RiSendPlaneFill className="w-[45px] h-[45px] mr-[6px] mt-[6px] text-darkBgPrimary" />
                                     </div>
-                                    
+
                                 </button>
 
                             </div>
 
                         </div>
-                    </div> 
+                    </div>
 
                     {/* GALLERY UPLOAD VIEW */}
                     <div className={`${isMediaSelected ? 'flex' : 'hidden'} z-20 w-full h-full bg-darkBgMain overflow-y-scroll no-scrollbar`}>
@@ -375,7 +376,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                         )
 
                                     })}
-                                    
+
                                     <button
                                         className="w-[60px] h-[60px] flex justify-center items-center border-2 border-black rounded-lg"
                                         onClick={() => selectInputMedia()}
@@ -383,7 +384,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                         <input onChange={mediaSelected} multiple={true} type="file" id="inputFile" ref={inputFile} style={{ display: "none" }} />
                                         <Image src={plus} alt='profilePicturePlaceholder' width={25} height={25} priority />
                                     </button>
-                                    
+
                                 </div>
                                 <div className="mt-4 mr-2">
                                     <button
@@ -427,41 +428,78 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                         </div>
 
                         {/* AVATAR NAME AND SHARED MEDIA */}
-                        <div className="w-full bg-darkBgMain min-h-[93%] flex flex-col justify-start items-center gap-4">
-                            <div className="flex flex-row justify-center items-end -space-x-9 mt-10">
-                                {
-                                    selectedFriendData.profileImage ?
-                                        <img
-                                            src={`/userProfileImages/${selectedFriendData.profileImage}`}
-                                            alt="profilePicturePlaceholder"
-                                            className="object-cover rounded-full"
-                                            width={140}
-                                            height={140} 
-                                        />
-                                        :
-                                        <Image
-                                            src={profilePicturePlaceholder}
-                                            alt='profilePicturePlaceholder'
-                                            width={120}
-                                            height={120}
-                                            className="rounded-full"
-                                            priority
-                                        />
-                                }
-                                {
-                                    activeUsers && activeUsers.find((user: any) => user.userId === selectedFriendData._id) ?
-                                        <div className="w-[20px] h-[20px] bg-green-500 rounded-full border-[3px] border-darkBgMain"></div> : ''
-                                }
+                        <div className={`w-full bg-darkBgMain min-h-[93%] `}>
+                            
+                            <div className={`flex flex-col items-center justify-start w-[100%] h-[100%] gap-4 ${isContactInfoOpen ? 'flex' : 'hidden'}`}>
+                                <div className={`flex flex-row justify-center items-end mt-10 -space-x-9 mr-2`}>
+                                    {
+                                        selectedFriendData.profileImage ?
+                                            <img
+                                                src={`/userProfileImages/${selectedFriendData.profileImage}`}
+                                                alt="profilePicturePlaceholder"
+                                                className="object-cover rounded-full"
+                                                width={150}
+                                                height={150}
+                                            />
+                                            :
+                                            <Image
+                                                src={profilePicturePlaceholder}
+                                                alt='profilePicturePlaceholder'
+                                                width={120}
+                                                height={120}
+                                                className="rounded-full"
+                                                priority
+                                            />
+                                    }
+                                    {
+                                        activeUsers && activeUsers.find((user: any) => user.userId === selectedFriendData._id) ?
+                                            <div className={`w-[25px] h-[25px] bg-green-500 rounded-full border-[3px] border-darkBgMain `}></div> : ''
+                                    }
+                                </div>
+
+                                <p className="text-2xl font-semibold text-white text-center">
+                                    {selectedFriendData?.username ? selectedFriendData.username : 'Contact Username'}
+                                </p>
+
+                                <p className="mb-4 text-lg">
+                                    "Hello, I am using Lotus Messenger :)"
+                                </p>
+
+                                <div className="flex flex-col w-[90%]">
+                                    <div className="flex flex-row justify-between items-center w-[100%]">
+                                        <p className="text-xl self-start ml-1">
+                                            Shared Media
+                                        </p>
+                                        <button>
+                                            <div className="flex flex-row justify-center items-center text-xl">
+                                                <p>123</p>
+                                                <IoMdArrowDropright className="w-[30px] h-[30px]" />
+                                            </div>
+                                        </button>
+
+
+                                    </div>
+                                    <div className="flex flex-col w-[100%] h-auto justify-center items-center -space-y-[155px]">
+                                        <div className="relative w-[100%] h-[160px] bg-gradient-to-t from-darkBgPrimary to-transparent rounded-lg">
+
+                                        </div>
+                                        <div className="w-[100%] grid grid-cols-3 gap-2 overflow-scroll no-scrollbar mb-4">
+                                            {[...Array(3)].map((x, i) =>
+                                                <div className="w-[160px] h-[150px] rounded-md flex items-center justify-center  desktop:w-[130px]" >
+                                                    <Image src={profilePicturePlaceholder} width={140} height={140} className="rounded-md" alt="alt">
+
+                                                    </Image>
+                                                </div>
+
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <p className="text-2xl font-semibold text-white text-center ml-4">
-                                {selectedFriendData?.username ? selectedFriendData.username : 'Contact Username'}
-                            </p>
-                            <div className="grid grid-cols-3 gap-4 overflow-scroll no-scrollbar mb-4">
-                                {[...Array(15)].map((x, i) =>
-                                    <div className="w-[150px] h-[150px] bg-darkBgPrimary rounded-md"/>
-                                    
-                                )}
-                            </div>
+
+
+
+
                         </div>
                     </div>
 
