@@ -4,7 +4,7 @@ import profilePicturePlaceholder from '@/profilePicturePlaceholder.png'
 import dots from '@/dots.png'
 import editing from '@/edit.png'
 import searchIcon from '@/loupe.png'
-import { getSelectedFriend, getFriends } from "@/store/actions/messengerAction"
+import { getSelectedFriend } from "@/store/actions/selectedFriendAction"
 import { userLogout, uploadUserProfileImage } from "@/store/actions/authAction";
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import moment from 'moment'
@@ -13,7 +13,6 @@ import delivered from '@/read.png'
 import defaultStatus from '@/default.png'
 import { Socket, io } from "socket.io-client";
 import logoutIcon from '@/logout.png'
-import { MdOutlinePhotoSizeSelectActual } from "react-icons/md";
 import { BsImage } from "react-icons/bs";
 
 interface Dictionary<T> {
@@ -211,7 +210,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                                     <p className="text-gray-400">{e.lastMessageInfo ? moment(e.lastMessageInfo.createdAt).startOf('minute').fromNow() : "-"}</p>
 
                                                 </div>
-                                                
+
                                                 <div className="flex flex-row gap-6 justify-between items-start w-[100%]">
                                                     <p className={`${e.lastMessageInfo ? (e.lastMessageInfo.status === 'delivered' && myInfo && e.lastMessageInfo.senderId !== myInfo.id) ? 'font-extrabold' : 'font-normal' : ''} line-clamp-1 break-all text-left`}>
                                                         {

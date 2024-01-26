@@ -3,11 +3,11 @@ import React, { useEffect, useRef, useState } from "react"
 import DirectMessages from "@/components/directMessages"
 import MessagesWinow from "@/components/messagesWindow"
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { seenMessage, updateMessage, getFriends, deliverUnsentMessages, getUnseenMessages, getMessages } from "@/store/actions/messengerAction"
+import { seenMessage, updateMessage, getFriends, deliverUnsentMessages, getMessages } from "@/store/actions/messengerAction"
+import { getSharedMedia } from '@/store/actions/selectedFriendAction'
 import { Socket, io } from 'socket.io-client'
 import { useRouter } from 'next/router'
 import { userLogout } from "@/store/actions/authAction";
-import imgBg from '@/bg.png'
 
 import toast, { Toaster } from 'react-hot-toast'
 
@@ -238,6 +238,19 @@ export default function Home() {
                 }
             })
         }
+    }, [messages])
+
+    //this should be done when retrieving messages, not here, change later
+    useEffect(() => {
+        let sharedMedia: string[] = []
+        for (let i = 0; i < messages.length; i++) {
+            if (messages[i].message.image.length > 0) {
+                for (let j = 0; j < messages[i].message.image.length; j++) {
+                    sharedMedia = [...sharedMedia, messages[i].message.image[j]]
+                }
+            }
+        }
+        dispatch(getSharedMedia(sharedMedia))
     }, [messages])
 
     //Notify user of new unseen messages when online

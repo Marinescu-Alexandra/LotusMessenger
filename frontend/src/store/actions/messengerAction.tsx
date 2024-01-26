@@ -1,7 +1,5 @@
 import axios from "axios"
-import {
-    FRIEND_GET_SUCCESS, MESSAGE_GET_SUCCESS, GET_SELECTED_FRIEND_SUCCESS, SEND_MESSAGE_SUCCESS, UNDELIVERED_GET_SUCCESS, UPLOAD_IMAGES_SUCCESS, UPLOAD_PROFILE_IMAGE_SUCCESS
-} from '../types/messengerType'
+import {  FRIEND_GET_SUCCESS, MESSAGE_GET_SUCCESS, SEND_MESSAGE_SUCCESS, UNDELIVERED_GET_SUCCESS, UPLOAD_IMAGES_SUCCESS } from '../types/messengerType'
 
 const config = {
     withCredentials: true,
@@ -23,17 +21,6 @@ export const getFriends = () => async (dispatch: any) => {
         })
     } catch(error){
         console.log(error)
-    }
-}
-
-export const getSelectedFriend = (data: any) => {
-    return async (dispatch: any) => {
-        dispatch({
-            type: GET_SELECTED_FRIEND_SUCCESS,
-            payload: {
-                selectedFriendData: data
-            }
-        })
     }
 }
 

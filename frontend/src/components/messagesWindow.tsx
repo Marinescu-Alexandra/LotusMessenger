@@ -7,7 +7,7 @@ import dots from '@/dots.png'
 import close from '@/close.png'
 import { motion } from "framer-motion"
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { getMessages, messageSend, uploadImages } from "@/store/actions/messengerAction";
+import { messageSend, uploadImages } from "@/store/actions/messengerAction";
 import LeftChatBubble from "./leftChatBubble";
 import RightChatBubble from "./rightChatBubble";
 import { Socket, io } from 'socket.io-client'
@@ -19,7 +19,7 @@ import GalleryView from "./galleryView";
 import { RiSendPlaneFill } from "react-icons/ri";
 import { PiSmileyLight } from "react-icons/pi";
 import { GoPaperclip } from "react-icons/go";
-import { IoMdArrowDropright } from "react-icons/io";
+import { IoMdArrowDropright, IoMdArrowDropdown } from "react-icons/io";
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -63,11 +63,13 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
         closed: { width: ['40%', '0%'] },
     }
 
-    const { selectedFriendData } = useAppSelector(state => state.selectedFriend)
-    const { messages, messageSendSuccess, friends, imagePaths } = useAppSelector(state => state.messenger)
+    const { selectedFriendData, sharedMedia } = useAppSelector(state => state.selectedFriend)
+    const { messages, messageSendSuccess, imagePaths } = useAppSelector(state => state.messenger)
 
     const [newMessage, setNewMessage] = useState('')
     const [isContactInfoOpen, setContactInfoOpen] = useState(false)
+    const [isSharedMediaOpen, setSharedMediaOpen] = useState(false)
+    const [sharedMediaLength, setSharedMediaLength] = useState(3)
     const [isMediaSelected, setMediaSelected] = useState(false)
     const [imageIndex, setImageIndex] = useState(0)
     const [isGalleryImageSelected, setGalleryImageSelected] = useState(false)
@@ -174,6 +176,15 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
     const handleGalleryClose = () => {
         setGalleryImageSelected(false)
+    }
+
+    const handleSharedMediaClicked = () => {
+        setSharedMediaOpen(!isSharedMediaOpen)
+        if (sharedMediaLength === 3) {
+            setSharedMediaLength(sharedMedia.length)
+        } else {
+            setSharedMediaLength(3)
+        }
     }
 
     const mediaSelected = (e: ChangeEvent<HTMLInputElement>) => {
@@ -465,41 +476,42 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                     "Hello, I am using Lotus Messenger :)"
                                 </p>
 
-                                <div className="flex flex-col w-[90%]">
+                                <div className="flex flex-col w-[90%] overflow-y-scroll no-scrollbar mb-6">
                                     <div className="flex flex-row justify-between items-center w-[100%]">
                                         <p className="text-xl self-start ml-1">
                                             Shared Media
                                         </p>
-                                        <button>
+                                        <button onClick={() => handleSharedMediaClicked()}>
                                             <div className="flex flex-row justify-center items-center text-xl">
-                                                <p>123</p>
-                                                <IoMdArrowDropright className="w-[30px] h-[30px]" />
+                                                <p>{sharedMedia.length}</p>
+                                                {
+                                                    isSharedMediaOpen ? 
+                                                        <IoMdArrowDropdown className="w-[30px] h-[30px]" />
+                                                        :
+                                                        <IoMdArrowDropright className="w-[30px] h-[30px]" />
+                                                }
                                             </div>
                                         </button>
 
 
                                     </div>
-                                    <div className="flex flex-col w-[100%] h-auto justify-center items-center -space-y-[155px]">
-                                        <div className="relative w-[100%] h-[160px] bg-gradient-to-t from-darkBgPrimary to-transparent rounded-lg">
-
-                                        </div>
-                                        <div className="w-[100%] grid grid-cols-3 gap-2 overflow-scroll no-scrollbar mb-4">
-                                            {[...Array(3)].map((x, i) =>
-                                                <div className="w-[160px] h-[150px] rounded-md flex items-center justify-center  desktop:w-[130px]" >
-                                                    <Image src={profilePicturePlaceholder} width={140} height={140} className="rounded-md" alt="alt">
-
-                                                    </Image>
-                                                </div>
-
+                                    <div className={`flex flex-col w-[100%] h-auto justify-center items-center ${isSharedMediaOpen ? '-space-y-[0px]' : '-space-y-[155px]'}`}>
+                                        <div className={` ${isSharedMediaOpen? 'hidden' : 'relative'} w-[100%] h-[160px] bg-gradient-to-t from-darkBgPrimary to-transparent rounded-lg`}/>
+                                        <div className="w-[100%] grid grid-cols-3 gap-2 mb-4">
+                                            {[...Array(sharedMediaLength)].map((item, index) =>
+                                                    <div className="w-[160px] h-[150px] rounded-md flex items-center justify-center  desktop:w-[130px]" >
+                                                        {
+                                                            sharedMedia[index] ?
+                                                                <img src={`/userImages/${sharedMedia[index]}`} alt="sharedMedia" className="object-cover w-[150px] h-[140px] rounded-md" />
+                                                                :
+                                                                <Image src={profilePicturePlaceholder} width={140} height={140} className="rounded-md" alt="alt" />
+                                                        }
+                                                    </div>
                                             )}
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
-
-
-
                         </div>
                     </div>
 
