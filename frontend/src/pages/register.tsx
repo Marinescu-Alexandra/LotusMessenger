@@ -1,3 +1,4 @@
+"use client";
 import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import Image from 'next/image'
 import lotus from '@/lotus.png'
@@ -43,6 +44,24 @@ const Register = () => {
         
     }
 
+    const handleRouterReload = () => {
+        router.reload()
+    }
+
+    useEffect(() => {
+        router.events.on('routeChangeComplete', handleRouterReload)
+    }, [router])
+   
+    useEffect(() => {
+        const init = async () => {
+            const { Input,
+                Ripple,
+                initTE, } = await import("tw-elements");
+            initTE({ Input, Ripple });;
+        };
+        init();
+    }, []);
+
     useEffect(() => {
         if (authenticate) {
             router.push('/')
@@ -76,11 +95,11 @@ const Register = () => {
                         {alertMessage}
                     </Alert>
                 </Fade> */}
-                <div className="w-[450px] justify-center items-center align-middle">
+                <div className="w-[20%] justify-center items-center align-middle">
                     <div className="rounded-lg bg-white shadow-lg dark:bg-neutral-800">
                         {/*-- Left column container-*/}
                         <div className="px-4 md:px-0 w-full">
-                            <div className="md:mx-6 md:p-12">
+                            <div className="mx-6">
                                 {/*--Logo-*/}
                                 <div className="text-center">
                                     <Image
@@ -95,7 +114,7 @@ const Register = () => {
                                 <form onSubmit={register}>
                                     <p className="mb-4">Please register an account</p>
                                     {/*--Username input-*/}
-                                    <div className="relative mb-4 border border-white/30 rounded" data-te-input-wrapper-init>
+                                    <div className="relative mb-4 rounded" data-te-input-wrapper-init>
                                         <input
                                             onChange={inputHandler}
                                             name='username'
@@ -119,16 +138,13 @@ const Register = () => {
                                     </div>
 
                                     {/*--Email input-*/}
-                                    <div className="relative mb-4 border border-white/30 rounded" data-te-input-wrapper-init>
+                                    <div className="relative mb-4" data-te-input-wrapper-init>
                                         <input
                                             onChange={inputHandler}
                                             name='email'
                                             value={state.email}
                                             type="text"
-                                            className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] 
-                                            leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 
-                                            data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none 
-                                            dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
+                                            className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[1.6] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none dark:placeholder:text-neutral-200 [&:not([data-te-input-placeholder-active])]:placeholder:opacity-0"
                                             id="email"
                                             placeholder="Email" />
                                         <label
@@ -143,7 +159,7 @@ const Register = () => {
                                     </div>
 
                                     {/*--Password input-*/}
-                                    <div className="relative mb-4 border border-white/30 rounded" data-te-input-wrapper-init>
+                                    <div className="relative mb-4 rounded" data-te-input-wrapper-init>
                                         <input
                                             onChange={inputHandler}
                                             name='password'
