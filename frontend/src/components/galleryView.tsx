@@ -23,7 +23,7 @@ const GalleryView: FC<GalleryViewProps> = ({ className, mediaSelected, imagePath
     if (imagePaths.length > 0) {
         return (
             <>
-                <div className={`${mediaSelected ? 'flex' : 'hidden'} z-30 w-full h-full bg-darkBgMain overflow-y-scroll no-scrollbar ${className}`}>
+                <div className={`${mediaSelected ? 'flex' : 'hidden'} z-30 w-full h-full bg-darkBgMain overflow-scroll no-scrollbar ${className}`}>
 
                     <div className="flex flex-col justify-between items-center w-full min-h-[800px] gap-10">
                         <button
@@ -35,12 +35,13 @@ const GalleryView: FC<GalleryViewProps> = ({ className, mediaSelected, imagePath
                             <img src={`/userImages/${imagePaths[imageIndex]}`} alt="messageImage" className="object-contain w-full h-full" />
                         </div>
 
-                        <div className="flex flex-row w-[90%] justify-between items-start h-[120px] border-t-2 border-darkBgPrimary ">
-                            <div className="flex flex-row w-full justify-center items-center h-auto gap-5 mt-4  overflow-y-scroll no-scrollbar">
+                        <div className="flex justify-center items-center w-[90%] h-[120px] border-t-2 border-darkBgPrimary">
+                            <div className="grid grid-rows-1 grid-flow-col w-[100%] h-auto gap-5 mt-4 mb-6 overflow-x-auto no-scrollbar">
 
                                 {
                                     images.map((image: string, index: React.Key | null | undefined) => {
                                         return (
+                                            //add scroll ref on button
                                             <button onClick={() => setImageIndex(Number(index))} className={`w-[60px] h-[60px] flex items-center justify-center rounded-lg ${imageIndex === Number(index) ? 'border-2 border-green-500' : 'border border-black'} `} id={String(index)}>
                                                 <img src={`/userImages/${image}`} alt="messageImage" className="object-cover w-full h-full rounded-lg" />
                                             </button>

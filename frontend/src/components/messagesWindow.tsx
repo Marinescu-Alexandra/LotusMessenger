@@ -70,6 +70,10 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
     const [isContactInfoOpen, setContactInfoOpen] = useState(false)
     const [isSharedMediaOpen, setSharedMediaOpen] = useState(false)
     const [sharedMediaLength, setSharedMediaLength] = useState(3)
+
+    const [isSharedMediaGalleryOpen, setSharedMediaGallery] = useState(false)
+    const [sharedMediaGalleryIndex, setSharedMediaGalleryIndex] = useState(0)
+
     const [isMediaSelected, setMediaSelected] = useState(false)
     const [imageIndex, setImageIndex] = useState(0)
     const [isGalleryImageSelected, setGalleryImageSelected] = useState(false)
@@ -125,6 +129,10 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
     useEffect(() => {
         setGalleryImageSelected(false)
         setMediaSelected(false)
+        setSharedMediaGallery(false)
+        setSharedMediaGalleryIndex(0)
+        setSharedMediaOpen(false)
+        setSharedMediaLength(3)
     }, [selectedFriendData])
 
 
@@ -176,6 +184,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
     const handleGalleryClose = () => {
         setGalleryImageSelected(false)
+        setSharedMediaGallery(false)
     }
 
     const handleSharedMediaClicked = () => {
@@ -185,6 +194,12 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
         } else {
             setSharedMediaLength(3)
         }
+    }
+
+    const handleSharedMediaImageClicked = (index: number) => {
+        setSharedMediaGallery(true)
+        setSharedMediaGalleryIndex(index)
+        setGalleryImageSelected(false)
     }
 
     const mediaSelected = (e: ChangeEvent<HTMLInputElement>) => {
@@ -274,7 +289,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     </div>
 
                     {/* CHAT WINDOW */}
-                    <div className={`chatWindow w-full h-full flex flex-col top-0 overflow-y-scroll no-scrollbar bg-darkBgMain ${isMediaSelected || isGalleryImageSelected ? 'hidden' : 'flex'}`}>
+                    <div className={`chatWindow w-full h-full flex flex-col top-0 overflow-y-scroll no-scrollbar bg-darkBgMain ${isMediaSelected || isGalleryImageSelected || isSharedMediaGalleryOpen ? 'hidden' : 'flex'}`}>
                         {
                             messages?.map((e: Message, index: React.Key | null | undefined) => {
                                 if (e.senderId === selectedFriendData._id) {
@@ -313,11 +328,11 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     {/* TYPING NOTICE */}
                     {
                         typying && typying.message && typying.senderId == selectedFriendData._id ?
-                            <p className={`mb-2 w-full text-semibold pl-6 text-lg text-left z-20 ${isMediaSelected || isGalleryImageSelected ? 'hidden' : 'flex'}`}>Typing Message...</p> : ''
+                            <p className={`mb-2 w-full text-semibold pl-6 text-lg text-left z-20 ${isMediaSelected || isGalleryImageSelected || isSharedMediaGalleryOpen ? 'hidden' : 'flex'}`}>Typing Message...</p> : ''
                     }
 
                     {/* MESSAGE TEXTAREA */}
-                    <div className={`writeMessage w-full min-h-[100px] z-20 ${Object.keys(selectedFriendData).length === 0 || isMediaSelected || isGalleryImageSelected ? 'hidden' : 'flex'}`}>
+                    <div className={`writeMessage w-full min-h-[100px] z-20 ${Object.keys(selectedFriendData).length === 0 || isMediaSelected || isGalleryImageSelected || isSharedMediaGalleryOpen ? 'hidden' : 'flex'}`}>
                         <div className="flex w-full h-full flex-row justify-center items-center border-t-2 border-darkBgPrimary mx-4">
 
                             <div className="w-[95%] rounded-xl h-[75%] flex flex-row justify-between items-center">
@@ -409,7 +424,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     </div>
 
                     <GalleryView imagePaths={galleryImages} handleGalleryClose={handleGalleryClose} index={galleryIndex} mediaSelected={isGalleryImageSelected} />
-
+                    <GalleryView imagePaths={sharedMedia} handleGalleryClose={handleGalleryClose} index={sharedMediaGalleryIndex} mediaSelected={isSharedMediaGalleryOpen} />
                 </motion.div>
 
 
@@ -476,7 +491,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                     "Hello, I am using Lotus Messenger :)"
                                 </p>
 
-                                <div className="flex flex-col w-[90%] overflow-y-scroll no-scrollbar mb-6">
+                                <div className={`flex flex-col w-[90%] mb-6 ${isSharedMediaOpen ? 'overflow-y-scroll no-scrollbar' : ''}`}>
                                     <div className="flex flex-row justify-between items-center w-[100%]">
                                         <p className="text-xl self-start ml-1">
                                             Shared Media
@@ -499,14 +514,16 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                         <div className={` ${isSharedMediaOpen? 'hidden' : 'relative'} w-[100%] h-[160px] bg-gradient-to-t from-darkBgPrimary to-transparent rounded-lg`}/>
                                         <div className="w-[100%] grid grid-cols-3 gap-2 mb-4">
                                             {[...Array(sharedMediaLength)].map((item, index) =>
-                                                    <div className="w-[160px] h-[150px] rounded-md flex items-center justify-center  desktop:w-[130px]" >
+                                                <button
+                                                    onClick={() => handleSharedMediaImageClicked(index)}
+                                                    className="w-[160px] h-[150px] rounded-md flex items-center justify-center  desktop:w-[130px]" >
                                                         {
                                                             sharedMedia[index] ?
                                                                 <img src={`/userImages/${sharedMedia[index]}`} alt="sharedMedia" className="object-cover w-[150px] h-[140px] rounded-md" />
                                                                 :
                                                                 <Image src={profilePicturePlaceholder} width={140} height={140} className="rounded-md" alt="alt" />
                                                         }
-                                                    </div>
+                                                    </button>
                                             )}
                                         </div>
                                     </div>
