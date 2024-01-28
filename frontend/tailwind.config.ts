@@ -22,7 +22,17 @@ const config: Config = {
                 darkBgMain: '#404040',
                 darkBgPrimary: '#262626',
                 textRightBubble: '#00000',
-                textLeftBubble: '#00000'
+                textLeftBubble: '#00000',
+                liliac: '#BE97C6',
+                fairyTail: '#EFBCD5',
+                amethyst: '#8661C1',
+                charcoal: '#4B5267',
+                spaceCadet: '#2E294E',
+                oxfordBlue: '#000022',
+                pennBlue: '#001242',
+                blue: '#0094C6',
+                lapisLazuli: '#005E7C',
+                aliceBlue:'#E5ECE9'
             },
         },
         screens: {
