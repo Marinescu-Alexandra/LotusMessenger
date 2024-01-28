@@ -225,7 +225,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
             <div className={`flex flex-row justify-start items-center h-screen ${className}`}>
 
                 {/* BACKGROUND IMAGE */}
-                <Image src={imgBg} className="fixed h-screen min-w-[100%] left-0 z-1 object-cover" alt="bg" />
+                <Image src={imgBg} className="fixed h-screen min-w-[100%] bg-bgMain left-0 z-1 object-cover" alt="bg" />
 
                 {/* MAIN WINDOW */}
                 <motion.div
@@ -240,7 +240,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                 >
                     {/* TOP BAR */}
                     <div className="topbar z-20 w-full min-h-[70px] flex flex-row justify-between items-center px-6 
-                                    bg-gradient-to-r from-orange via-magneta to-crayola border-b-2 border-darkBgPrimary">
+                                    bg-gradient-to-r from-gradientOne via-gradientTwo to-gradientThree border-b-2 border-bgPrimary">
 
                         <div className={`flex-row justify-center items-center px-2 gap-2 ${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'}`}>
 
@@ -266,12 +266,12 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
                                 {
                                     activeUsers && activeUsers.find((user: any) => user.userId === selectedFriendData._id) ?
-                                        <div className="w-4 h-4 bg-green-500 rounded-full border-2 border-orange"></div> : ''
+                                        <div className="w-4 h-4 bg-green-500 rounded-full border-2 border-gradientOne"></div> : ''
                                 }
                             </div>
 
                             {/* USERNAME */}
-                            <h2 className="font-bold text-xl text-black">
+                            <h2 className="text-2xl text-black">
                                 {selectedFriendData?.username ? selectedFriendData.username : 'Contact Username'}
                             </h2>
 
@@ -289,7 +289,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     </div>
 
                     {/* CHAT WINDOW */}
-                    <div className={`chatWindow w-full h-full flex flex-col top-0 overflow-y-scroll no-scrollbar bg-darkBgMain ${isMediaSelected || isGalleryImageSelected || isSharedMediaGalleryOpen ? 'hidden' : 'flex'}`}>
+                    <div className={`chatWindow w-full h-full flex flex-col top-0 overflow-y-scroll no-scrollbar bg-bgMain ${isMediaSelected || isGalleryImageSelected || isSharedMediaGalleryOpen ? 'hidden' : 'flex'}`}>
                         {
                             messages?.map((e: Message, index: React.Key | null | undefined) => {
                                 if (e.senderId === selectedFriendData._id) {
@@ -333,10 +333,10 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
                     {/* MESSAGE TEXTAREA */}
                     <div className={`writeMessage w-full min-h-[100px] z-20 ${Object.keys(selectedFriendData).length === 0 || isMediaSelected || isGalleryImageSelected || isSharedMediaGalleryOpen ? 'hidden' : 'flex'}`}>
-                        <div className="flex w-full h-full flex-row justify-center items-center border-t-2 border-darkBgPrimary mx-4">
+                        <div className="flex w-full h-full flex-row justify-center items-center border-t-2 border-bgPrimary mx-4">
 
                             <div className="w-[95%] rounded-xl h-[75%] flex flex-row justify-between items-center">
-                                <div className="w-full h-full flex flex-row mx-4 rounded-lg border justify-center items-center gap-2 bg-darkBgPrimary border-gray-600 focus-within:ring-2 focus-within:ring-white">
+                                <div className="w-full h-full flex flex-row mx-4 rounded-lg border justify-center items-center gap-2 bg-bgPrimary border-gray-600 focus-within:ring-2 focus-within:ring-white">
 
                                     <button onClick={() => selectInputMedia()}>
                                         <input onChange={mediaSelected} multiple={true} type="file" id="inputFile" ref={inputFile} style={{ display: "none" }} />
@@ -346,11 +346,10 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                         <PiSmileyLight className="h-[35px] w-[35px] text-neutral-400" />
                                     </button>
 
-                                    <textarea id="chat" rows={3} className="w-full h-full mr-2 pt-6 flex items-center justify-start align-middle resize-none text-md rounded-lg ml-2 bg-darkBgPrimary placeholder-gray-400 text-white no-scrollbar outline-none"
+                                    <textarea id="chat" rows={3} className="w-full h-full mr-2 pt-6 flex items-center justify-start align-middle resize-none text-md rounded-lg ml-2 bg-bgPrimary placeholder-gray-400 text-white no-scrollbar outline-none"
                                         placeholder="Your message..."
                                         onChange={inputHandler}
                                         value={newMessage}
-
                                     />
 
                                 </div>
@@ -359,8 +358,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                 <button
                                     onClick={() => [sendMessage(), setNewMessage("")]}
                                 >
-                                    <div className="w-[50px] h-[50px] flex justify-center items-center rounded-full rotate-45 bg-gradient-to-r from-orange via-magneta to-crayola  border-darkBgPrimary">
-                                        <RiSendPlaneFill className="w-[45px] h-[45px] mr-[6px] mt-[6px] text-darkBgPrimary" />
+                                    <div className="w-[50px] h-[50px] flex justify-center items-center rounded-full rotate-45 bg-gradient-to-r from-gradientOne via-gradientTwo to-gradientThree  border-bgPrimary">
+                                        <RiSendPlaneFill className="w-[45px] h-[45px] mr-[6px] mt-[6px] text-bgPrimary" />
                                     </div>
 
                                 </button>
@@ -371,7 +370,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     </div>
 
                     {/* GALLERY UPLOAD VIEW */}
-                    <div className={`${isMediaSelected ? 'flex' : 'hidden'} z-20 w-full h-full bg-darkBgMain overflow-y-scroll no-scrollbar`}>
+                    <div className={`${isMediaSelected ? 'flex' : 'hidden'} z-20 w-full h-full bg-bgMain overflow-y-scroll no-scrollbar`}>
 
                         <div className="flex flex-col justify-between items-center w-full min-h-[800px] gap-10">
                             <button
@@ -383,7 +382,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                 <img src={`/userImages/${imagePaths[imageIndex]}`} alt="messageImage" className="object-contain w-full h-full" />
                             </div>
                             <textarea id="chatImage" rows={3} className="mx-4 p-2.5 w-[60%] h-[7%] resize-none text-md text-gray-900 rounded-lg border
-                                 border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-darkBgPrimary dark:border-gray-600
+                                 border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-bgPrimary dark:border-gray-600
                                   dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 no-scrollbar"
                                 placeholder="Your message..."
                                 onChange={inputHandler}
@@ -391,7 +390,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                             >
                             </textarea>
 
-                            <div className="flex flex-row w-[90%] justify-between items-start h-[120px] border-t-2 border-darkBgPrimary ">
+                            <div className="flex flex-row w-[90%] justify-between items-start h-[120px] border-t-2 border-bgPrimary ">
                                 <div className="flex flex-row w-full justify-center items-center h-auto gap-5 mt-4  overflow-y-scroll no-scrollbar">
 
                                     {imagePaths.map((image: string, index: React.Key | null | undefined) => {
@@ -404,7 +403,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                     })}
 
                                     <button
-                                        className="w-[60px] h-[60px] flex justify-center items-center border-2 border-black rounded-lg"
+                                        className="w-[60px] h-[60px] flex justify-center items-center border-2 border-brPrimary rounded-lg"
                                         onClick={() => selectInputMedia()}
                                     >
                                         <input onChange={mediaSelected} multiple={true} type="file" id="inputFile" ref={inputFile} style={{ display: "none" }} />
@@ -412,13 +411,15 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                     </button>
 
                                 </div>
-                                <div className="mt-4 mr-2">
-                                    <button
-                                        className=""
-                                        onClick={() => [sendMessage(), setNewMessage(""), setMediaSelected(false), dispatch({ type: "UPLOAD_IMAGES_SUCCESS_CLEAR" })]}>
-                                        <Image src={sendIcon} alt='profilePicturePlaceholder' width={50} height={50} priority />
-                                    </button>
-                                </div>
+                                
+                                <button
+                                    className="mt-5 mr-4"
+                                    onClick={() => [sendMessage(), setNewMessage(""), setMediaSelected(false), dispatch({ type: "UPLOAD_IMAGES_SUCCESS_CLEAR" })]}>
+                                    <div className="w-[50px] h-[50px] flex justify-center items-center rounded-full rotate-45 bg-gradient-to-r from-gradientOne via-gradientTwo to-gradientThree  border-bgPrimary">
+                                        <RiSendPlaneFill className="w-[45px] h-[45px] mr-[6px] mt-[6px] text-bgPrimary" />
+                                    </div>
+                                </button>
+                                
                             </div>
                         </div>
                     </div>
@@ -431,7 +432,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
                 {/* CONTACT INFO */}
                 <motion.div
-                    className="contactInfo z-20 h-full border-l-2 border-darkBgPrimary"
+                    className="contactInfo z-20 h-full border-l-2 border-bgPrimary"
                     initial={false}
                     animate={isContactInfoOpen ? "open" : "closed"}
                     variants={variantsContactInfo}
@@ -442,7 +443,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                 >
                     <div className="w-full h-full flex flex-col justify-start items-center overflow-hidden">
                         {/* TOP BAR */}
-                        <div className="topbar w-full min-h-[70px] flex flex-row justify-start items-center px-6 gap-4 border-b-2 border-darkBgPrimary bg-gradient-to-l from-orange via-magneta to-crayola">
+                        <div className="topbar w-full min-h-[70px] flex flex-row justify-start items-center px-6 gap-4 border-b-2 border-bgPrimary bg-gradient-to-l from-gradientOne via-gradientTwo to-gradientThree">
                             <Image src={close} alt='closeIcon' width={20} height={20} className="rounded-full"
                                 priority
                                 sizes="(max-width: 768px) 100vw,
@@ -454,7 +455,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                         </div>
 
                         {/* AVATAR NAME AND SHARED MEDIA */}
-                        <div className={`w-full bg-darkBgMain min-h-[93%] `}>
+                        <div className={`w-full bg-bgMain min-h-[93%] `}>
                             
                             <div className={`flex flex-col items-center justify-start w-[100%] h-[100%] gap-4 ${isContactInfoOpen ? 'flex' : 'hidden'}`}>
                                 <div className={`flex flex-row justify-center items-end mt-10 -space-x-9 mr-2`}>
@@ -479,7 +480,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                     }
                                     {
                                         activeUsers && activeUsers.find((user: any) => user.userId === selectedFriendData._id) ?
-                                            <div className={`w-[25px] h-[25px] bg-green-500 rounded-full border-[3px] border-darkBgMain `}></div> : ''
+                                            <div className={`w-[25px] h-[25px] bg-green-500 rounded-full border-[3px] border-bgMain `}></div> : ''
                                     }
                                 </div>
 
@@ -511,7 +512,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
                                     </div>
                                     <div className={`flex flex-col w-[100%] h-auto justify-center items-center ${isSharedMediaOpen ? '-space-y-[0px]' : '-space-y-[155px]'}`}>
-                                        <div className={` ${isSharedMediaOpen? 'hidden' : 'relative'} w-[100%] h-[160px] bg-gradient-to-t from-darkBgPrimary to-transparent rounded-lg`}/>
+                                        <div className={` ${isSharedMediaOpen? 'hidden' : 'relative'} w-[100%] h-[160px] bg-gradient-to-t from-bgPrimary to-transparent rounded-lg`}/>
                                         <div className="w-[100%] grid grid-cols-3 gap-2 mb-4">
                                             {[...Array(sharedMediaLength)].map((item, index) =>
                                                 <button

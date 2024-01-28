@@ -2,17 +2,15 @@ import React, { ChangeEvent, FC, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import profilePicturePlaceholder from '@/profilePicturePlaceholder.png'
 import dots from '@/dots.png'
-import editing from '@/edit.png'
 import searchIcon from '@/loupe.png'
 import { getSelectedFriend } from "@/store/actions/selectedFriendAction"
-import { userLogout, uploadUserProfileImage } from "@/store/actions/authAction";
+import { userLogout, uploadUserProfileImage, updateUserTheme } from "@/store/actions/authAction";
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import moment from 'moment'
 import seen from '@/seen.png'
 import delivered from '@/read.png'
 import defaultStatus from '@/default.png'
 import { Socket, io } from "socket.io-client";
-import logoutIcon from '@/logout.png'
 import { BsImage } from "react-icons/bs";
 import { RxExit } from "react-icons/rx";
 import { CiEdit } from "react-icons/ci";
@@ -44,21 +42,15 @@ interface LastMessage {
 }
 
 const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUsers }) => {
-
     const { friends } = useAppSelector(state => state.messenger)
     const [friendsList, setFriendList] = useState(friends)
     const dispatch = useAppDispatch()
 
-    const colorPalette = {
-        sunset: ['orange', 'magneta', 'crayola', 'darkBgPrimary', 'darkBgMain'],
-        midnight: ['liliac', 'fairyTail', 'amethyst', 'charcoal', 'spaceCadet'],
-        azure: ['aliceBlue', 'blue', 'lapisLazuli', 'oxfordBlue', 'blue']
-    }
-
+    const colorPalette = ['bgMain', 'bgPrimary', 'gradientOne', 'gradientTwo', 'gradientThree']
+    
     const [isClient, setIsClient] = useState(false)
     const [isMenuOpen, setMenuOpen] = useState(false)
     const [isProfileMenuOpen, setProfileMenuOpen] = useState(false)
-    const [isThemeMenuOpen, setThemeMenuOpen] = useState(false)
 
     const inputProfileImage = useRef<HTMLInputElement | null>(null);
     const socketRef = useRef<Socket | null>(null)
@@ -86,6 +78,10 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
             formData.append('profileImageName', Date.now() + e.target.files[0].name);
             dispatch(uploadUserProfileImage(formData))
         }
+    }
+
+    const themeSelected = (theme: string) => {
+        dispatch(updateUserTheme(JSON.stringify({ theme: theme })))
     }
 
     const logout = () => {
@@ -123,13 +119,12 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
 
     return (
         <>
-            <div className={`border-r-2 border-darkBgPrimary z-20 bg-darkBgMain ${className}`}>
-                <div className="w-full h-screen"
-                    style={{ 'position': 'relative' }}
-                >
-                    <div className="w-full h-full flex flex-col gap-4 justify-start items-center shrink-0 z-20 bg-darkBgMain">
+            <div className={`border-r-2 border-bgPrimary z-20 bg-bgMain ${className}`} >
+                <div className="w-full h-screen" style={{ 'position': 'relative' }}>
+                    
+                    <div className={`w-full h-full flex flex-col gap-4 justify-start items-center shrink-0 z-20`}>
                         <div
-                            className="topbar relative z-30 w-full min-h-[70px] flex flex-row justify-between items-center px-6 border-b-2 border-darkBgPrimary bg-gradient-to-l from-orange via-magneta to-crayola"
+                            className={`topbar relative z-30 w-full min-h-[70px] flex flex-row justify-between items-center px-6 border-b-2 border-bgPrimary bg-gradient-to-l from-gradientOne via-gradientTwo to-gradientThree`}
                             style={{ 'position': 'relative' }}
                         >
                             <button
@@ -182,21 +177,21 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                             </div>
 
                             {/* DROPDOWN MENU */}
-                            <div className={`flex-col text-black w-[220px] justify-center rounded-md absolute h-auto bg-darkBgPrimary right-0 top-[80%] 
-                                            mr-10 shadow-lg bg-gradient-to-l from-orange to-magneta border border-darkBgPrimary
+                            <div className={`flex-col text-black w-[220px] justify-center rounded-md absolute h-auto bg-bgPrimary right-0 top-[80%] 
+                                            mr-10 shadow-lg bg-gradient-to-l from-gradientOne to-gradientTwo border border-bgPrimary
                                             ${isMenuOpen ? 'flex' : 'hidden'}`}>
                                 
-                                <button onClick={() => logout()} className="flex flex-row justify-between items-center text-xl w-full py-2 px-2 border-b border-darkBgPrimary text-left hover:bg-magneta hover:text-white rounded-t-md">
+                                <button onClick={() => logout()} className="flex flex-row justify-between items-center text-xl w-full py-2 px-2 border-b border-bgPrimary text-left hover:bg-gradientThree hover:text-white rounded-t-md">
                                     <p className="">Lougout</p>
                                     <RxExit className="mr-[2px]" />
                                 </button>
 
-                                <button onClick={() => setProfileMenuOpen(true)} className="flex flex-row justify-between items-center text-xl w-full py-2 px-2 text-left hover:bg-magneta hover:text-white border-b border-darkBgPrimary">
+                                <button onClick={() => setProfileMenuOpen(true)} className="flex flex-row justify-between items-center text-xl w-full py-2 px-2 text-left hover:bg-gradientThree hover:text-white border-b border-bgPrimary">
                                     <p>Settings</p>
                                     <CiSettings className="w-[25px] h-[25px]" />
                                 </button>
 
-                                <div style={{ 'position': 'relative' }} className="flex text-xl w-full py-2 px-2 text-left hover:bg-magneta hover:text-white rounded-b-md group">
+                                <div style={{ 'position': 'relative' }} className="flex text-xl w-full py-2 px-2 text-left hover:bg-gradientThree hover:text-white rounded-b-md group">
                                     
                                     <button className="flex flex-row justify-between items-center w-full">
                                         <p>Theme</p>
@@ -204,41 +199,50 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                     </button>
 
                                     {/* THEME DROPDOWN MENU */}
-                                    <div className={`flex-col text-black absolute -top-[1px] right-0 w-[220px] h-auto translate-x-[100%] group-hover:block hidden
-                                        border border-darkBgPrimary bg-gradient-to-r from-orange to-magneta rounded-tr-lg rounded-b-lg`}>
+                                    <div className={`flex-col text-black absolute top-0 right-0 w-[240px] h-auto translate-x-[100%] group-hover:block hidden z-50
+                                        border border-bgPrimary bg-gradient-to-r from-gradientOne to-gradientTwo rounded-tr-lg rounded-b-lg`}>
                                         
-                                        <button className="flex flex-row justify-between items-center w-full py-2 px-2 border-b rounded-tr-lg border-darkBgPrimary hover:bg-magneta hover:text-white">
+                                        <button
+                                            disabled={myInfo && myInfo.theme === 'sunset' ? true : false}
+                                            onClick={() => themeSelected('sunset')}
+                                            className="flex flex-row justify-between items-center w-full py-2 px-2 border-b rounded-tr-lg border-bgPrimary hover:bg-gradientThree hover:text-white">
                                             <p>Sunset</p>
                                             <div className="flex flex-row justify-center items-center w-auto h-auto gap-2">
                                                 {
-                                                    colorPalette.sunset.map((color) => {
+                                                    colorPalette.map((color) => {
                                                         return (
-                                                            <div className={`w-[15px] h-[15px] bg-${color} rounded-full`} />
+                                                            <div className={`w-[15px] h-[15px] bg-${color} rounded-full border border-black sunset ${myInfo && myInfo.theme === 'sunset' ? 'border-2 border-white w-[18px] h-[18px]' : '' }`} />
                                                         )
                                                     })
                                                 }
                                             </div>
                                         </button>
 
-                                        <button className="flex flex-row justify-between items-center w-full py-2 px-2 border-b border-darkBgPrimary hover:bg-magneta hover:text-white">
+                                        <button
+                                            disabled={myInfo && myInfo.theme === 'azure' ? true : false}
+                                            onClick={() => themeSelected('azure')}
+                                            className="flex flex-row justify-between items-center w-full py-2 px-2 border-b border-bgPrimary hover:bg-gradientThree hover:text-white">
                                             <p>Azure</p>
                                             <div className="flex flex-row justify-center items-center w-auto h-auto gap-2">
                                                 {
-                                                    colorPalette.azure.map((color) => {
+                                                    colorPalette.map((color) => {
                                                         return (
-                                                            <div className={`w-[15px] h-[15px] bg-${color} rounded-full`} />
+                                                            <div className={`w-[15px] h-[15px] bg-${color} rounded-full border border-black azure ${myInfo && myInfo.theme === 'azure' ? 'border-2 border-white w-[18px] h-[18px]' : '' }`} />
                                                         )
                                                     })
                                                 }
                                             </div>
                                         </button>
-                                        <button className="flex flex-row justify-between items-center w-full py-2 px-2 hover:bg-magneta hover:text-white rounded-b-lg">
+                                        <button
+                                            disabled={myInfo && myInfo.theme === 'midnight' ? true : false}
+                                            onClick={() => themeSelected('midnight')}
+                                            className="flex flex-row justify-between items-center w-full py-2 px-2 hover:bg-gradientThree hover:text-white rounded-b-lg">
                                             <p>Midnight</p>
                                             <div className="flex flex-row justify-center items-center w-auto h-auto gap-2">
                                                 {
-                                                    colorPalette.midnight.map((color) => {
+                                                    colorPalette.map((color) => {
                                                         return (
-                                                            <div className={`w-[15px] h-[15px] bg-${color} rounded-full`} />
+                                                            <div className={`w-[15px] h-[15px] bg-${color} rounded-full border border-black midnight ${myInfo && myInfo.theme === 'midnight' ? 'border-2 border-white w-[18px] h-[18px]' : '' }`} />
                                                         )
                                                     })
                                                 }
@@ -254,7 +258,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                         </div>
 
                         {/* SEARCH BAR*/}
-                        <div className="searchBar z-20 w-[95%] min-h-[50px] mt-4 mb-2 flex flex-row justify-center items-center gap-4  bg-darkBgPrimary rounded-full">
+                        <div className="searchBar z-20 w-[95%] min-h-[50px] mt-4 mb-2 flex flex-row justify-center items-center gap-4  bg-bgPrimary rounded-full">
                             <Image src={searchIcon} alt='serachIcon' width={30} height={30} className="ml-4"
                                 priority
                                 sizes="(max-width: 768px) 100vw,
@@ -262,7 +266,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                            50vw"
                             />
                             <div className="text-md text-white w-[85%] mr-4">
-                                <input className="w-full bg-darkBgPrimary" onChange={serachFriend} type="text">
+                                <input className="w-full bg-bgPrimary" onChange={serachFriend} type="text">
                                 </input>
                             </div>
                         </div>
@@ -272,8 +276,8 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                             {
                                 friendsList?.map((e: any, index: React.Key | null | undefined) => {
                                     return (
-                                        <button key={index} className=" w-full hover:bg-zinc-800 active:bg-zinc-800 flex justify-center items-center">
-                                            <div className="bg-transparent w-[95%] border-b-2 border-darkBgPrimary flex flex-row justify-start items-center px-4 py-6 gap-4"
+                                        <button key={index} className=" w-full hover:bg-bgPrimary active:bg-Primary flex justify-center items-center">
+                                            <div className="bg-transparent w-[95%] border-b-2 border-bgPrimary flex flex-row justify-start items-center px-4 py-6 gap-4"
                                                 onClick={async () => await dispatch(getSelectedFriend(e))}
                                             >
                                                 <div className="flex flex-row justify-center items-end -space-x-4">
@@ -297,7 +301,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
 
                                                     {
                                                         activeUsers && activeUsers.find((user: any) => user.userId === e._id) ?
-                                                            <div className="w-4 h-4 bg-green-500 rounded-full relative border-2 border-darkBgMain"></div> : ''
+                                                            <div className="w-4 h-4 bg-green-500 rounded-full relative border-2 border-bgMain"></div> : ''
                                                     }
                                                 </div>
 
@@ -339,14 +343,14 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                     </div>
 
                     {/* PROFILE EDIT*/}
-                    <div className={`w-full h-screen top-0 absolute flex-col gap-4 justify-start items-center shrink-0 z-40 bg-darkBgMain overflow-hidden ${isProfileMenuOpen ? 'flex' : 'hidden'}`}>
+                    <div className={`w-full h-screen top-0 absolute flex-col gap-4 justify-start items-center shrink-0 z-30 bg-bgMain overflow-hidden ${isProfileMenuOpen ? 'flex' : 'hidden'}`}>
                         <div
-                            className="topbar relative z-30 w-full min-h-[70px] flex flex-row justify-between items-center px-6 border-b-2 border-darkBgPrimary bg-gradient-to-l from-orange via-magneta to-crayola"
+                            className="topbar relative z-30 w-full min-h-[70px] flex flex-row justify-between items-center px-6 border-b-2 border-bgPrimary bg-gradient-to-l from-gradientOne via-gradientTwo to-gradientThree"
                             style={{ 'position': 'relative' }}
                         >
 
                             <button onClick={() => setProfileMenuOpen(false)}>
-                                <IoChevronBackOutline className="w-[35px] h-[35px] text-darkBgPrimary" />
+                                <IoChevronBackOutline className="w-[35px] h-[35px] text-bgPrimary" />
                             </button>
                         </div>
                     </div>

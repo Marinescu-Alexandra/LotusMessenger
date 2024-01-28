@@ -8,7 +8,6 @@ import { getSharedMedia } from '@/store/actions/selectedFriendAction'
 import { Socket, io } from 'socket.io-client'
 import { useRouter } from 'next/router'
 import { userLogout } from "@/store/actions/authAction";
-
 import toast, { Toaster } from 'react-hot-toast'
 
 interface Dictionary<T> {
@@ -47,6 +46,7 @@ type SocketTypyingMessage = {
 }
 
 export default function Home() {
+
     const { friends, messages, newUserAdded, undeliveredMessages } = useAppSelector(state => state.messenger)
     const { authenticate, myInfo } = useAppSelector(state => state.auth);
     const { selectedFriendData } = useAppSelector(state => state.selectedFriend)
@@ -67,7 +67,6 @@ export default function Home() {
     useEffect(() => {
         setIsClient(true)
     }, [])
-
 
     useEffect(() => {
         if (!authenticate) {
@@ -143,9 +142,7 @@ export default function Home() {
                 socketRef.current.emit('addUser', currentUserInfo.id, currentUserInfo)
             }
         }, 1000)
-
     }, [])
-
 
     // GET SELECTED FRIEND MESSAGES
     useEffect(() => {
@@ -157,7 +154,7 @@ export default function Home() {
     // GET ALL UNDELIVERED MESSAGES
     useEffect(() => {
         if (friends) {
-            friends.forEach((friend:any) => {
+            friends.forEach((friend: any) => {
                 if (friend.lastMessageInfo && friend.lastMessageInfo.status === 'unseen') {
                     dispatch(deliverUnsentMessages(friend._id))
                 }
@@ -186,8 +183,6 @@ export default function Home() {
             })
         }
     }, [undeliveredMessages])
-
-
 
     //Update real time message
     useEffect(() => {
@@ -218,15 +213,15 @@ export default function Home() {
     //Update chunk of unseen and delivered messages as seen
     useEffect(() => {
         if (messages.length >= 1 && messages[messages.length - 1].status === "delivered" && messages[messages.length - 1].receiverId === currentUserInfo.id) {
-            
+
             for (let i = messages.length - 1; i >= 0; i--) {
                 if ((messages[i].status === 'delivered' || messages[i].status === 'unseen') && messages[i].receiverId === currentUserInfo.id) {
                     dispatch(seenMessage(messages[i]))
-                } else if (messages[i].status === 'seen' && messages[i].receiverId === currentUserInfo.id){
+                } else if (messages[i].status === 'seen' && messages[i].receiverId === currentUserInfo.id) {
                     break
                 }
             }
-            
+
             if (socketRef.current) {
                 socketRef.current.emit('messageSeen', messages[messages.length - 1])
             }
@@ -273,7 +268,7 @@ export default function Home() {
             }
         }
     }, [socketMessage])
-    
+
     useEffect(() => {
         dispatch(getFriends())
         if (newUserAdded === true) {
@@ -290,7 +285,7 @@ export default function Home() {
                     <title>Messenger</title>
                     <meta name="login page" content="content" />
                 </Head>
-                <main className="w-full min-h-[100px] min-w-[1280px] bg-neutral-800 flex flex-row ">
+                <main className={`w-full min-h-[100px] min-w-[1280px] bg-neutral-800 flex flex-row ${currentUserInfo.theme}`}>
                     <Toaster
                         position={'top-right'}
                         reverseOrder={false}
@@ -300,11 +295,10 @@ export default function Home() {
                             }
                         }}
                     />
-                    <DirectMessages className="w-[28%] min-h-[100%] bg-darkBgMain" myInfo={myInfo} activeUsers={activeUsers} />
-                    <MessagesWinow className="w-[72%] min-h-[100%] bg-darkBgMain" currentUserInfo={myInfo} activeUsers={activeUsers} typying={typingMessage} />
-                </main> 
+                    <DirectMessages className="w-[28%] min-h-[100%]" myInfo={myInfo} activeUsers={activeUsers} />
+                    <MessagesWinow className="w-[72%] min-h-[100%] z-10" currentUserInfo={myInfo} activeUsers={activeUsers} typying={typingMessage} />
+                </main>
             </>
-
         )
     }
 }

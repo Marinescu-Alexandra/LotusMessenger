@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import { REGISTER_FAIL, REGISTER_SUCCESS, LOGIN_SUCCESS, LOGIN_FAIL, UPLOAD_PROFILE_IMAGE_SUCCESS } from '../types/authType';
+import { REGISTER_FAIL, REGISTER_SUCCESS, LOGIN_SUCCESS, LOGIN_FAIL, UPLOAD_PROFILE_IMAGE_SUCCESS, UPDATE_USER_THEME_SUCCESS } from '../types/authType';
 
 const config = {
     withCredentials: true,
@@ -96,6 +96,29 @@ export const uploadUserProfileImage = (data: any) => async (dispatch: any) => {
             type: UPLOAD_PROFILE_IMAGE_SUCCESS,
             payload: {
                 profileImagePath: response.data.profileImagePath
+            }
+        })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const updateUserTheme = (theme: string) => async (dispatch: any) => {
+
+    const newConfig = {
+        withCredentials: true,
+        headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+        },
+    }
+    try {
+        const response = await axios.post('http://localhost:5000/api/messenger/update-user-theme', theme, newConfig);
+        localStorage.setItem('authToken', response.data.token);
+        dispatch({
+            type: UPDATE_USER_THEME_SUCCESS,
+            payload: {
+                theme: response.data.theme
             }
         })
     } catch (error) {

@@ -17,6 +17,14 @@ const registerSchema = new Schema({
     profileImage: {
         type: String,
         default: ''
+    },
+    status: {
+        type: String,
+        default: 'Hello, I am using Lotus Messenger :)'
+    },
+    theme: {
+        type: String,
+        default: 'sunset'
     }
 }, { timestamps: true });
 

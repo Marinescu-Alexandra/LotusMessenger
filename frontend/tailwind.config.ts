@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss'
+import { createThemes } from 'tw-colors';
 
 const config: Config = {
     content: [
@@ -23,16 +24,16 @@ const config: Config = {
                 darkBgPrimary: '#262626',
                 textRightBubble: '#00000',
                 textLeftBubble: '#00000',
-                liliac: '#BE97C6',
-                fairyTail: '#EFBCD5',
-                amethyst: '#8661C1',
-                charcoal: '#4B5267',
-                spaceCadet: '#2E294E',
-                oxfordBlue: '#000022',
-                pennBlue: '#001242',
-                blue: '#0094C6',
-                lapisLazuli: '#005E7C',
-                aliceBlue:'#E5ECE9'
+                liliac: '#be97C6',
+                fairyTail: '#efbcd5',
+                amethyst: '#8661c1',
+                charcoal: '#4b5267',
+                spaceCadet: '#2e294e',
+                oxfordBlue: '#233656',
+                pennBlue: '#a0c2f9',
+                blue: '#0094c6',
+                lapisLazuli: '#005e7c',
+                aliceBlue:'#e5ece9'
             },
         },
         screens: {
@@ -48,6 +49,31 @@ const config: Config = {
             // => @media (max-width: 640px) { ... }
         },
     },
-    plugins: [require("tw-elements/dist/plugin.cjs")]
+    plugins: [
+        require("tw-elements/dist/plugin.cjs"),
+        createThemes({
+            sunset: {
+                'bgMain': '#404040',
+                'bgPrimary': '#262626',
+                'gradientOne': '#ee7724',
+                'gradientTwo': '#dd3675',
+                'gradientThree': '#b44593',
+            },
+            midnight: {
+                'bgMain': '#3C4152',
+                'bgPrimary': '#201C37',
+                'gradientOne': '#be97C6',
+                'gradientTwo': '#efbcd5',
+                'gradientThree': '#8661c1',
+            },
+            azure: {
+                'bgMain': '#35445E',
+                'bgPrimary': '#181D25',
+                'gradientOne': '#6B7697',
+                'gradientTwo': '#D6D9DE',
+                'gradientThree': '#99A9D8',
+            },
+        })
+    ]
 }
 export default config

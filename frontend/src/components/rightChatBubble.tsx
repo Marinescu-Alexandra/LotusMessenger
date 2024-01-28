@@ -20,7 +20,7 @@ const RightChatBubble: FC<RightChatBubble> = ({ className, message, deliverTime,
     return (
         <>
             <div className="flex items-end gap-2.5 ml-4 mt-4 mb-4 justify-end mr-4 z-20">
-                <div className={`min-w-[30px] ${imageUrl && imageUrl.length <= 4 ? 'max-w-[380px]' : 'max-w-[580px]'}  leading-1.5 p-4 border-gray-200 bg-darkBgPrimary rounded-l-xl rounded-b-xl rounded-es-xl`}>
+                <div className={`min-w-[30px] ${imageUrl && imageUrl.length <= 4 ? 'max-w-[380px]' : 'max-w-[580px]'}  leading-1.5 p-4 border-gray-200 bg-bgPrimary rounded-l-xl rounded-b-xl rounded-es-xl`}>
                     <p className="text-normal font-normal pb-2.5 text-textRightBubble break-words text-wrap">{message}</p>
                     {
                         (imageUrl && imageUrl.length <= 4) &&

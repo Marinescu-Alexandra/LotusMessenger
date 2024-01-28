@@ -27,7 +27,7 @@ const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, s
             }
             
 
-            <div className={`min-w-[30px] ${imageUrl && imageUrl.length <= 4 ? 'max-w-[380px]' : 'max-w-[580px]'}  leading-1.5 p-4 border-gray-200 bg-darkBgPrimary rounded-r-xl rounded-b-xl rounded-es-xl`}>
+            <div className={`min-w-[30px] ${imageUrl && imageUrl.length <= 4 ? 'max-w-[380px]' : 'max-w-[580px]'}  leading-1.5 p-4 border-gray-200 bg-bgPrimary rounded-r-xl rounded-b-xl rounded-es-xl`}>
                 <p className="text-normal font-normal pb-2.5 text-textLeftBubble break-words">{message}</p>
                 {
                     (imageUrl && imageUrl.length <= 4) &&

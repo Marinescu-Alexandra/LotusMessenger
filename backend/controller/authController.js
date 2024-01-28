@@ -57,6 +57,8 @@ module.exports.userRegister = async (req, res) => {
                         username: userCreate.username,
                         registerTimer: userCreate.createdAt,
                         profileImage: userCreate.profileImage,
+                        status: userCreate.status,
+                        theme: userCreate.theme
                     }, process.env.SECRET, {
                         expiresIn: process.env.TOKEN_EXP
                     })
@@ -130,6 +132,8 @@ module.exports.userLogin = async (req, res) => {
                         username: checkUser.username,
                         registerTimer: checkUser.createdAt,
                         profileImage: checkUser.profileImage,
+                        status: checkUser.status,
+                        theme: checkUser.theme
                     }, process.env.SECRET, {
                         expiresIn: process.env.TOKEN_EXP
                     })
@@ -214,6 +218,8 @@ module.exports.updateUserProfileImage = async (req, res) => {
                         username: user.username,
                         registerTimer: user.createdAt,
                         profileImage: String(profileImageName),
+                        status: user.status,
+                        theme: user.theme
                     }, process.env.SECRET, {
                         expiresIn: process.env.TOKEN_EXP
                     })
@@ -236,4 +242,46 @@ module.exports.updateUserProfileImage = async (req, res) => {
 
             })
     });
+}
+
+module.exports.updateUserTheme = async (req, res) => {
+    const currentUserId = req.myId;
+    const { theme } = req.body
+    
+    console.log(theme)
+
+    await registerModel.findByIdAndUpdate(currentUserId, {
+        theme: String(theme)
+    })
+        .then((user) => {
+            try {
+                const token = jwt.sign({
+                    id: user._id,
+                    email: user.email,
+                    username: user.username,
+                    registerTimer: user.createdAt,
+                    profileImage: user.profileImage,
+                    status: user.status,
+                    theme: String(theme)
+                }, process.env.SECRET, {
+                    expiresIn: process.env.TOKEN_EXP
+                })
+
+                const options = { expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000) }
+
+                res.status(200).cookie('authToken', token, options).json({
+                    successMessage: 'Cookie update successful',
+                    theme: theme,
+                    token: token
+                })
+            } catch (error) {
+                console.log(error)
+                res.status(500).json({
+                    error: {
+                        errorMessage: error
+                    }
+                })
+            }
+
+        })
 }
