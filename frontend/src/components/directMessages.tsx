@@ -153,13 +153,10 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
     }, [])
 
     useEffect(() => {
-        if (friends && friendIndex) {
+        setFriendList(friends)
+        if (friendIndex !== null) {
             dispatch(getSelectedFriend(friends[Number(friendIndex)]))
         }
-    }, [friends[Number(friendIndex)]])
-
-    useEffect(() => {
-        setFriendList(friends)
     }, [friends])
 
     useEffect(() => {
@@ -169,7 +166,6 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
     }, [myInfo])
 
     useEffect(() => {
-
         if (socketRef.current && currentUserInfo) {
             socketRef.current.emit('userProfileInfoUpdate', currentUserInfo.id)
         }
@@ -390,6 +386,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                             </button>
                         </div>
 
+                        {/* PROFILE VIEW & EDIT */}
                         <div className="flex flex-col justify-start items-center w-full h-full gap-16">
                             {
                                 myInfo && currentUserInfo.profileImage ?

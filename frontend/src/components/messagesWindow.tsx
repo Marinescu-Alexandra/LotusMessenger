@@ -1,8 +1,6 @@
-import React, { ChangeEvent, FC, LegacyRef, RefObject, use, useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, FC, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import profilePicturePlaceholder from '@/profilePicturePlaceholder.png'
-import sendIcon from '@/send.png'
-import emojiIcon from '@/happiness.png'
 import dots from '@/dots.png'
 import close from '@/close.png'
 import { motion } from "framer-motion"
@@ -12,7 +10,6 @@ import LeftChatBubble from "./leftChatBubble";
 import RightChatBubble from "./rightChatBubble";
 import { Socket, io } from 'socket.io-client'
 import moment from 'moment'
-import img from '@/img.png'
 import imgBg from '@/bg.png'
 import plus from '@/plus.png'
 import GalleryView from "./galleryView";
@@ -41,15 +38,12 @@ interface Message {
     status: string
 }
 
-
 interface MessagesWindowProps {
     className?: string,
     currentUserInfo?: Dictionary<string>
     activeUsers?: Dictionary<string>[]
     typying?: any
 }
-
-
 
 const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, activeUsers, typying }) => {
 
@@ -133,8 +127,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
         setSharedMediaGalleryIndex(0)
         setSharedMediaOpen(false)
         setSharedMediaLength(3)
-    }, [selectedFriendData])
-
+    }, [selectedFriendData._id])
 
     const inputHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setNewMessage(e.target.value)
@@ -427,8 +420,6 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     <GalleryView imagePaths={galleryImages} handleGalleryClose={handleGalleryClose} index={galleryIndex} mediaSelected={isGalleryImageSelected} />
                     <GalleryView imagePaths={sharedMedia} handleGalleryClose={handleGalleryClose} index={sharedMediaGalleryIndex} mediaSelected={isSharedMediaGalleryOpen} />
                 </motion.div>
-
-
 
                 {/* CONTACT INFO */}
                 <motion.div

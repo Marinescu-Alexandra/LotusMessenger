@@ -7,7 +7,6 @@ const path = require('path')
 const fs = require('fs')
 
 module.exports.userRegister = async (req, res) => {
-    console.log(req.body)
     const { username, email, password } = req.body;
 
     const error = [];
@@ -43,7 +42,6 @@ module.exports.userRegister = async (req, res) => {
                     }
                 })
             } else {
-                console.log("Email is valid and not on use.")
                 try {
                     const userCreate = await registerModel.create({
                         username,
@@ -96,8 +94,6 @@ module.exports.userRegister = async (req, res) => {
             })
         }
     }
-
-    console.log('Register is working')
 }
 
 module.exports.userLogin = async (req, res) => {

@@ -46,7 +46,6 @@ const GalleryView: FC<GalleryViewProps> = ({ className, mediaSelected, imagePath
                                                 <img src={`/userImages/${image}`} alt="messageImage" className="object-cover w-full h-full rounded-lg" />
                                             </button>
                                         )
-
                                     })
                                 }
                             </div>

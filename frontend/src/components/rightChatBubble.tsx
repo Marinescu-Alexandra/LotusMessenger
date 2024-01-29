@@ -77,15 +77,9 @@ const RightChatBubble: FC<RightChatBubble> = ({ className, message, deliverTime,
                                     <Image src={delivered} alt='readIcon' width={25} height={25} className="rounded-full" priority />
                                     :
                                     <Image src={defaultStatus} alt='readIcon' width={25} height={25} className="rounded-full" priority />
-
                         }
-
                     </div>
-
                 </div>
-
-
-
             </div>
         </>
     )
