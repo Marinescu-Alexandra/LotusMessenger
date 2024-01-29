@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import { REGISTER_FAIL, REGISTER_SUCCESS, LOGIN_SUCCESS, LOGIN_FAIL, UPLOAD_PROFILE_IMAGE_SUCCESS, UPDATE_USER_THEME_SUCCESS } from '../types/authType';
+import { REGISTER_FAIL, REGISTER_SUCCESS, LOGIN_SUCCESS, LOGIN_FAIL, UPLOAD_PROFILE_IMAGE_SUCCESS, UPDATE_USER_THEME_SUCCESS, UPDATE_USER_STATUS_SUCCESS, UPDATE_USER_NAME_SUCCESS } from '../types/authType';
 
 const config = {
     withCredentials: true,
@@ -104,21 +104,43 @@ export const uploadUserProfileImage = (data: any) => async (dispatch: any) => {
 }
 
 export const updateUserTheme = (theme: string) => async (dispatch: any) => {
-
-    const newConfig = {
-        withCredentials: true,
-        headers: {
-            'Content-Type': 'application/json',
-            'Access-Control-Allow-Origin': '*'
-        },
-    }
     try {
-        const response = await axios.post('http://localhost:5000/api/messenger/update-user-theme', theme, newConfig);
+        const response = await axios.post('http://localhost:5000/api/messenger/update-user-theme', theme, config);
         localStorage.setItem('authToken', response.data.token);
         dispatch({
             type: UPDATE_USER_THEME_SUCCESS,
             payload: {
                 theme: response.data.theme
+            }
+        })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const updateUserName = (name: string) => async (dispatch: any) => {
+    try {
+        const response = await axios.post('http://localhost:5000/api/messenger/update-user-name', name, config);
+        localStorage.setItem('authToken', response.data.token);
+        dispatch({
+            type: UPDATE_USER_NAME_SUCCESS,
+            payload: {
+                name: response.data.name
+            }
+        })
+    } catch (error) {
+        console.log(error)
+    }
+}
+
+export const updateUserStatus = (status: string) => async (dispatch: any) => {
+    try {
+        const response = await axios.post('http://localhost:5000/api/messenger/update-user-status', status, config);
+        localStorage.setItem('authToken', response.data.token);
+        dispatch({
+            type: UPDATE_USER_STATUS_SUCCESS,
+            payload: {
+                status: response.data.status
             }
         })
     } catch (error) {

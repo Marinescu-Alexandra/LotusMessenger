@@ -251,7 +251,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                         <img
                                             src={`/userProfileImages/${selectedFriendData.profileImage}`}
                                             alt="profilePicturePlaceholder"
-                                            className="rounded-full w-[50px]"
+                                            className="rounded-full object-cover min-w-[50px] min-h-[50px] max-w-[50px] max-h-[50px]"
                                         />
                                         :
                                         <Image
@@ -458,15 +458,13 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                         <div className={`w-full bg-bgMain min-h-[93%] `}>
                             
                             <div className={`flex flex-col items-center justify-start w-[100%] h-[100%] gap-4 ${isContactInfoOpen ? 'flex' : 'hidden'}`}>
-                                <div className={`flex flex-row justify-center items-end mt-10 -space-x-9 mr-2`}>
+                                <div className={`flex flex-row justify-center items-end mt-10 group relative mr-2`}>
                                     {
                                         selectedFriendData.profileImage ?
                                             <img
                                                 src={`/userProfileImages/${selectedFriendData.profileImage}`}
                                                 alt="profilePicturePlaceholder"
-                                                className="object-cover rounded-full"
-                                                width={150}
-                                                height={150}
+                                                className="object-cover rounded-full min-h-[200px] min-w-[200px] max-h-[200px] max-w-[200px]"
                                             />
                                             :
                                             <Image
@@ -480,7 +478,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                     }
                                     {
                                         activeUsers && activeUsers.find((user: any) => user.userId === selectedFriendData._id) ?
-                                            <div className={`w-[25px] h-[25px] bg-green-500 rounded-full border-[3px] border-bgMain `}></div> : ''
+                                            <div className={`w-[25px] h-[25px] absolute right-10 bg-green-500 rounded-full border-[3px] border-bgMain `}></div> : ''
                                     }
                                 </div>
 
@@ -489,7 +487,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                 </p>
 
                                 <p className="mb-4 text-lg">
-                                    "Hello, I am using Lotus Messenger :)"
+                                    {selectedFriendData?.status ? selectedFriendData.status : ''}
                                 </p>
 
                                 <div className={`flex flex-col w-[90%] mb-6 ${isSharedMediaOpen ? 'overflow-y-scroll no-scrollbar' : ''}`}>
@@ -516,6 +514,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                         <div className="w-[100%] grid grid-cols-3 gap-2 mb-4">
                                             {[...Array(sharedMediaLength)].map((item, index) =>
                                                 <button
+                                                    key={index}
                                                     onClick={() => handleSharedMediaImageClicked(index)}
                                                     className="w-[160px] h-[150px] rounded-md flex items-center justify-center  desktop:w-[130px]" >
                                                         {

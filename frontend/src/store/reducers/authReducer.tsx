@@ -1,5 +1,5 @@
 
-import { REGISTER_FAIL, REGISTER_SUCCESS, SUCCESS_MESSAGE_CLEAR, ERRORS_CLEAR, LOGIN_FAIL, LOGIN_SUCCESS, LOGOUT_SUCCESS, UPLOAD_PROFILE_IMAGE_SUCCESS, UPDATE_USER_THEME_SUCCESS } from "../types/authType"
+import { REGISTER_FAIL, REGISTER_SUCCESS, SUCCESS_MESSAGE_CLEAR, ERRORS_CLEAR, LOGIN_FAIL, LOGIN_SUCCESS, LOGOUT_SUCCESS, UPLOAD_PROFILE_IMAGE_SUCCESS, UPDATE_USER_THEME_SUCCESS, UPDATE_USER_NAME_SUCCESS, UPDATE_USER_STATUS_SUCCESS } from "../types/authType"
 import { jwtDecode } from "jwt-decode";
 
 interface Dictionary<T> {
@@ -116,7 +116,24 @@ export default function authReducer(state = authState, action: any) {
                     theme: String(action.payload.theme)
                 }   
             }
-
+        case UPDATE_USER_NAME_SUCCESS: {
+            return {
+                ...state,
+                myInfo: {
+                    ...state.myInfo,
+                    username: String(action.payload.name)
+                }
+            }
+        }
+        case UPDATE_USER_STATUS_SUCCESS: {
+            return {
+                ...state,
+                myInfo: {
+                    ...state.myInfo,
+                    status: String(action.payload.status)
+                }
+            }
+        }
         default:
             return state
     }

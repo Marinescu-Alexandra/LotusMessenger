@@ -4,7 +4,7 @@ import profilePicturePlaceholder from '@/profilePicturePlaceholder.png'
 import dots from '@/dots.png'
 import searchIcon from '@/loupe.png'
 import { getSelectedFriend } from "@/store/actions/selectedFriendAction"
-import { userLogout, uploadUserProfileImage, updateUserTheme } from "@/store/actions/authAction";
+import { userLogout, uploadUserProfileImage, updateUserTheme, updateUserName, updateUserStatus } from "@/store/actions/authAction";
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import moment from 'moment'
 import seen from '@/seen.png'
@@ -16,6 +16,8 @@ import { RxExit } from "react-icons/rx";
 import { CiEdit } from "react-icons/ci";
 import { CiSettings } from "react-icons/ci";
 import { IoChevronBackOutline } from "react-icons/io5";
+import { SlPencil } from "react-icons/sl";
+import { FaCheck } from "react-icons/fa6";
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -41,7 +43,8 @@ interface LastMessage {
     _id: string
 }
 
-const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUsers }) => {
+const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => {
+    const { myInfo } = useAppSelector(state => state.auth);
     const { friends } = useAppSelector(state => state.messenger)
     const [friendsList, setFriendList] = useState(friends)
     const dispatch = useAppDispatch()
@@ -51,18 +54,55 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
     const [isClient, setIsClient] = useState(false)
     const [isMenuOpen, setMenuOpen] = useState(false)
     const [isProfileMenuOpen, setProfileMenuOpen] = useState(false)
+    const [friendIndex, setFriendIndex] = useState<React.Key | null>(null)
+
+    const currentUserInfo: Dictionary<string> = myInfo
 
     const inputProfileImage = useRef<HTMLInputElement | null>(null);
+    const inputUserName = useRef<HTMLInputElement | null>(null)
+    const inputUserStatus = useRef<HTMLInputElement | null>(null)
     const socketRef = useRef<Socket | null>(null)
 
-    useEffect(() => {
-        const socket = io("ws://localhost:8000", {
-            reconnection: true,
-            reconnectionAttempts: Infinity,
-            reconnectionDelay: 1000,
-        });
-        socketRef.current = socket
-    }, [])
+    const [inputState, setInputState] = useState({
+        username: String(currentUserInfo.username) || '',
+        status: String(currentUserInfo.status) || '',
+    })
+
+    const [isUsernameInputDisabled, setUsernameInputDisabled] = useState(true)
+    const [isStatusInputDisabled, setStatusInputDisabled] = useState(true)
+
+    const editUsernameClicked = () => {
+        setUsernameInputDisabled(false)
+        setTimeout(() => {
+            inputUserName.current?.focus()
+        }, 200)
+    }
+
+    const handleUsernameEditingDone = (newUsername: string) => {
+        if (newUsername !== currentUserInfo.username) {
+            dispatch(updateUserName(JSON.stringify({ name: newUsername })))
+        }
+    }
+
+    const handleStatusEditingDone = (newStatus: string) => {
+        if (newStatus !== currentUserInfo.status) {
+            dispatch(updateUserStatus(JSON.stringify({ status: newStatus })))
+        }
+    }
+
+    const editStatusClicked = () => {
+        setStatusInputDisabled(false)
+        setTimeout(() => {
+            inputUserStatus.current?.focus()
+        }, 200)
+    }
+
+    const inputHandler = (e: ChangeEvent<HTMLInputElement>) => {
+        setInputState({
+            ...inputState,
+            [e.target.name]: e.target.value
+        })
+    }
 
     const selectInputMedia = () => {
         if (inputProfileImage.current) {
@@ -87,7 +127,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
     const logout = () => {
         dispatch(userLogout());
         if (socketRef.current && myInfo) {
-            socketRef.current.emit('logout', myInfo.id)
+            socketRef.current.emit('logout', currentUserInfo.id)
         }
     }
 
@@ -104,6 +144,21 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
     }
 
     useEffect(() => {
+        const socket = io("ws://localhost:8000", {
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000,
+        });
+        socketRef.current = socket
+    }, [])
+
+    useEffect(() => {
+        if (friends && friendIndex) {
+            dispatch(getSelectedFriend(friends[Number(friendIndex)]))
+        }
+    }, [friends[Number(friendIndex)]])
+
+    useEffect(() => {
         setFriendList(friends)
     }, [friends])
 
@@ -111,11 +166,15 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
         if (myInfo) {
             setIsClient(true)
         }
-
-        if (socketRef.current && myInfo) {
-            socketRef.current.emit('userProfilePictureUpdate', myInfo.id)
-        }
     }, [myInfo])
+
+    useEffect(() => {
+
+        if (socketRef.current && currentUserInfo) {
+            socketRef.current.emit('userProfileInfoUpdate', currentUserInfo.id)
+        }
+
+    }, [currentUserInfo.status, currentUserInfo.username, currentUserInfo.profileImage])
 
     return (
         <>
@@ -123,6 +182,8 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                 <div className="w-full h-screen" style={{ 'position': 'relative' }}>
                     
                     <div className={`w-full h-full flex flex-col gap-4 justify-start items-center shrink-0 z-20`}>
+
+                        {/* TOP BAR */}
                         <div
                             className={`topbar relative z-30 w-full min-h-[70px] flex flex-row justify-between items-center px-6 border-b-2 border-bgPrimary bg-gradient-to-l from-gradientOne via-gradientTwo to-gradientThree`}
                             style={{ 'position': 'relative' }}
@@ -131,13 +192,11 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                 onClick={() => setProfileMenuOpen(true)}
                                 className="flex flex-row gap-2 justify-center items-center">
                                 {
-                                    myInfo && myInfo.profileImage ?
+                                    currentUserInfo && currentUserInfo.profileImage ?
                                         <img
-                                            src={`/userProfileImages/${myInfo.profileImage}`}
+                                            src={`/userProfileImages/${currentUserInfo.profileImage}`}
                                             alt="profilePicturePlaceholder"
-                                            className="object-cover rounded-full border-[2.5px] border-darkBgMain"
-                                            width={50}
-                                            height={50} />
+                                            className="object-cover rounded-full border-[2.5px] border-darkBgMain min-w-[50px] min-h-[50px] max-w-[50px] max-h-[50px]"/>
                                         :
                                         <Image
                                             src={profilePicturePlaceholder}
@@ -147,30 +206,10 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                             priority />
                                 }
                                 <h2 className="text-2xl w-full text-center text-black">
-                                    {isClient ? myInfo?.username : " "}
+                                    {isClient ? currentUserInfo?.username : " "}
                                 </h2>
                             </button>
                             <div className="flex flex-row gap-4 justify-center items-center">
-                                {/* <button onClick={() => selectInputMedia()}>
-                                <Image
-                                    src={editing}
-                                    alt='changeAvatarIcon'
-                                    width={25}
-                                    height={25}
-                                    className="mb-1.5"
-                                    priority
-                                />
-                                <input onChange={mediaSelected} multiple={false} type="file" id="inputFile" ref={inputProfileImage} style={{ display: "none" }} />
-                            </button>
-                            <button onClick={() => logout()}>
-                                <Image
-                                    src={logoutIcon}
-                                    alt='logoutIcon'
-                                    width={25}
-                                    height={25}
-                                    priority
-                                />
-                            </button> */}
                                 <button onClick={() => handleMenuClick()}>
                                     <Image src={dots} alt='dotsIcon' width={25} height={25} className="rounded-full" priority />
                                 </button>
@@ -203,15 +242,15 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                         border border-bgPrimary bg-gradient-to-r from-gradientOne to-gradientTwo rounded-tr-lg rounded-b-lg`}>
                                         
                                         <button
-                                            disabled={myInfo && myInfo.theme === 'sunset' ? true : false}
+                                            disabled={currentUserInfo && currentUserInfo.theme === 'sunset' ? true : false}
                                             onClick={() => themeSelected('sunset')}
                                             className="flex flex-row justify-between items-center w-full py-2 px-2 border-b rounded-tr-lg border-bgPrimary hover:bg-gradientThree hover:text-white">
                                             <p>Sunset</p>
                                             <div className="flex flex-row justify-center items-center w-auto h-auto gap-2">
                                                 {
-                                                    colorPalette.map((color) => {
+                                                    colorPalette.map((color, index) => {
                                                         return (
-                                                            <div className={`w-[15px] h-[15px] bg-${color} rounded-full border border-black sunset ${myInfo && myInfo.theme === 'sunset' ? 'border-2 border-white w-[18px] h-[18px]' : '' }`} />
+                                                            <div key={index} className={`w-[15px] h-[15px] bg-${color} rounded-full border border-black sunset ${currentUserInfo && currentUserInfo.theme === 'sunset' ? 'border-2 border-white w-[18px] h-[18px]' : '' }`} />
                                                         )
                                                     })
                                                 }
@@ -219,30 +258,30 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                         </button>
 
                                         <button
-                                            disabled={myInfo && myInfo.theme === 'azure' ? true : false}
+                                            disabled={currentUserInfo && currentUserInfo.theme === 'azure' ? true : false}
                                             onClick={() => themeSelected('azure')}
                                             className="flex flex-row justify-between items-center w-full py-2 px-2 border-b border-bgPrimary hover:bg-gradientThree hover:text-white">
                                             <p>Azure</p>
                                             <div className="flex flex-row justify-center items-center w-auto h-auto gap-2">
                                                 {
-                                                    colorPalette.map((color) => {
+                                                    colorPalette.map((color, index) => {
                                                         return (
-                                                            <div className={`w-[15px] h-[15px] bg-${color} rounded-full border border-black azure ${myInfo && myInfo.theme === 'azure' ? 'border-2 border-white w-[18px] h-[18px]' : '' }`} />
+                                                            <div key={index} className={`w-[15px] h-[15px] bg-${color} rounded-full border border-black azure ${currentUserInfo && currentUserInfo.theme === 'azure' ? 'border-2 border-white w-[18px] h-[18px]' : '' }`} />
                                                         )
                                                     })
                                                 }
                                             </div>
                                         </button>
                                         <button
-                                            disabled={myInfo && myInfo.theme === 'midnight' ? true : false}
+                                            disabled={currentUserInfo && currentUserInfo.theme === 'midnight' ? true : false}
                                             onClick={() => themeSelected('midnight')}
                                             className="flex flex-row justify-between items-center w-full py-2 px-2 hover:bg-gradientThree hover:text-white rounded-b-lg">
                                             <p>Midnight</p>
                                             <div className="flex flex-row justify-center items-center w-auto h-auto gap-2">
                                                 {
-                                                    colorPalette.map((color) => {
+                                                    colorPalette.map((color, index) => {
                                                         return (
-                                                            <div className={`w-[15px] h-[15px] bg-${color} rounded-full border border-black midnight ${myInfo && myInfo.theme === 'midnight' ? 'border-2 border-white w-[18px] h-[18px]' : '' }`} />
+                                                            <div key={index} className={`w-[15px] h-[15px] bg-${color} rounded-full border border-black midnight ${currentUserInfo && currentUserInfo.theme === 'midnight' ? 'border-2 border-white w-[18px] h-[18px]' : '' }`} />
                                                         )
                                                     })
                                                 }
@@ -274,11 +313,11 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                         {/* CONTACT LIST */}
                         <div className="contactsList z-20 w-[100%] min-h-fit flex-col justify-start items-center overflow-y-scroll no-scrollbar">
                             {
-                                friendsList?.map((e: any, index: React.Key | null | undefined) => {
+                                friendsList?.map((e: any, index: any) => {
                                     return (
                                         <button key={index} className=" w-full hover:bg-bgPrimary active:bg-Primary flex justify-center items-center">
                                             <div className="bg-transparent w-[95%] border-b-2 border-bgPrimary flex flex-row justify-start items-center px-4 py-6 gap-4"
-                                                onClick={async () => await dispatch(getSelectedFriend(e))}
+                                                onClick={async () => [await dispatch(getSelectedFriend(e)), setFriendIndex(index)]}
                                             >
                                                 <div className="flex flex-row justify-center items-end -space-x-4">
                                                     {
@@ -286,16 +325,12 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                                             <img
                                                                 src={`/userProfileImages/${e.profileImage}`}
                                                                 alt="profilePicturePlaceholder"
-                                                                className="object-cover rounded-full"
-                                                                width={65}
-                                                                height={65} />
+                                                                className="object-cover rounded-full min-h-[65px] min-w-[65px] max-h-[65px] max-w-[65px]" />
                                                             :
                                                             <Image
                                                                 src={profilePicturePlaceholder}
                                                                 alt='profilePicturePlaceholder'
-                                                                width={65}
-                                                                height={65}
-                                                                className="rounded-full"
+                                                                className="rounded-full min-w-[65px] max-h-[65px] max-w-[65px]"
                                                                 priority />
                                                     }
 
@@ -314,13 +349,13 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
                                                     </div>
 
                                                     <div className="flex flex-row gap-6 justify-between items-start w-[100%]">
-                                                        <p className={`${e.lastMessageInfo ? (e.lastMessageInfo.status === 'delivered' && myInfo && e.lastMessageInfo.senderId !== myInfo.id) ? 'font-extrabold' : 'font-normal' : ''} line-clamp-1 break-all text-left`}>
+                                                        <p className={`${e.lastMessageInfo ? (e.lastMessageInfo.status === 'delivered' && myInfo && e.lastMessageInfo.senderId !== currentUserInfo.id) ? 'font-extrabold' : 'font-normal' : ''} line-clamp-1 break-all text-left`}>
                                                             {
                                                                 e.lastMessageInfo && (e.lastMessageInfo.message !== undefined) ? (e.lastMessageInfo.message.text === '' ? <div className="flex-row flex gap-2"><BsImage className="w-5 h-5" /><p>Media</p></div> : e.lastMessageInfo.message.text) : "No messages yet"
                                                             }
                                                         </p>
                                                         {
-                                                            (isClient && e.lastMessageInfo) ? myInfo?.id === e.lastMessageInfo.senderId ?
+                                                            (isClient && e.lastMessageInfo) ? currentUserInfo?.id === e.lastMessageInfo.senderId ?
 
                                                                 e.lastMessageInfo.status === 'seen' ?
                                                                     <Image src={seen} alt='readIcon' width={25} height={25} className="rounded-full" priority />
@@ -344,21 +379,112 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, myInfo, activeUser
 
                     {/* PROFILE EDIT*/}
                     <div className={`w-full h-screen top-0 absolute flex-col gap-4 justify-start items-center shrink-0 z-30 bg-bgMain overflow-hidden ${isProfileMenuOpen ? 'flex' : 'hidden'}`}>
+                        
+                        {/* TOP BAR */}
                         <div
                             className="topbar relative z-30 w-full min-h-[70px] flex flex-row justify-between items-center px-6 border-b-2 border-bgPrimary bg-gradient-to-l from-gradientOne via-gradientTwo to-gradientThree"
                             style={{ 'position': 'relative' }}
                         >
-
                             <button onClick={() => setProfileMenuOpen(false)}>
-                                <IoChevronBackOutline className="w-[35px] h-[35px] text-bgPrimary" />
+                                <IoChevronBackOutline className="min-w-[35px] min-h-[35px] text-bgPrimary" />
                             </button>
+                        </div>
+
+                        <div className="flex flex-col justify-start items-center w-full h-full gap-16">
+                            {
+                                myInfo && currentUserInfo.profileImage ?
+                                    <button
+                                        onClick={() => selectInputMedia()}
+                                        className="mt-10 group relative"> 
+                                        <img
+                                            src={`/userProfileImages/${currentUserInfo.profileImage}`}
+                                            alt="profilePicturePlaceholder"
+                                            className="object-cover rounded-full border-[2.5px] border-darkBgMain w-[200px] h-[200px]"/>
+                                        <div className="min-w-[200px] min-h-[200px] top-0 absolute rounded-full bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center" >
+                                            <CiEdit className="min-w-[50px] min-h-[50px]" />
+                                            <p className="text-lg">
+                                                Edit Picture
+                                            </p>
+                                        </div>
+                                        <input onChange={mediaSelected} multiple={false} type="file" id="inputFile" ref={inputProfileImage} style={{ display: "none" }} />
+                                    </button>
+                                    :
+                                    <button
+                                        onClick={() => selectInputMedia()}
+                                        className=" mt-10 group">
+                                        <Image
+                                            src={profilePicturePlaceholder}
+                                            alt='profilePicturePlaceholder'
+                                            width={200} height={200}
+                                            className="rounded-full"
+                                            priority />
+                                        <div className="w-[200px] h-[200px] -translate-y-[100%] rounded-full bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center" >
+                                            <CiEdit className="w-[50px] h-[50px]" />
+                                            <p className="text-lg">
+                                                Edit Picture
+                                            </p>
+                                        </div>
+                                        <input onChange={mediaSelected} multiple={false} type="file" id="inputFile" ref={inputProfileImage} style={{ display: "none" }} />
+                                    </button>
+                            }
+                            <div className="w-[80%] flex flex-col justify-center items-center gap-10">
+                                <div className="w-full flex flex-col justify-center items-start gap-4">
+                                    <p className=" text-gray-400">
+                                        Your Name:
+                                    </p>
+                                    <div className={`w-full ${isUsernameInputDisabled === false ? 'border-b-2' : ''} flex flex-row justify-center items-start relative`}>
+                                        <input
+                                            onChange={inputHandler}
+                                            name="username"
+                                            value={inputState.username}
+                                            ref={inputUserName}
+                                            disabled={isUsernameInputDisabled}
+                                            maxLength={25}
+                                            id="usernameInput"
+                                            className="peer bg-bgMain w-full text-xl mb-2 outline-none">
+                                        </input>
+                                        <span className={`mr-10 text-lg ${isUsernameInputDisabled === true ? 'hidden' : ''}`}>
+                                            {25 - inputState.username.length}
+                                        </span>
+                                        <button onClick={editUsernameClicked} className={`${isUsernameInputDisabled === false ? 'hidden' : ''} absolute right-0 bottom-3`}>
+                                            <SlPencil className="w-6 h-6" />
+                                        </button>
+                                        <button onClick={() => [setUsernameInputDisabled(true), handleUsernameEditingDone(inputState.username)]} className={`${isUsernameInputDisabled === true ? 'hidden' : ''} absolute right-0`}>
+                                            <FaCheck className="w-[27px] h-[27px]" />
+                                        </button>
+                                        
+                                    </div>
+                                </div>
+
+                                <div className="w-full flex flex-col justify-center items-start gap-4">
+                                    <p className=" text-gray-400">
+                                        Status:
+                                    </p>
+                                    <div className={`w-full ${isStatusInputDisabled === false ? 'border-b-2' : ''} flex flex-row justify-center items-start relative`}>
+                                        <input
+                                            onChange={inputHandler}
+                                            name="status"
+                                            disabled={isStatusInputDisabled}
+                                            value={inputState.status}
+                                            ref={inputUserStatus}
+                                            maxLength={36}
+                                            className="peer bg-bgMain text-xl mb-2 w-full outline-none">
+                                        </input>
+                                        <span className={`mr-10 text-lg ${isStatusInputDisabled === true ? 'hidden' : ''}`}>
+                                            {36 - inputState.status.length}
+                                        </span>
+                                        <button onClick={editStatusClicked} className={`${isStatusInputDisabled === false ? 'hidden' : ''} absolute right-0 bottom-3`}>
+                                            <SlPencil className="w-6 h-6" />
+                                        </button>
+                                        <button onClick={() => [setStatusInputDisabled(true), handleStatusEditingDone(inputState.status)]} className={`${isStatusInputDisabled === true ? 'hidden' : ''} absolute right-0`}>
+                                            <FaCheck className="w-[27px] h-[27px]" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-
-
-
             </div>
         </>
     )

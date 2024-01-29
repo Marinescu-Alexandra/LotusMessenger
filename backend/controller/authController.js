@@ -247,8 +247,6 @@ module.exports.updateUserProfileImage = async (req, res) => {
 module.exports.updateUserTheme = async (req, res) => {
     const currentUserId = req.myId;
     const { theme } = req.body
-    
-    console.log(theme)
 
     await registerModel.findByIdAndUpdate(currentUserId, {
         theme: String(theme)
@@ -283,5 +281,85 @@ module.exports.updateUserTheme = async (req, res) => {
                 })
             }
 
+        })
+}
+
+module.exports.updateUserName = async (req, res) => {
+    const currentUserId = req.myId;
+    const { name } = req.body
+
+    await registerModel.findByIdAndUpdate(currentUserId, {
+        username: String(name)
+    })
+        .then((user) => {
+            try {
+                const token = jwt.sign({
+                    id: user._id,
+                    email: user.email,
+                    username: String(name),
+                    registerTimer: user.createdAt,
+                    profileImage: user.profileImage,
+                    status: user.status,
+                    theme: user.theme
+                }, process.env.SECRET, {
+                    expiresIn: process.env.TOKEN_EXP
+                })
+
+                const options = { expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000) }
+
+                res.status(200).cookie('authToken', token, options).json({
+                    successMessage: 'Cookie update successful',
+                    name: name,
+                    token: token
+                })
+            } catch (error) {
+                console.log(error)
+                res.status(500).json({
+                    error: {
+                        errorMessage: error
+                    }
+                })
+            }
+
+        })
+
+}
+
+module.exports.updateUserStatus = async (req, res) => {
+    const currentUserId = req.myId;
+    const { status } = req.body
+
+    await registerModel.findByIdAndUpdate(currentUserId, {
+        status: String(status)
+    })
+        .then((user) => {
+            try {
+                const token = jwt.sign({
+                    id: user._id,
+                    email: user.email,
+                    username: user.username,
+                    registerTimer: user.createdAt,
+                    profileImage: user.profileImage,
+                    status: String(status),
+                    theme: user.theme
+                }, process.env.SECRET, {
+                    expiresIn: process.env.TOKEN_EXP
+                })
+
+                const options = { expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000) }
+
+                res.status(200).cookie('authToken', token, options).json({
+                    successMessage: 'Cookie update successful',
+                    status: status,
+                    token: token
+                })
+            } catch (error) {
+                console.log(error)
+                res.status(500).json({
+                    error: {
+                        errorMessage: error
+                    }
+                })
+            }
         })
 }
