@@ -21,9 +21,9 @@ const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, s
                     <img
                         src={`/userProfileImages/${userProfileImage}`}
                         alt="profilePicturePlaceholder"
-                        className="rounded-full w-10 h-10" />
+                        className="rounded-full w-10 h-10 object-cover" />
                     :
-                    <Image className="w-8 h-8 rounded-full" src={profilePlaceholder} alt="profilePicPlaceholder" />
+                    <Image className="w-8 h-8 rounded-full object-cover" src={profilePlaceholder} alt="profilePicPlaceholder" />
             }
             
 

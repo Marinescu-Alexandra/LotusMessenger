@@ -19,6 +19,7 @@ import { IoChevronBackOutline } from "react-icons/io5";
 import { SlPencil } from "react-icons/sl";
 import { FaCheck } from "react-icons/fa6";
 
+
 interface Dictionary<T> {
     [Key: string]: T;
 }
@@ -46,6 +47,7 @@ interface LastMessage {
 const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => {
     const { myInfo } = useAppSelector(state => state.auth);
     const { friends } = useAppSelector(state => state.messenger)
+    const { selectedFriendData } = useAppSelector(state => state.selectedFriend)
     const [friendsList, setFriendList] = useState(friends)
     const dispatch = useAppDispatch()
 
@@ -153,9 +155,17 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
     }, [])
 
     useEffect(() => {
-        setFriendList(friends)
-        if (friendIndex !== null) {
-            dispatch(getSelectedFriend(friends[Number(friendIndex)]))
+        var sortedFriendList = friends.slice(0);
+        sortedFriendList.sort(function(a: any, b: any) { 
+            var dateA = new Date(a.lastMessageInfo.createdAt).getTime()
+            var dateB = new Date(b.lastMessageInfo.createdAt).getTime()
+            return dateA > dateB ? -1 : dateA < dateB ? 1 : 0
+        })
+
+        setFriendList(sortedFriendList)
+        
+        if (friendIndex !== null && sortedFriendList[Number(friendIndex)]._id === selectedFriendData._id) {
+            dispatch(getSelectedFriend(sortedFriendList[Number(friendIndex)]))
         }
     }, [friends])
 
@@ -201,7 +211,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                                             className="rounded-full"
                                             priority />
                                 }
-                                <h2 className="text-2xl w-full text-center text-black">
+                                <h2 className="text-2xl w-full text-center text-black line-clamp-1 break-words">
                                     {isClient ? currentUserInfo?.username : " "}
                                 </h2>
                             </button>
@@ -408,14 +418,14 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                                     :
                                     <button
                                         onClick={() => selectInputMedia()}
-                                        className=" mt-10 group">
+                                        className=" mt-10 group relative">
                                         <Image
                                             src={profilePicturePlaceholder}
                                             alt='profilePicturePlaceholder'
                                             width={200} height={200}
-                                            className="rounded-full"
+                                            className="object-cover rounded-full border-[2.5px] border-darkBgMain w-[200px] h-[200px]"
                                             priority />
-                                        <div className="w-[200px] h-[200px] -translate-y-[100%] rounded-full bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center" >
+                                        <div className="min-w-[200px] min-h-[200px] top-0 absolute rounded-full bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center" >
                                             <CiEdit className="w-[50px] h-[50px]" />
                                             <p className="text-lg">
                                                 Edit Picture

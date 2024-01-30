@@ -36,7 +36,7 @@ const GalleryView: FC<GalleryViewProps> = ({ className, mediaSelected, imagePath
                         </div>
 
                         <div className="flex justify-center items-center w-[90%] h-[120px] border-t-2 border-bgPrimary">
-                            <div className="grid grid-rows-1 grid-flow-col w-[100%] h-auto gap-5 mt-4 mb-6 overflow-x-auto no-scrollbar">
+                            <div className="grid grid-rows-1 grid-flow-col w-auto h-auto gap-5 mt-4 mb-6 overflow-x-auto no-scrollbar">
 
                                 {
                                     images.map((image: string, index: React.Key | null | undefined) => {

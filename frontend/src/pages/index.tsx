@@ -146,10 +146,10 @@ export default function Home() {
 
     // GET SELECTED FRIEND MESSAGES
     useEffect(() => {
-        if (selectedFriendData && friends) {
+        if (selectedFriendData && Object.keys(selectedFriendData).length > 0) {
             dispatch(getMessages(selectedFriendData._id))
         }
-    }, [friends, selectedFriendData])
+    }, [selectedFriendData])
 
     // GET ALL UNDELIVERED MESSAGES
     useEffect(() => {
@@ -236,17 +236,17 @@ export default function Home() {
     }, [messages])
 
     //this should be done when retrieving messages, not here, change later
-    useEffect(() => {
-        let sharedMedia: string[] = []
-        for (let i = 0; i < messages.length; i++) {
-            if (messages[i].message.image.length > 0) {
-                for (let j = 0; j < messages[i].message.image.length; j++) {
-                    sharedMedia = [...sharedMedia, messages[i].message.image[j]]
-                }
-            }
-        }
-        dispatch(getSharedMedia(sharedMedia))
-    }, [messages])
+    // useEffect(() => {
+    //     let sharedMedia: string[] = []
+    //     for (let i = 0; i < messages.length; i++) {
+    //         if (messages[i].message.image.length > 0) {
+    //             for (let j = 0; j < messages[i].message.image.length; j++) {
+    //                 sharedMedia = [...sharedMedia, messages[i].message.image[j]]
+    //             }
+    //         }
+    //     }
+    //     dispatch(getSharedMedia(sharedMedia))
+    // }, [messages])
 
     //Notify user of new unseen messages when online
     useEffect(() => {

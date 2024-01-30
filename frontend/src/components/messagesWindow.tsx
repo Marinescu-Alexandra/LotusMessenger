@@ -383,8 +383,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                             >
                             </textarea>
 
-                            <div className="flex flex-row w-[90%] justify-between items-start h-[120px] border-t-2 border-bgPrimary ">
-                                <div className="flex flex-row w-full justify-center items-center h-auto gap-5 mt-4  overflow-y-scroll no-scrollbar">
+                            <div className="flex flex-row w-[90%] justify-between gap-4 items-start h-[120px] border-t-2 border-bgPrimary ">
+                                <div className="grid grid-rows-1 grid-flow-col w-auto h-auto gap-5 mt-4 mb-6 overflow-x-auto no-scrollbar">
 
                                     {imagePaths.map((image: string, index: React.Key | null | undefined) => {
                                         return (
