@@ -34,7 +34,7 @@ const getLastMessage = async (myId, friendId) => {
     return message;
 }
 
-module.exports.getFriends = async (req, res) => {
+module.exports.getFriends = async (req, res, next) => {
     const myId = req.myId
     const newUsers = []
 
@@ -44,7 +44,7 @@ module.exports.getFriends = async (req, res) => {
                 $ne: myId
             }
         })
-        for (let i = 0; i < friendGet.length; i++){
+        for (let i = 0; i < friendGet.length; i++) {
             let lastMessage = await getLastMessage(myId, friendGet[i].id)
             var newUser = friendGet[i]
             if (lastMessage !== null) {
@@ -61,16 +61,12 @@ module.exports.getFriends = async (req, res) => {
             newUsers.push(newUser)
         }
         res.status(200).json({ success: true, friends: newUsers })
-    } catch {
-        res.status(500).json({
-            error: {
-                errorMessage: 'Internal server error'
-            }
-        })
+    } catch (error) {
+        next(error)
     }
 }
 
-module.exports.messageUploadDB = async (req, res) => {
+module.exports.messageUploadDB = async (req, res, next) => {
     const {
         senderId,
         receiverId,
@@ -93,25 +89,19 @@ module.exports.messageUploadDB = async (req, res) => {
             success: true,
             message: insertMessage
         })
-    } catch(error) {
-        res.status(500).json({
-            error: {
-                errorMessage: [
-                    'Internal server error'
-                ]
-            }
-        })
+    } catch (error) {
+        next(error)
     }
 }
 
-module.exports.messageGet = async(req, res) => {
+module.exports.messageGet = async (req, res, next) => {
     const currentUserId = req.myId;
     const friendId = req.params.id
 
     try {
         let getAllMessages = await messageModel.find({
 
-            $or : [{
+            $or: [{
                 $and: [{
                     senderId: {
                         $eq: currentUserId
@@ -139,16 +129,12 @@ module.exports.messageGet = async(req, res) => {
             success: true,
             messages: getAllMessages
         })
-    } catch {
-        res.status(500).json({
-            error: {
-                errorMessage: ['Internal server error']
-            }
-        })
+    } catch (error) {
+        next(error)
     }
 }
 
-module.exports.undeliveredMessagesGet = async (req, res) => {
+module.exports.undeliveredMessagesGet = async (req, res, next) => {
     const currentUserId = req.myId;
     const friendId = req.params.id
 
@@ -172,79 +158,59 @@ module.exports.undeliveredMessagesGet = async (req, res) => {
             success: true,
             undeliveredMessages: getAllUndeliveredMessages
         })
-    } catch {
-        res.status(500).json({
-            error: {
-                errorMessage: ['Internal server error']
-            }
-        })
+    } catch (error) {
+        next(error)
     }
-    
+
 }
 
-module.exports.imagesUpload = async (req, res) => {
+module.exports.imagesUpload = async (req, res, next) => {
     const form = new formidable.IncomingForm();
 
-    form.parse(req, async (err, fields, files) => {
-        if (err) {
-            next(err);
-            return;
-        }
-        const imageNames = fields['imageName[]']
+    try {
+        form.parse(req, async (err, fields, files) => {
+            if (err) {
+                throw new err;
+            }
+            const imageNames = fields['imageName[]']
 
-        const paths = []
-        imageNames.forEach(function callback(name, index) {
-            const newPath = path.join(__dirname + `../../../frontend/public/userImages/${name}`)
-            files['fileToUpload[]'][index].originalFilename = name
-            paths.push(name)
-            fs.copyFile(files['fileToUpload[]'][index].filepath, newPath, (err) => {
-                if (err) {
-                    res.status(500).json({
-                        error: {
-                            errorMessage: 'Image upload fail.'
-                        }
-                    })
-                    return
-                }
+            const paths = []
+            imageNames.forEach(function callback(name, index) {
+                const newPath = path.join(__dirname + `../../../frontend/public/userImages/${name}`)
+                files['fileToUpload[]'][index].originalFilename = name
+                paths.push(name)
+                fs.copyFile(files['fileToUpload[]'][index].filepath, newPath, (err) => {
+                    if (err) {
+                        throw new BadRequestError('Image upload fail.');
+                    }
+                })
             })
-        })
-        try {
             res.status(200).json({
                 success: true,
                 paths: paths
             })
-            
-        } catch (error) {
-            res.status(500).json({
-                error: {
-                    errorMessage: error
-                }
-            })
-        }
-        
-    });
+        });
+    } catch (error) {
+        next(error)
+    }
 }
 
-module.exports.messageSeen = async (req, res) => {
+module.exports.messageSeen = async (req, res, next) => {
     const messageId = req.body._id
-    
+
     await messageModel.findByIdAndUpdate(messageId, {
         status: 'seen'
     })
-    .then(() => {
-        res.status(200).json({
-            success: true
+        .then(() => {
+            res.status(200).json({
+                success: true
+            })
+        }).catch((error) => {
+            next(error)
         })
-    }).catch(() => {
-        res.status(500).json({
-            error: {
-                errorMessage: 'Internal server error'
-            }
-        })
-    })
 }
 
-module.exports.messageDeliver = async (req, res) => {
+module.exports.messageDeliver = async (req, res, next) => {
     const messageId = req.body._id
 
     await messageModel.findByIdAndUpdate(messageId, {
@@ -254,11 +220,7 @@ module.exports.messageDeliver = async (req, res) => {
             res.status(200).json({
                 success: true
             })
-        }).catch(() => {
-            res.status(500).json({
-                error: {
-                    errorMessage: 'Internal server error'
-                }
-            })
+        }).catch((error) => {
+            next(error)
         })
 }

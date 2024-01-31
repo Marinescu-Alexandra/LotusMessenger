@@ -1,4 +1,4 @@
-const { AppError } = require('../errors/errors')
+const { AppError } = require('./errors')
 
 module.exports.errorHandler = async (error, request, response, next) => {
     if (error instanceof AppError) {

@@ -2,7 +2,7 @@ const router = require('express').Router();
 
 const { userRegister, userLogin, userLogout, updateUserProfileImage, updateUserTheme, updateUserName, updateUserStatus } = require('../controller/authController')
 const { authMiddleware } = require('../middleware/authMiddleware');
-const { errorHandler } = require('../middleware/errorHandler');
+const { errorHandler } = require('../errors/errorHandler');
 
 router.post('/user-login', userLogin, errorHandler)
 router.post('/user-register', userRegister, errorHandler)
