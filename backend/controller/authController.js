@@ -1,175 +1,140 @@
-const validator = require('validator')
 const registerModel = require('../models/authModel')
 const bycrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const formidable = require('formidable')
 const path = require('path')
 const fs = require('fs')
+const validator = require('validator');
+const { BadRequestError } = require('../errors/errors');
 
-module.exports.userRegister = async (req, res) => {
-    const { username, email, password } = req.body;
+async function signToken({ id, email, username, createdAt, profileImage, status, theme }) {
+    const token = jwt.sign({
+        id: id,
+        email: email,
+        username: username,
+        registerTimer: createdAt,
+        profileImage: profileImage,
+        status: status,
+        theme: theme
+    }, process.env.SECRET, {
+        expiresIn: process.env.TOKEN_EXP
+    })
+    const options = { expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000) }
 
-    const error = [];
+    return [token, options]
+}
 
-    if (!username) {
-        error.push('Please provide an user name.')
-    }
+function checkForLoginErrors({ email, password }) {
+    const errors = []
     if (!email) {
-        error.push('Please provide an email.')
+        errors.push('Please provide an email.')
     }
     if (!password) {
-        error.push('Please provide a password.')
+        errors.push('Please provide a password.')
+    }
+    if (email && !validator.isEmail(email)) {
+        errors.push('Please provide a valid email.')
+    }
+    return errors
+}
+
+function checkForRegisterErrors({ username, email, password }) {
+    const errors = []
+    if (!username) {
+        errors.push('Please provide an user name.')
+    }
+    if (!email) {
+        errors.push('Please provide an email.')
+    }
+    if (!password) {
+        errors.push('Please provide a password.')
     }
 
     if (email && !validator.isEmail(email)) {
-        error.push('Plese provide a valid email.')
+        errors.push('Plese provide a valid email.')
     }
-    if (error.length > 0) {
-        res.status(400).json({
-            error: {
-                errorMessage: error
-            }
-        })
-    } else {
-        try {
+
+    return errors
+}
+
+module.exports.userRegister = async (req, res, next) => {
+    const { username, email, password } = req.body;
+    const errors = checkForRegisterErrors({ username, email, password })
+    try {
+        if (errors.length > 0) {
+            throw new BadRequestError(errors);
+        } else {
             const checkUser = await registerModel.findOne({
                 email: email,
             })
             if (checkUser) {
-                res.status(404).json({
-                    error: {
-                        errorMessage: ['The provided email is already in use.']
-                    }
-                })
+                throw new BadRequestError('The provided email is already in use.');
             } else {
-                try {
-                    const userCreate = await registerModel.create({
-                        username,
-                        email,
-                        password: await bycrypt.hash(password, 10),
-                    });
 
-                    const token = jwt.sign({
+                const userCreate = await registerModel.create({
+                    username,
+                    email,
+                    password: await bycrypt.hash(password, 10),
+                });
+
+                const [token, options] = await signToken(
+                    {
                         id: userCreate._id,
                         email: userCreate.email,
                         username: userCreate.username,
-                        registerTimer: userCreate.createdAt,
+                        createdAt: userCreate.createdAt,
                         profileImage: userCreate.profileImage,
                         status: userCreate.status,
                         theme: userCreate.theme
-                    }, process.env.SECRET, {
-                        expiresIn: process.env.TOKEN_EXP
-                    })
-
-                    const options = { expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000) }
-
-                    try {
-                        res.status(200).cookie('authToken', token, options).json({
-                            successMessage: 'Registration complete.', token
-                        })
-                    } catch (error) {
-                        console.log(error)
-                        res.status(500).json({
-                            error: {
-                                errorMessage: error
-                            }
-                        })
                     }
-                    console.log('Registration complete')
-
-                } catch (error) {
-                    res.status(500).json({
-                        error: {
-                            errorMessage: error
-                        }
-                    })
-                }
-
+                )
+                res.status(200).cookie('authToken', token, options).json({
+                    successMessage: 'Registration complete.', token
+                })
             }
-        } catch (error) {
-            res.status(500).json({
-                error: {
-                    errorMessage: error
-                }
-            })
         }
+    } catch (error) {
+        next(error)
     }
 }
 
-module.exports.userLogin = async (req, res) => {
-    const error = [];
+module.exports.userLogin = async (req, res, next) => {
     const { email, password } = req.body;
-    if (!email) {
-        error.push('Please provide an email.')
-    }
-    if (!email) {
-        error.push('Please provide a password.')
-    }
-    if (email && !validator.isEmail(email)) {
-        error.push('Please provide a valid email.')
-    }
-    if (error.length > 0) {
-        res.status(400).json({
-            error: {
-                errorMessage: error
-            }
-        })
-    } else {
-        try {
+    const errors = checkForLoginErrors({ email, password })
+    try {
+        if (errors.length > 0) {
+            throw new BadRequestError(errors);
+        } else {
             const checkUser = await registerModel.findOne({
                 email: email
             }).select('+password');
+
             if (checkUser) {
                 const matchPassword = await bycrypt.compare(password, checkUser.password);
                 if (matchPassword) {
-                    const token = jwt.sign({
-                        id: checkUser._id,
-                        email: checkUser.email,
-                        username: checkUser.username,
-                        registerTimer: checkUser.createdAt,
-                        profileImage: checkUser.profileImage,
-                        status: checkUser.status,
-                        theme: checkUser.theme
-                    }, process.env.SECRET, {
-                        expiresIn: process.env.TOKEN_EXP
-                    })
-
-                    const options = { expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000) }
-
-                    try {
-                        res.status(200).cookie('authToken', token, options).json({
-                            successMessage: 'Login successful', token
-                        })
-                    } catch (error) {
-                        console.log(error)
-                        res.status(500).json({
-                            error: {
-                                errorMessage: error
-                            }
-                        })
-                    }
-                    console.log('Login successful')
-                } else {
-                    res.status(500).json({
-                        error: {
-                            errorMessage: ['Password not valid.']
+                    const [token, options] = await signToken(
+                        {
+                            id: checkUser._id,
+                            email: checkUser.email,
+                            username: checkUser.username,
+                            createdAt: checkUser.createdAt,
+                            profileImage: checkUser.profileImage,
+                            status: checkUser.status,
+                            theme: checkUser.theme
                         }
+                    )
+                    res.status(200).cookie('authToken', token, options).json({
+                        successMessage: 'Login successful', token
                     })
+                } else {
+                    throw new BadRequestError('Password not valid.');
                 }
             } else {
-                res.status(500).json({
-                    error: {
-                        errorMessage: ['Email not valid. Please use another email or register.']
-                    }
-                })
+                throw new BadRequestError('Email not valid. Please use another email or register.');
             }
-        } catch (error) {
-            res.status(404).json({
-                error: {
-                    errorMessage: ['Internal server error', error]
-                }
-            })
         }
+    } catch (error) {
+        next(error)
     }
 }
 
@@ -179,183 +144,139 @@ module.exports.userLogout = (req, res) => {
     })
 }
 
-module.exports.updateUserProfileImage = async (req, res) => {
+module.exports.updateUserProfileImage = async (req, res, next) => {
     const currentUserId = req.myId;
     const form = new formidable.IncomingForm();
-
-    form.parse(req, async (err, fields, files) => {
-        if (err) {
-            next(err);
-            return;
-        }
-        const profileImageName = fields['profileImageName']
-
-        const newPath = path.join(__dirname + `../../../frontend/public/userProfileImages/${profileImageName}`)
-        files['profileImage'][0].originalFilename = profileImageName
-        fs.copyFile(files['profileImage'][0].filepath, newPath, (err) => {
+    try {
+        form.parse(req, async (err, fields, files) => {
             if (err) {
-                res.status(500).json({
-                    error: {
-                        errorMessage: 'Profile image upload fail.'
-                    }
-                })
-                return
+                throw new err;
             }
-        })
+            const profileImageName = fields['profileImageName']
 
-        await registerModel.findByIdAndUpdate(currentUserId, {
-            profileImage: String(profileImageName)
-        })
-            .then((user) => {
-                try {
-                    const token = jwt.sign({
-                        id: user._id,
-                        email: user.email,
-                        username: user.username,
-                        registerTimer: user.createdAt,
-                        profileImage: String(profileImageName),
-                        status: user.status,
-                        theme: user.theme
-                    }, process.env.SECRET, {
-                        expiresIn: process.env.TOKEN_EXP
-                    })
-
-                    const options = { expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000) }
-
+            const newPath = path.join(__dirname + `../../../frontend/public/userProfileImages/${profileImageName}`)
+            files['profileImage'][0].originalFilename = profileImageName
+            fs.copyFile(files['profileImage'][0].filepath, newPath, (err) => {
+                if (err) {
+                    throw new BadRequestError('Profile image upload fail.');
+                }
+            })
+            await registerModel.findByIdAndUpdate(currentUserId, {
+                profileImage: String(profileImageName)
+            })
+                .then(async (user) => {
+                    const [token, options] = await signToken(
+                        {
+                            id: user._id,
+                            email: user.email,
+                            username: user.username,
+                            createdAt: user.createdAt,
+                            profileImage: String(profileImageName),
+                            status: user.status,
+                            theme: user.theme
+                        }
+                    )
                     res.status(200).cookie('authToken', token, options).json({
                         successMessage: 'Cookie update successful',
                         profileImagePath: profileImageName,
                         token: token
                     })
-                } catch (error) {
-                    console.log(error)
-                    res.status(500).json({
-                        error: {
-                            errorMessage: error
-                        }
-                    })
-                }
-
-            })
-    });
+                })
+        });
+    } catch (error) {
+        next(error)
+    }
 }
 
-module.exports.updateUserTheme = async (req, res) => {
+module.exports.updateUserTheme = async (req, res, next) => {
     const currentUserId = req.myId;
     const { theme } = req.body
 
-    await registerModel.findByIdAndUpdate(currentUserId, {
-        theme: String(theme)
-    })
-        .then((user) => {
-            try {
-                const token = jwt.sign({
-                    id: user._id,
-                    email: user.email,
-                    username: user.username,
-                    registerTimer: user.createdAt,
-                    profileImage: user.profileImage,
-                    status: user.status,
-                    theme: String(theme)
-                }, process.env.SECRET, {
-                    expiresIn: process.env.TOKEN_EXP
-                })
-
-                const options = { expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000) }
-
+    try {
+        await registerModel.findByIdAndUpdate(currentUserId, {
+            theme: String(theme)
+        })
+            .then(async (user) => {
+                const [token, options] = await signToken(
+                    {
+                        id: user._id,
+                        email: user.email,
+                        username: user.username,
+                        createdAt: user.createdAt,
+                        profileImage: user.profileImage,
+                        status: user.status,
+                        theme: String(theme)
+                    }
+                )
                 res.status(200).cookie('authToken', token, options).json({
                     successMessage: 'Cookie update successful',
                     theme: theme,
                     token: token
                 })
-            } catch (error) {
-                console.log(error)
-                res.status(500).json({
-                    error: {
-                        errorMessage: error
-                    }
-                })
-            }
-
-        })
+            })
+    } catch (error) {
+        next(error)
+    }
 }
 
-module.exports.updateUserName = async (req, res) => {
+module.exports.updateUserName = async (req, res, next) => {
     const currentUserId = req.myId;
     const { name } = req.body
 
-    await registerModel.findByIdAndUpdate(currentUserId, {
-        username: String(name)
-    })
-        .then((user) => {
-            try {
-                const token = jwt.sign({
-                    id: user._id,
-                    email: user.email,
-                    username: String(name),
-                    registerTimer: user.createdAt,
-                    profileImage: user.profileImage,
-                    status: user.status,
-                    theme: user.theme
-                }, process.env.SECRET, {
-                    expiresIn: process.env.TOKEN_EXP
-                })
-
-                const options = { expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000) }
-
+    try {
+        await registerModel.findByIdAndUpdate(currentUserId, {
+            username: String(name)
+        })
+            .then(async (user) => {
+                const [token, options] = await signToken(
+                    {
+                        id: user._id,
+                        email: user.email,
+                        username: String(name),
+                        createdAt: user.createdAt,
+                        profileImage: user.profileImage,
+                        status: user.status,
+                        theme: user.theme
+                    }
+                )
                 res.status(200).cookie('authToken', token, options).json({
                     successMessage: 'Cookie update successful',
                     name: name,
                     token: token
                 })
-            } catch (error) {
-                console.log(error)
-                res.status(500).json({
-                    error: {
-                        errorMessage: error
-                    }
-                })
-            }
-
-        })
-
+            })
+    } catch (error) {
+        next(error)
+    }
 }
 
-module.exports.updateUserStatus = async (req, res) => {
+module.exports.updateUserStatus = async (req, res, next) => {
     const currentUserId = req.myId;
     const { status } = req.body
 
-    await registerModel.findByIdAndUpdate(currentUserId, {
-        status: String(status)
-    })
-        .then((user) => {
-            try {
-                const token = jwt.sign({
-                    id: user._id,
-                    email: user.email,
-                    username: user.username,
-                    registerTimer: user.createdAt,
-                    profileImage: user.profileImage,
-                    status: String(status),
-                    theme: user.theme
-                }, process.env.SECRET, {
-                    expiresIn: process.env.TOKEN_EXP
-                })
-
-                const options = { expires: new Date(Date.now() + process.env.COOKIE_EXP * 24 * 60 * 60 * 1000) }
-
+    try {
+        await registerModel.findByIdAndUpdate(currentUserId, {
+            status: String(status)
+        })
+            .then(async (user) => {
+                const [token, options] = await signToken(
+                    {
+                        id: user._id,
+                        email: user.email,
+                        username: user.username,
+                        createdAt: user.createdAt,
+                        profileImage: user.profileImage,
+                        status: String(status),
+                        theme: user.theme
+                    }
+                )
                 res.status(200).cookie('authToken', token, options).json({
                     successMessage: 'Cookie update successful',
                     status: status,
                     token: token
                 })
-            } catch (error) {
-                console.log(error)
-                res.status(500).json({
-                    error: {
-                        errorMessage: error
-                    }
-                })
-            }
-        })
+            })
+    } catch (error) {
+        next(error)
+    }
 }

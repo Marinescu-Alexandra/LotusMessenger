@@ -27,7 +27,7 @@ const messengerState: MessengerState = {
 }
 
 export const messengerReducer = (state = messengerState, action: any) => {
-    if (action.type ===  FRIEND_GET_SUCCESS) {
+    if (action.type === FRIEND_GET_SUCCESS) {
         return {
             ...state,
             friends: action.payload.friends
