@@ -6,6 +6,7 @@ import close from '@/close.png'
 import { motion } from "framer-motion"
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { messageSend, uploadImages } from "@/store/actions/messengerAction";
+import { getSharedMedia, updateSharedMedia } from '@/store/actions/selectedFriendAction'
 import LeftChatBubble from "./leftChatBubble";
 import RightChatBubble from "./rightChatBubble";
 import { Socket, io } from 'socket.io-client'
@@ -138,6 +139,12 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
     }, [imagePaths])
 
     useEffect(() => {
+        if (isSharedMediaOpen === true) {
+            setSharedMediaLength(sharedMedia.length)
+        }
+    }, [sharedMedia])
+
+    useEffect(() => {
         setGalleryImageSelected(false)
         setMediaSelected(false)
         setSharedMediaGallery(false)
@@ -177,6 +184,10 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
             }
 
             dispatch(messageSend(data))
+
+            if (imagePaths.length > 0) {
+                imagePaths.forEach((image: string) => dispatch(updateSharedMedia(image)));
+            }
         }
     }
 
@@ -228,6 +239,18 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
             dispatch(uploadImages(formData))
         }
 
+    }
+
+    const sharedMediaHandler = () => {
+            let sharedMedia: string[] = []
+            for (let i = 0; i < messages.length; i++) {
+                if (messages[i].message.image.length > 0) {
+                    for (let j = 0; j < messages[i].message.image.length; j++) {
+                        sharedMedia = [...sharedMedia, messages[i].message.image[j]]
+                    }
+                }
+            }
+            dispatch(getSharedMedia(sharedMedia))
     }
 
     return (
@@ -290,7 +313,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                         {/* OPEN CONTACT INFO BUTTON */}
                         <button
                             className={`${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'}`}
-                            onClick={() => setContactInfoOpen(true)}
+                            onClick={() => [setContactInfoOpen(true), sharedMediaHandler()]}
                             disabled={Object.keys(selectedFriendData).length !== 0 ? false : true}
                         >
                             <Image src={dots} alt='dotsIcon' width={25} height={25} className="rounded-full" priority />
@@ -301,10 +324,11 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     {/* CHAT WINDOW */}
                     <div className={`chatWindow w-full h-full flex flex-col top-0 overflow-y-scroll no-scrollbar bg-bgMain ${isMediaSelected || isGalleryImageSelected || isSharedMediaGalleryOpen ? 'hidden' : 'flex'}`}>
                         {
-                            messages?.map((e: Message, index: React.Key | null | undefined) => {
-                                if (e.senderId === selectedFriendData._id) {
+                            messages && messages.map((e: Message, index: any) => {
+                                
                                     return (
-                                        e.message &&
+                                        e.message && e.senderId === selectedFriendData._id ? 
+                                        
                                         <LeftChatBubble
                                             scrollRef={scrollRefLeft}
                                             key={index}
@@ -313,24 +337,18 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                             imageUrl={e.message.image}
                                             handleImageGalleryClick={handleImageGalleryClick}
                                             userProfileImage={selectedFriendData.profileImage}
+                                            />
+                                        :
+                                        <RightChatBubble
+                                            scrollRef={scrollRefRight}
+                                            key={index}
+                                            message={e.message.text}
+                                            deliverTime={moment(e.createdAt).format('kk:mm')}
+                                            status={e.status}
+                                            imageUrl={e.message.image}
+                                            handleImageGalleryClick={handleImageGalleryClick}
                                         />
                                     )
-                                } else {
-                                    return (
-                                        <>
-                                            <RightChatBubble
-                                                scrollRef={scrollRefRight}
-                                                key={index}
-                                                message={e.message.text}
-                                                deliverTime={moment(e.createdAt).format('kk:mm')}
-                                                status={e.status}
-                                                imageUrl={e.message.image}
-                                                handleImageGalleryClick={handleImageGalleryClick}
-                                            />
-                                        </>
-
-                                    )
-                                }
                             })
                         }
                     </div>
@@ -403,10 +421,10 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                             <div className="flex flex-row w-[90%] justify-between gap-4 items-start h-[120px] border-t-2 border-bgPrimary ">
                                 <div className="grid grid-rows-1 grid-flow-col w-auto h-auto gap-5 mt-4 mb-6 overflow-x-auto no-scrollbar">
 
-                                    {imagePaths.map((image: string, index: React.Key | null | undefined) => {
+                                    {imagePaths.map((image: string, index) => {
                                         return (
                                             <button key={index} onClick={() => setImageIndex(Number(index))} className={`w-[60px] h-[60px] flex items-center justify-center rounded-lg ${imageIndex === Number(index) ? 'border-2 border-green-500' : 'border border-black'} `} id={String(index)}>
-                                                <img src={`/userImages/${image}`} alt="messageImage" className="object-cover w-full h-full rounded-lg" />
+                                                <img src={`/userImages/${image}`} key={index} alt="messageImage" className="object-cover w-full h-full rounded-lg" />
                                             </button>
                                         )
 
@@ -527,9 +545,9 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                                     className="w-[160px] h-[150px] rounded-md flex items-center justify-center  desktop:w-[130px]" >
                                                         {
                                                             sharedMedia[index] ?
-                                                                <img src={`/userImages/${sharedMedia[index]}`} alt="sharedMedia" className="object-cover w-[150px] h-[140px] rounded-md" />
+                                                                <img src={`/userImages/${sharedMedia[index]}`} key={index} alt="sharedMedia" className="object-cover w-[150px] h-[140px] rounded-md" />
                                                                 :
-                                                                <Image src={profilePicturePlaceholder} width={140} height={140} className="rounded-md" alt="alt" />
+                                                                <Image src={profilePicturePlaceholder} key={index} width={140} height={140} className="rounded-md" alt="alt" />
                                                         }
                                                     </button>
                                             )}

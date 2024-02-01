@@ -10,7 +10,7 @@ interface LeftChatBubble {
     scrollRef: any
     imageUrl: string[]
     handleImageGalleryClick: (a: number, b: string[]) => void,
-    userProfileImage?: string
+    userProfileImage?: string,
 }
 
 const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, scrollRef, imageUrl, handleImageGalleryClick, userProfileImage }) => {

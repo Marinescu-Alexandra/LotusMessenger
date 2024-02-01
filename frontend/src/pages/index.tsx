@@ -4,7 +4,7 @@ import DirectMessages from "@/components/directMessages"
 import MessagesWinow from "@/components/messagesWindow"
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { seenMessage, updateMessage, getFriends, deliverUnsentMessages, getMessages } from "@/store/actions/messengerAction"
-import { getSharedMedia } from '@/store/actions/selectedFriendAction'
+import { updateSharedMedia } from '@/store/actions/selectedFriendAction'
 import { Socket, io } from 'socket.io-client'
 import { useRouter } from 'next/router'
 import { userLogout } from "@/store/actions/authAction";
@@ -22,7 +22,7 @@ type SocketMessage = {
     updatedAt: string,
     message: {
         text: string,
-        image: string
+        image: string[]
     }
     __v: number,
     _id: string,
@@ -122,7 +122,6 @@ export default function Home() {
         })
 
         socket.on('messageDeliverResponse', (data: any) => {
-            console.log('messageDeliverResponse', data)
             dispatch({
                 type: 'DELIVER_MESSAGE',
                 payload: {
@@ -214,6 +213,10 @@ export default function Home() {
 
                 dispatch(seenMessage(socketMessage))
 
+                if (socketMessage.message?.image) {
+                    socketMessage.message?.image.forEach((image: string) => dispatch(updateSharedMedia(image)));
+                }
+
                 socketRef.current.emit('messageSeen', socketMessage)
 
                 dispatch({
@@ -251,19 +254,6 @@ export default function Home() {
             })
         }
     }, [messages])
-
-    //this should be done when retrieving messages, not here, change later
-    // useEffect(() => {
-    //     let sharedMedia: string[] = []
-    //     for (let i = 0; i < messages.length; i++) {
-    //         if (messages[i].message.image.length > 0) {
-    //             for (let j = 0; j < messages[i].message.image.length; j++) {
-    //                 sharedMedia = [...sharedMedia, messages[i].message.image[j]]
-    //             }
-    //         }
-    //     }
-    //     dispatch(getSharedMedia(sharedMedia))
-    // }, [messages])
 
     //Notify user of new unseen messages when online
     useEffect(() => {

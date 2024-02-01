@@ -8,7 +8,7 @@ interface GalleryViewProps {
     mediaSelected: boolean,
     imagePaths: string[],
     index: number,
-    handleGalleryClose: any
+    handleGalleryClose: () => void
 }
 
 const GalleryView: FC<GalleryViewProps> = ({ className, mediaSelected, imagePaths, index, handleGalleryClose }) => {
@@ -39,10 +39,10 @@ const GalleryView: FC<GalleryViewProps> = ({ className, mediaSelected, imagePath
                             <div className="grid grid-rows-1 grid-flow-col w-auto h-auto gap-5 mt-4 mb-6 overflow-x-auto no-scrollbar">
 
                                 {
-                                    images.map((image: string, index: React.Key | null | undefined) => {
+                                    images.map((image: string, index) => {
                                         return (
                                             //add scroll ref on button
-                                            <button onClick={() => setImageIndex(Number(index))} className={`w-[60px] h-[60px] flex items-center justify-center rounded-lg ${imageIndex === Number(index) ? 'border-2 border-green-500' : 'border border-bgPrimary'} `} id={String(index)}>
+                                            <button key={index} onClick={() => setImageIndex(Number(index))} className={`w-[60px] h-[60px] flex items-center justify-center rounded-lg ${imageIndex === Number(index) ? 'border-2 border-green-500' : 'border border-bgPrimary'} `} id={String(index)}>
                                                 <img src={`/userImages/${image}`} alt="messageImage" className="object-cover w-full h-full rounded-lg" />
                                             </button>
                                         )

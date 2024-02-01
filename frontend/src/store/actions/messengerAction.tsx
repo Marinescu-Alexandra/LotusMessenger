@@ -103,7 +103,6 @@ export const deliverUnsentMessages = (id: string) => async (dispatch: any) => {
                 undeliveredMessages: response.data.undeliveredMessages
             }
         })
-        console.log(response.data.undeliveredMessages)
     } catch (error) {
         console.log(error)
     }
@@ -118,7 +117,6 @@ export const getUnseenMessages = (id: string) => async (dispatch: any) => {
                 undeliveredMessages: response.data.undeliveredMessages
             }
         })
-        console.log(response.data.undeliveredMessages)
     } catch (error) {
         console.log(error)
     }

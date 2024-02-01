@@ -1,4 +1,4 @@
-import { GET_SELECTED_FRIEND_SUCCESS, GET_SHARED_MEDIA_SUCCESS } from '../types/selectedFriendType'
+import { GET_SELECTED_FRIEND_SUCCESS, GET_SHARED_MEDIA_SUCCESS, UPDATE_SHARED_MEDIA_SUCCESS } from '../types/selectedFriendType'
 import { LOGOUT_SUCCESS } from '../types/authType'
 
 interface Dictionary<T> {
@@ -31,6 +31,11 @@ export const selectedFriendReducer = (state = selectedFriendState, action: any) 
             return {
                 ...state,
                 sharedMedia: action.payload.sharedMedia
+            }
+        case UPDATE_SHARED_MEDIA_SUCCESS:
+            return {
+                ...state,
+                sharedMedia: [...state.sharedMedia, action.payload.imagePath]
             }
         default:
             return {

@@ -200,6 +200,13 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                 var dateB = new Date(b.lastMessageInfo.createdAt).getTime()
                 return dateA > dateB ? -1 : dateA < dateB ? 1 : 0
             }
+            if (!a.lastMessageInfo) {
+                return 1
+            }
+
+            if (!b.lastMessageInfo) {
+                return -1
+            }
             return 0
         })
 
@@ -418,7 +425,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                                                     </div>
 
                                                     <div className="flex flex-row gap-6 justify-between items-start w-[100%]">
-                                                        <p className={
+                                                        <span className={
                                                             `${e.lastMessageInfo && (e.lastMessageInfo.status === 'delivered' && myInfo && e.lastMessageInfo.senderId !== currentUserInfo.id) ?
                                                                 'font-extrabold'
                                                                 :
@@ -429,19 +436,25 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                                                                     (e.lastMessageInfo.message.text === '' ?
                                                                         <div className="flex-row flex gap-2"><BsImage className="w-5 h-5" /><p>Media</p></div>
                                                                         :
-                                                                        e.lastMessageInfo.message.text) 
+                                                                        <p>{e.lastMessageInfo.message.text}</p>) 
                                                                     :
                                                                     "No messages yet"
                                                             }
-                                                        </p>
+                                                        </span>
                                                         {
-                                                            (isClient && e.lastMessageInfo) && currentUserInfo?.id === e.lastMessageInfo.senderId && e.lastMessageInfo.status === 'seen' ?
-                                                                <Image src={seen} alt='readIcon' width={25} height={25} className="rounded-full" priority />
-                                                                :
-                                                                e.lastMessageInfo.status === 'delivered' ?
-                                                                    <Image src={delivered} alt='deliveredIcon' width={25} height={25} className="rounded-full" priority />
+                                                            e.lastMessageInfo && e.lastMessageInfo.status?
+                                                                currentUserInfo?.id === e.lastMessageInfo.senderId ?
+                                                                    e.lastMessageInfo.status === 'seen' ?
+                                                                        <Image src={seen} alt='readIcon' width={25} height={25} className="rounded-full" priority />
+                                                                        :
+                                                                        e.lastMessageInfo.status === 'delivered' ?
+                                                                            <Image src={delivered} alt='deliveredIcon' width={25} height={25} className="rounded-full" priority />
+                                                                            :
+                                                                            <Image src={defaultStatus} alt='sentIcon' width={25} height={25} className="rounded-full" priority />
                                                                     :
-                                                                    <Image src={defaultStatus} alt='sentIcon' width={25} height={25} className="rounded-full" priority />
+                                                                    '' //The message was sent by the other user, therefore no need for an status icon
+                                                                :
+                                                                '' //There are no messages between the users
                                                         }
                                                     </div>
                                                 </div>

@@ -12,7 +12,7 @@ interface RightChatBubble {
     status: string
     scrollRef: any
     imageUrl: string[],
-    handleImageGalleryClick: (a: number, b: string[]) => void
+    handleImageGalleryClick: (a: number, b: string[]) => void,
 }
 
 const RightChatBubble: FC<RightChatBubble> = ({ className, message, deliverTime, status, scrollRef, imageUrl, handleImageGalleryClick }) => {
