@@ -18,6 +18,7 @@ import { CiSettings } from "react-icons/ci";
 import { IoChevronBackOutline } from "react-icons/io5";
 import { SlPencil } from "react-icons/sl";
 import { FaCheck } from "react-icons/fa6";
+import { motion } from "framer-motion"
 
 
 interface Dictionary<T> {
@@ -76,15 +77,20 @@ interface SocketUser {
 }
 
 const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => {
+
+    const variantsEditProfileMenu = {
+        open: { width: ['0%', '100%'] },
+        closed: { width: ['100%', '0%'] },
+    }
+
     const { myInfo } = useAppSelector(state => state.auth);
     const { friends } = useAppSelector(state => state.messenger)
     const { selectedFriendData } = useAppSelector(state => state.selectedFriend)
     const [friendsList, setFriendList] = useState(friends)
     const dispatch = useAppDispatch()
 
-    //this needs a fix
-    const colorPalette = ['bgMain', 'bgPrimary', 'gradientOne', 'gradientTwo', 'gradientThree']
-    
+    const colorPalette = ['bg-bgMain', 'bg-bgPrimary', 'bg-gradientOne', 'bg-gradientTwo', 'bg-gradientThree']
+
     const [isClient, setIsClient] = useState(false)
     const [isMenuOpen, setMenuOpen] = useState(false)
     const [isProfileMenuOpen, setProfileMenuOpen] = useState(false)
@@ -188,7 +194,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
 
     useEffect(() => {
         var sortedFriendList = friends.slice(0);
-        sortedFriendList.sort(function (a: Friend, b: Friend) { 
+        sortedFriendList.sort(function (a: Friend, b: Friend) {
             if (a.lastMessageInfo && b.lastMessageInfo) {
                 var dateA = new Date(a.lastMessageInfo.createdAt).getTime()
                 var dateB = new Date(b.lastMessageInfo.createdAt).getTime()
@@ -198,7 +204,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
         })
 
         setFriendList(sortedFriendList)
-        
+
         if (friendIndex !== null && sortedFriendList[Number(friendIndex)]._id === selectedFriendData._id) {
             dispatch(getSelectedFriend(sortedFriendList[Number(friendIndex)]))
         }
@@ -220,12 +226,13 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
         <>
             <div className={`border-r-2 border-bgPrimary z-20 bg-bgMain ${className}`} >
                 <div className="w-full h-screen" style={{ 'position': 'relative' }}>
-                    
+
                     <div className={`w-full h-full flex flex-col gap-4 justify-start items-center shrink-0 z-20`}>
 
                         {/* TOP BAR */}
                         <div
-                            className={`topbar relative z-30 w-full min-h-[70px] flex flex-row justify-between items-center px-6 border-b-2 border-bgPrimary bg-gradient-to-l from-gradientOne via-gradientTwo to-gradientThree`}
+                            className={`topbar relative z-30 w-full min-h-[70px] flex flex-row justify-between items-center px-6 border-b-2 border-bgPrimary 
+                                        bg-gradient-to-l from-gradientOne via-gradientTwo to-gradientThree`}
                             style={{ 'position': 'relative' }}
                         >
                             <button
@@ -236,13 +243,15 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                                         <img
                                             src={`/userProfileImages/${currentUserInfo.profileImage}`}
                                             alt="profilePicturePlaceholder"
-                                            className="object-cover rounded-full border-[2.5px] border-darkBgMain min-w-[50px] min-h-[50px] max-w-[50px] max-h-[50px]"/>
+                                            className="object-cover rounded-full border-[2.5px] border-darkBgMain min-w-[50px] min-h-[50px] max-w-[50px] 
+                                            max-h-[50px]" />
                                         :
                                         <Image
                                             src={profilePicturePlaceholder}
                                             alt='profilePicturePlaceholder'
                                             width={50} height={50}
-                                            className="rounded-full"
+                                            className="object-cover rounded-full border-[2.5px] border-darkBgMain min-w-[50px] min-h-[50px] max-w-[50px] 
+                                            max-h-[50px]"
                                             priority />
                                 }
                                 <h2 className="text-2xl w-full text-center text-black line-clamp-1 break-words">
@@ -259,38 +268,51 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                             <div className={`flex-col text-black w-[220px] justify-center rounded-md absolute h-auto bg-bgPrimary right-0 top-[80%] 
                                             mr-10 shadow-lg bg-gradient-to-l from-gradientOne to-gradientTwo border border-bgPrimary
                                             ${isMenuOpen ? 'flex' : 'hidden'}`}>
-                                
-                                <button onClick={() => logout()} className="flex flex-row justify-between items-center text-xl w-full py-2 px-2 border-b border-bgPrimary text-left hover:bg-gradientThree hover:text-white rounded-t-md">
+
+                                <button
+                                    onClick={() => logout()}
+                                    className="flex flex-row justify-between items-center text-xl w-full py-2 px-2 border-b 
+                                               border-bgPrimary text-left hover:bg-gradientThree hover:text-white rounded-t-md">
                                     <p className="">Lougout</p>
                                     <RxExit className="mr-[2px]" />
                                 </button>
 
-                                <button onClick={() => setProfileMenuOpen(true)} className="flex flex-row justify-between items-center text-xl w-full py-2 px-2 text-left hover:bg-gradientThree hover:text-white border-b border-bgPrimary">
+                                <button
+                                    onClick={() => setProfileMenuOpen(true)}
+                                    className="flex flex-row justify-between items-center text-xl w-full 
+                                               py-2 px-2 text-left hover:bg-gradientThree hover:text-white border-b border-bgPrimary">
                                     <p>Settings</p>
                                     <CiSettings className="w-[25px] h-[25px]" />
                                 </button>
 
-                                <div style={{ 'position': 'relative' }} className="flex text-xl w-full py-2 px-2 text-left hover:bg-gradientThree hover:text-white rounded-b-md group">
-                                    
+                                <div
+                                    style={{ 'position': 'relative' }}
+                                    className="flex text-xl w-full py-2 px-2 text-left hover:bg-gradientThree 
+                                             hover:text-white rounded-b-md group">
+
                                     <button className="flex flex-row justify-between items-center w-full">
                                         <p>Theme</p>
                                         <CiEdit className="w-[25px] h-[25px]" />
                                     </button>
 
                                     {/* THEME DROPDOWN MENU */}
-                                    <div className={`flex-col text-black absolute top-0 right-0 w-[240px] h-auto translate-x-[100%] group-hover:block hidden z-50
-                                        border border-bgPrimary bg-gradient-to-r from-gradientOne to-gradientTwo rounded-tr-lg rounded-b-lg`}>
-                                        
+                                    <div className={`flex-col text-black absolute top-0 right-0 w-[240px] h-auto translate-x-[100%] group-hover:block hidden 
+                                                    z-50 border border-bgPrimary bg-gradient-to-r from-gradientOne to-gradientTwo rounded-tr-lg rounded-b-lg`}>
+
                                         <button
                                             disabled={currentUserInfo && currentUserInfo.theme === 'sunset' ? true : false}
                                             onClick={() => themeSelected('sunset')}
-                                            className="flex flex-row justify-between items-center w-full py-2 px-2 border-b rounded-tr-lg border-bgPrimary hover:bg-gradientThree hover:text-white">
+                                            className="flex flex-row justify-between items-center w-full py-2 px-2 border-b rounded-tr-lg border-bgPrimary 
+                                                       hover:bg-gradientThree hover:text-white">
                                             <p>Sunset</p>
                                             <div className="flex flex-row justify-center items-center w-auto h-auto gap-2">
                                                 {
                                                     colorPalette.map((color, index) => {
                                                         return (
-                                                            <div key={index} className={`w-[15px] h-[15px] bg-${color} rounded-full border border-black sunset ${currentUserInfo && currentUserInfo.theme === 'sunset' ? 'border-2 border-white w-[18px] h-[18px]' : '' }`} />
+                                                            <div
+                                                                key={index}
+                                                                className={`w-[15px] h-[15px] ${color} rounded-full border border-black sunset 
+                                                                            ${currentUserInfo && currentUserInfo.theme === 'sunset' ? 'border-2 border-white w-[18px] h-[18px]' : ''}`} />
                                                         )
                                                     })
                                                 }
@@ -300,13 +322,17 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                                         <button
                                             disabled={currentUserInfo && currentUserInfo.theme === 'azure' ? true : false}
                                             onClick={() => themeSelected('azure')}
-                                            className="flex flex-row justify-between items-center w-full py-2 px-2 border-b border-bgPrimary hover:bg-gradientThree hover:text-white">
+                                            className="flex flex-row justify-between items-center w-full py-2 px-2 border-b border-bgPrimary 
+                                                       hover:bg-gradientThree hover:text-white">
                                             <p>Azure</p>
                                             <div className="flex flex-row justify-center items-center w-auto h-auto gap-2">
                                                 {
                                                     colorPalette.map((color, index) => {
                                                         return (
-                                                            <div key={index} className={`w-[15px] h-[15px] bg-${color} rounded-full border border-black azure ${currentUserInfo && currentUserInfo.theme === 'azure' ? 'border-2 border-white w-[18px] h-[18px]' : '' }`} />
+                                                            <div
+                                                                key={index}
+                                                                className={`w-[15px] h-[15px] ${color} rounded-full border border-black azure 
+                                                                            ${currentUserInfo && currentUserInfo.theme === 'azure' ? 'border-2 border-white w-[18px] h-[18px]' : ''}`} />
                                                         )
                                                     })
                                                 }
@@ -315,20 +341,23 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                                         <button
                                             disabled={currentUserInfo && currentUserInfo.theme === 'midnight' ? true : false}
                                             onClick={() => themeSelected('midnight')}
-                                            className="flex flex-row justify-between items-center w-full py-2 px-2 hover:bg-gradientThree hover:text-white rounded-b-lg">
+                                            className="flex flex-row justify-between items-center w-full py-2 px-2 hover:bg-gradientThree 
+                                                       hover:text-white rounded-b-lg">
                                             <p>Midnight</p>
                                             <div className="flex flex-row justify-center items-center w-auto h-auto gap-2">
                                                 {
                                                     colorPalette.map((color, index) => {
                                                         return (
-                                                            <div key={index} className={`w-[15px] h-[15px] bg-${color} rounded-full border border-black midnight ${currentUserInfo && currentUserInfo.theme === 'midnight' ? 'border-2 border-white w-[18px] h-[18px]' : '' }`} />
+                                                            <div
+                                                                key={index}
+                                                                className={`w-[15px] h-[15px] ${color} rounded-full border border-black midnight 
+                                                                            ${currentUserInfo && currentUserInfo.theme === 'midnight' ? 'border-2 border-white w-[18px] h-[18px]' : ''}`} />
                                                         )
                                                     })
                                                 }
-                                                <div className={` hidden`}/>
                                             </div>
                                         </button>
-                                        
+
                                     </div>
                                 </div>
 
@@ -389,22 +418,30 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                                                     </div>
 
                                                     <div className="flex flex-row gap-6 justify-between items-start w-[100%]">
-                                                        <p className={`${e.lastMessageInfo ? (e.lastMessageInfo.status === 'delivered' && myInfo && e.lastMessageInfo.senderId !== currentUserInfo.id) ? 'font-extrabold' : 'font-normal' : ''} line-clamp-1 break-all text-left`}>
+                                                        <p className={
+                                                            `${e.lastMessageInfo && (e.lastMessageInfo.status === 'delivered' && myInfo && e.lastMessageInfo.senderId !== currentUserInfo.id) ?
+                                                                'font-extrabold'
+                                                                :
+                                                                'font-normal'} line-clamp-1 break-all text-left`
+                                                        }>
                                                             {
-                                                                e.lastMessageInfo && (e.lastMessageInfo.message !== undefined) ? (e.lastMessageInfo.message.text === '' ? <div className="flex-row flex gap-2"><BsImage className="w-5 h-5" /><p>Media</p></div> : e.lastMessageInfo.message.text) : "No messages yet"
+                                                                e.lastMessageInfo && (e.lastMessageInfo.message !== undefined) ?
+                                                                    (e.lastMessageInfo.message.text === '' ?
+                                                                        <div className="flex-row flex gap-2"><BsImage className="w-5 h-5" /><p>Media</p></div>
+                                                                        :
+                                                                        e.lastMessageInfo.message.text) 
+                                                                    :
+                                                                    "No messages yet"
                                                             }
                                                         </p>
                                                         {
-                                                            (isClient && e.lastMessageInfo) ? currentUserInfo?.id === e.lastMessageInfo.senderId ?
-
-                                                                e.lastMessageInfo.status === 'seen' ?
-                                                                    <Image src={seen} alt='readIcon' width={25} height={25} className="rounded-full" priority />
+                                                            (isClient && e.lastMessageInfo) && currentUserInfo?.id === e.lastMessageInfo.senderId && e.lastMessageInfo.status === 'seen' ?
+                                                                <Image src={seen} alt='readIcon' width={25} height={25} className="rounded-full" priority />
+                                                                :
+                                                                e.lastMessageInfo.status === 'delivered' ?
+                                                                    <Image src={delivered} alt='deliveredIcon' width={25} height={25} className="rounded-full" priority />
                                                                     :
-                                                                    e.lastMessageInfo.status === 'delivered' ?
-                                                                        <Image src={delivered} alt='readIcon' width={25} height={25} className="rounded-full" priority />
-                                                                        :
-                                                                        <Image src={defaultStatus} alt='readIcon' width={25} height={25} className="rounded-full" priority />
-                                                                : '' : ''
+                                                                    <Image src={defaultStatus} alt='sentIcon' width={25} height={25} className="rounded-full" priority />
                                                         }
                                                     </div>
                                                 </div>
@@ -414,12 +451,19 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                                 })
                             }
                         </div>
-
                     </div>
 
                     {/* PROFILE EDIT*/}
-                    <div className={`w-full h-screen top-0 absolute flex-col gap-4 justify-start items-center shrink-0 z-30 bg-bgMain overflow-hidden ${isProfileMenuOpen ? 'flex' : 'hidden'}`}>
-                        
+                    <motion.div
+                        initial={false}
+                        animate={isProfileMenuOpen ? "open" : "closed"}
+                        variants={variantsEditProfileMenu}
+                        transition={{
+                            opacity: { ease: 'linear' },
+                            layout: { duration: 0.3 },
+                        }}
+                        className={`w-full h-screen top-0 absolute flex-col gap-4 justify-start items-center shrink-0 z-30 bg-bgMain overflow-hidden flex`}>
+
                         {/* TOP BAR */}
                         <div
                             className="topbar relative z-30 w-full min-h-[70px] flex flex-row justify-between items-center px-6 border-b-2 border-bgPrimary bg-gradient-to-l from-gradientOne via-gradientTwo to-gradientThree"
@@ -432,42 +476,34 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
 
                         {/* PROFILE VIEW & EDIT */}
                         <div className="flex flex-col justify-start items-center w-full h-full gap-16">
-                            {
-                                myInfo && currentUserInfo.profileImage ?
-                                    <button
-                                        onClick={() => selectInputMedia()}
-                                        className="mt-10 group relative"> 
+                            {/* EDIT PROFILE PHOTO */}
+                            <button
+                                onClick={() => selectInputMedia()}
+                                className="mt-10 group relative">
+                                {
+                                    myInfo && currentUserInfo.profileImage ?
                                         <img
                                             src={`/userProfileImages/${currentUserInfo.profileImage}`}
                                             alt="profilePicturePlaceholder"
-                                            className="object-cover rounded-full border-[2.5px] border-darkBgMain w-[200px] h-[200px]"/>
-                                        <div className="min-w-[200px] min-h-[200px] top-0 absolute rounded-full bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center" >
-                                            <CiEdit className="min-w-[50px] min-h-[50px]" />
-                                            <p className="text-lg">
-                                                Edit Picture
-                                            </p>
-                                        </div>
-                                        <input onChange={mediaSelected} multiple={false} type="file" id="inputFile" ref={inputProfileImage} style={{ display: "none" }} />
-                                    </button>
-                                    :
-                                    <button
-                                        onClick={() => selectInputMedia()}
-                                        className=" mt-10 group relative">
+                                            className="object-cover rounded-full border-[2.5px] border-darkBgMain w-[200px] h-[200px]" />
+                                        :
                                         <Image
                                             src={profilePicturePlaceholder}
                                             alt='profilePicturePlaceholder'
                                             width={200} height={200}
                                             className="object-cover rounded-full border-[2.5px] border-darkBgMain w-[200px] h-[200px]"
                                             priority />
-                                        <div className="min-w-[200px] min-h-[200px] top-0 absolute rounded-full bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center" >
-                                            <CiEdit className="w-[50px] h-[50px]" />
-                                            <p className="text-lg">
-                                                Edit Picture
-                                            </p>
-                                        </div>
-                                        <input onChange={mediaSelected} multiple={false} type="file" id="inputFile" ref={inputProfileImage} style={{ display: "none" }} />
-                                    </button>
-                            }
+                                }
+                                <div className="min-w-[200px] min-h-[200px] top-0 absolute rounded-full bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center" >
+                                    <CiEdit className="min-w-[50px] min-h-[50px]" />
+                                    <p className="text-lg">
+                                        Edit Picture
+                                    </p>
+                                </div>
+                                <input onChange={mediaSelected} multiple={false} type="file" id="inputFile" ref={inputProfileImage} style={{ display: "none" }} />
+                            </button>
+
+                            {/* EDIT NAME */}
                             <div className="w-[80%] flex flex-col justify-center items-center gap-10">
                                 <div className="w-full flex flex-col justify-center items-start gap-4">
                                     <p className=" text-gray-400">
@@ -493,10 +529,11 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                                         <button onClick={() => [setUsernameInputDisabled(true), handleUsernameEditingDone(inputState.username)]} className={`${isUsernameInputDisabled === true ? 'hidden' : ''} absolute right-0`}>
                                             <FaCheck className="w-[27px] h-[27px]" />
                                         </button>
-                                        
+
                                     </div>
                                 </div>
 
+                                {/* EDIT STATUS */}
                                 <div className="w-full flex flex-col justify-center items-start gap-4">
                                     <p className=" text-gray-400">
                                         Status:
@@ -524,7 +561,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
         </>

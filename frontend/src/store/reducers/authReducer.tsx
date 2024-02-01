@@ -6,6 +6,17 @@ interface Dictionary<T> {
     [Key: string]: T;
 }
 
+interface UserInfo {
+    id: string,
+    username: string,
+    registerTimer: string,
+    profileImage: string,
+    status: string,
+    theme: string,
+    iat: number,
+    exp: number
+}
+
 interface AuthState {
     loading: boolean,
     authenticate: boolean,
