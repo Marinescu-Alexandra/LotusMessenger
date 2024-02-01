@@ -27,21 +27,52 @@ interface Dictionary<T> {
 interface DirectMessagesProps {
     className?: string,
     myInfo?: Dictionary<string>
-    activeUsers?: Dictionary<string>[]
+    activeUsers?: SocketUser[]
 }
 
 interface LastMessage {
-    createdAt: string
     message: {
         text: string,
         image: string[]
-    }
-    receiverId: string,
+    },
+    _id: string,
     senderId: string,
+    senderName: string,
+    receiverId: string,
     status: string,
+    createdAt: string,
     updatedAt: string,
     __v: number
-    _id: string
+}
+
+interface Friend {
+    _id: string,
+    username: string,
+    password: string,
+    profileImage: string,
+    status: string,
+    theme: string,
+    createdAt: string,
+    updatedAt: string,
+    __v: number,
+    lastMessageInfo: LastMessage
+}
+
+interface UserInfo {
+    id: string,
+    username: string,
+    registerTimer: string,
+    profileImage: string,
+    status: string,
+    theme: string,
+    iat: number,
+    exp: number
+}
+
+interface SocketUser {
+    userId: string,
+    socketId: string,
+    userInfo: UserInfo
 }
 
 const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => {
@@ -51,6 +82,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
     const [friendsList, setFriendList] = useState(friends)
     const dispatch = useAppDispatch()
 
+    //this needs a fix
     const colorPalette = ['bgMain', 'bgPrimary', 'gradientOne', 'gradientTwo', 'gradientThree']
     
     const [isClient, setIsClient] = useState(false)
@@ -139,7 +171,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
 
     const serachFriend = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.value.length > 0) {
-            setFriendList(friendsList.filter((friend: any) => friend.username.includes(e.target.value)))
+            setFriendList(friendsList.filter((friend: Friend) => friend.username.includes(e.target.value)))
         } else {
             setFriendList(friends)
         }
@@ -156,7 +188,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
 
     useEffect(() => {
         var sortedFriendList = friends.slice(0);
-        sortedFriendList.sort(function (a: any, b: any) { 
+        sortedFriendList.sort(function (a: Friend, b: Friend) { 
             if (a.lastMessageInfo && b.lastMessageInfo) {
                 var dateA = new Date(a.lastMessageInfo.createdAt).getTime()
                 var dateB = new Date(b.lastMessageInfo.createdAt).getTime()
@@ -182,7 +214,6 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
         if (socketRef.current && currentUserInfo) {
             socketRef.current.emit('userProfileInfoUpdate', currentUserInfo.id)
         }
-
     }, [currentUserInfo.status, currentUserInfo.username, currentUserInfo.profileImage])
 
     return (
@@ -322,7 +353,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                         {/* CONTACT LIST */}
                         <div className="contactsList z-20 w-[100%] min-h-fit flex-col justify-start items-center overflow-y-scroll no-scrollbar">
                             {
-                                friendsList?.map((e: any, index: any) => {
+                                friendsList?.map((e: Friend, index: number) => {
                                     return (
                                         <button key={index} className=" w-full hover:bg-bgPrimary active:bg-Primary flex justify-center items-center">
                                             <div className="bg-transparent w-[95%] border-b-2 border-bgPrimary flex flex-row justify-start items-center px-4 py-6 gap-4"
@@ -344,7 +375,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                                                     }
 
                                                     {
-                                                        activeUsers && activeUsers.find((user: any) => user.userId === e._id) ?
+                                                        activeUsers && activeUsers.find((user: SocketUser) => user.userId === e._id) ?
                                                             <div className="w-4 h-4 bg-green-500 rounded-full relative border-2 border-bgMain"></div> : ''
                                                     }
                                                 </div>

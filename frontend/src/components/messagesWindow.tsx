@@ -41,8 +41,25 @@ interface Message {
 interface MessagesWindowProps {
     className?: string,
     currentUserInfo?: Dictionary<string>
-    activeUsers?: Dictionary<string>[]
+    activeUsers?: SocketUser[]
     typying?: any
+}
+
+interface UserInfo {
+    id: string,
+    username: string,
+    registerTimer: string,
+    profileImage: string,
+    status: string,
+    theme: string,
+    iat: number,
+    exp: number
+}
+
+interface SocketUser {
+    userId: string,
+    socketId: string,
+    userInfo: UserInfo
 }
 
 const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, activeUsers, typying }) => {
@@ -258,7 +275,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                 }
 
                                 {
-                                    activeUsers && activeUsers.find((user: any) => user.userId === selectedFriendData._id) ?
+                                    activeUsers && activeUsers.find((user: SocketUser) => user.userId === selectedFriendData._id) ?
                                         <div className="w-4 h-4 bg-green-500 rounded-full border-2 border-gradientOne"></div> : ''
                                 }
                             </div>
@@ -468,7 +485,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                                             />
                                     }
                                     {
-                                        activeUsers && activeUsers.find((user: any) => user.userId === selectedFriendData._id) ?
+                                        activeUsers && activeUsers.find((user: SocketUser) => user.userId === selectedFriendData._id) ?
                                             <div className={`w-[25px] h-[25px] absolute right-10 bg-green-500 rounded-full border-[3px] border-bgMain `}></div> : ''
                                     }
                                 </div>

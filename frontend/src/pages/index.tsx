@@ -45,6 +45,23 @@ type SocketTypyingMessage = {
     message: string
 }
 
+interface UserInfo {
+    id: string,
+    username: string,
+    registerTimer: string,
+    profileImage: string,
+    status: string,
+    theme: string,
+    iat: number,
+    exp: number
+}
+
+interface SocketUser {
+    userId: string,
+    socketId: string,
+    userInfo: UserInfo
+}
+
 export default function Home() {
 
     const { friends, messages, newUserAdded, undeliveredMessages } = useAppSelector(state => state.messenger)
@@ -53,7 +70,7 @@ export default function Home() {
 
     const currentUserInfo: Dictionary<string> = myInfo
 
-    const [activeUsers, setActiveUsers] = useState([])
+    const [activeUsers, setActiveUsers] = useState<Array<SocketUser>>([])
 
     const socketRef = useRef<Socket | null>(null)
     const [socketMessage, setSocketMessage] = useState<Partial<SocketMessage>>({})
@@ -121,8 +138,8 @@ export default function Home() {
             }
         })
 
-        socketRef.current.on('getUser', (users: any) => {
-            const filteredUsers = users.filter((user: any) => user.userId !== currentUserInfo.id)
+        socketRef.current.on('getUser', (users: SocketUser[]) => {
+            const filteredUsers = users.filter((user: SocketUser) => user.userId !== currentUserInfo.id)
             setActiveUsers(filteredUsers)
         })
 
