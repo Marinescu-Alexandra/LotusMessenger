@@ -19,7 +19,7 @@ import { RiSendPlaneFill } from "react-icons/ri";
 import { PiSmileyLight } from "react-icons/pi";
 import { GoPaperclip } from "react-icons/go";
 import { IoMdArrowDropright, IoMdArrowDropdown } from "react-icons/io";
-import toast, { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -81,6 +81,7 @@ type SocketMessage = {
 const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
 
     const chatWindow = document.getElementById('chatWindow');
+
     const variantsMessagesWindow = {
         open: { width: '60%' },
         closed: { width: '100%' },
@@ -99,7 +100,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
 
     const [shouldScroll, setShouldScroll] = useState({state: true})
 
-    const [newMessage, setNewMessage] = useState('')
+    const [newMessage, setNewMessage] = useState("")
     const [isContactInfoOpen, setContactInfoOpen] = useState(false)
     const [isSharedMediaOpen, setSharedMediaOpen] = useState(false)
     const [sharedMediaLength, setSharedMediaLength] = useState(3)
@@ -137,7 +138,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
 
     const sendMessage = () => {
         newMessage.trim()
-        if (newMessage !== "" || imagePaths.length > 0) {
+        if ((newMessage !== "" && newMessage !== '\n') || imagePaths.length > 0) {
             const data = {
                 senderName: currentUserInfo?.username,
                 senderId: currentUserInfo?.id,
@@ -249,6 +250,20 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         }
     }
 
+    function keyPressed(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault()
+            sendMessage()
+            setNewMessage("")
+
+            if (isMediaSelected === true) {
+                setMediaSelected(false)
+                dispatch({ type: "UPLOAD_IMAGES_SUCCESS_CLEAR" })
+            }
+        }
+    }
+
+    // SOCKET EMITORS
     useEffect(() => {
         const socket = io("ws://localhost:8000", {
             reconnection: true,
@@ -310,6 +325,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         })
     }, [socketMessage, typingMessage])
 
+    // GIVE TIME TO DISSMISS OTHER ACTIVE INSTANCES WHEN USER IS TRYING TO LOGIN MULTIPLE TIMES
     useEffect(() => {
         setTimeout(() => {
             if (socketRef.current && currentUserInfo) {
@@ -318,6 +334,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         }, 1000)
     }, [])
 
+    // UPDATE THE USER IS CHATTING WITH WHEN NEW MESSAGE WAS SENT
     useEffect(() => {
         if (messageSendSuccess) {
             if (socketRef.current && currentUserInfo) {
@@ -335,12 +352,14 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         }
     }, [messageSendSuccess])
 
+    // SCROLL IF NEEDED WHEN NEW MESSAGES ARE ADDED
     useEffect(() => {
         if (shouldScroll.state === true) {
             scrollToBottom();
         }
     }, [messages])
 
+    // OPEN GALERY VIEW WHEN USER FINISHED CHOOSING MEDIA TO SHARE
     useEffect(() => {
         if (imagePaths.length > 0) {
             setMediaSelected(true)
@@ -349,12 +368,14 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         }
     }, [imagePaths])
 
+    // UPDATE SHARED MEDIA LENGTH WHEN NEW IMAGES ARE SHARED
     useEffect(() => {
         if (isSharedMediaOpen === true) {
             setSharedMediaLength(sharedMedia.length)
         }
     }, [sharedMedia])
 
+    // RESET SHARED MEDIA GALERY AND CONTACT INFO WHEN SWITCHING ACTIVE CHAT WINDOW
     useEffect(() => {
         setGalleryImageSelected(false)
         setMediaSelected(false)
@@ -364,7 +385,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         setSharedMediaLength(3)
     }, [selectedFriendData._id])
 
-    // GET SELECTED FRIEND MESSAGES
+    // GET MESSAGES OF ACTIVE CHAT WINDOW
     useEffect(() => {
         if (selectedFriendData && Object.keys(selectedFriendData).length > 0) {
             dispatch(getMessages(selectedFriendData._id))
@@ -404,16 +425,16 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         }
     }, [undeliveredMessages])
 
-    //Update real time message
+    // GET REAL TIME MESSAGE AND DECIDE WHETHER SCROLL TO BOTTOM IS NEEDED OR NOT
     useEffect(() => {
         if (socketMessage && Object.keys(selectedFriendData).length > 0 && socketRef.current) {
             if (socketMessage.senderId === selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
-
                 updateShouldScroll()
             }
         }
     }, [socketMessage])
 
+    // AFTER SHOULDSCROLL WAS UPDATED SEND SOCKET MESSAGE
     useEffect(() => {
         if (socketMessage && Object.keys(selectedFriendData).length > 0 && socketRef.current) {
             if (socketMessage.senderId === selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
@@ -444,7 +465,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         }
     }, [shouldScroll])
 
-    //Update chunk of unseen and delivered messages as seen
+    // UPDATE UNSEEN MESSAGES FROM ACTIVE WINDOW AS SEEN 
     useEffect(() => {
         if (messages.length >= 1 && messages[messages.length - 1].status === "delivered" && messages[messages.length - 1].receiverId === currentUserInfo.id) {
 
@@ -469,7 +490,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         }
     }, [messages])
 
-    //Notify user of new unseen messages when online
+    // SENT USER NOTIFICATION WHEN RECEIVING REAL TIME MESSAGES FROM A DIFFERENT USER THAN CURRENT USER FROM ACTIVE CHAT WINDOW
     useEffect(() => {
         if (socketMessage && selectedFriendData && socketRef.current) {
             if (socketMessage.senderId !== selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
@@ -614,7 +635,10 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                                         <PiSmileyLight className="h-[35px] w-[35px] text-neutral-400" />
                                     </button>
 
-                                    <textarea id="chat" rows={3} className="w-full h-full mr-2 pt-6 flex items-center justify-start align-middle resize-none text-md rounded-lg ml-2 bg-bgPrimary placeholder-gray-400 text-white no-scrollbar outline-none"
+                                    <textarea
+                                        onKeyDown={keyPressed}
+                                        rows={3}
+                                        className="w-full h-full mr-2 pt-6 flex items-center justify-start align-middle resize-none text-md rounded-lg ml-2 bg-bgPrimary placeholder-gray-400 text-white no-scrollbar outline-none"
                                         placeholder="Your message..."
                                         onChange={inputHandler}
                                         value={newMessage}
@@ -654,7 +678,10 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                             <div className="w-[480px] h-[480px] flex items-center justify-center">
                                 <img src={`/userImages/${imagePaths[imageIndex]}`} alt="messageImage" className="object-contain w-full h-full" />
                             </div>
-                            <textarea id="chatImage" rows={3} className="mx-4 p-2.5 w-[60%] h-[7%] resize-none text-md text-gray-900 rounded-lg border
+                            <textarea
+                                onKeyDown={keyPressed}
+                                rows={3}
+                                className="mx-4 p-2.5 w-[60%] h-[7%] resize-none text-md text-gray-900 rounded-lg border
                                  border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-bgPrimary dark:border-gray-600
                                   dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 no-scrollbar"
                                 placeholder="Your message..."
@@ -720,14 +747,9 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                             <motion.button
                                 whileTap={{ backgroundColor: 'rgba(0, 0, 0, 0.32)' }}
                                 className="rounded-full w-[45px] h-[45px] flex justify-center items-center"
+                                onClick={() => setContactInfoOpen(false)}
                             >
-                                <Image src={close} alt='closeIcon' width={20} height={20} className="rounded-full"
-                                    priority
-                                    sizes="(max-width: 768px) 100vw,
-                                                    (max-width: 1200px) 50vw,
-                                                    50vw"
-                                    onClick={() => setContactInfoOpen(false)}
-                                />
+                                <Image src={close} alt='closeIcon' width={20} height={20} className="rounded-full" priority />
                             </motion.button>
 
 
