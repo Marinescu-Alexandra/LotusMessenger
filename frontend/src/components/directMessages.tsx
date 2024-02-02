@@ -76,7 +76,7 @@ interface SocketUser {
     userInfo: UserInfo
 }
 
-const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => {
+const DirectMessages: FC<DirectMessagesProps> = ({ className }) => {
 
     const variantsEditProfileMenu = {
         open: { width: ['0%', '100%'] },
@@ -110,6 +110,8 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
 
     const [isUsernameInputDisabled, setUsernameInputDisabled] = useState(true)
     const [isStatusInputDisabled, setStatusInputDisabled] = useState(true)
+
+    const [activeUsers, setActiveUsers] = useState<Array<SocketUser>>([])
 
     const editUsernameClicked = () => {
         setUsernameInputDisabled(false)
@@ -190,6 +192,11 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
             reconnectionDelay: 1000,
         });
         socketRef.current = socket
+
+        socketRef.current.on('getUser', (users: SocketUser[]) => {
+            const filteredUsers = users.filter((user: SocketUser) => user.userId !== currentUserInfo.id)
+            setActiveUsers(filteredUsers)
+        })
     }, [])
 
     useEffect(() => {
@@ -266,9 +273,12 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                                 </h2>
                             </button>
                             <div className="flex flex-row gap-4 justify-center items-center">
-                                <button onClick={() => handleMenuClick()}>
+                                <motion.button
+                                    whileTap={{ backgroundColor: 'rgba(0, 0, 0, 0.32)' }}
+                                    className="rounded-full w-[45px] h-[45px] flex justify-center items-center"
+                                    onClick={() => handleMenuClick()}>
                                     <Image src={dots} alt='dotsIcon' width={25} height={25} className="rounded-full" priority />
-                                </button>
+                                </motion.button>
                             </div>
 
                             {/* DROPDOWN MENU */}
@@ -280,7 +290,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                                     onClick={() => logout()}
                                     className="flex flex-row justify-between items-center text-xl w-full py-2 px-2 border-b 
                                                border-bgPrimary text-left hover:bg-gradientThree hover:text-white rounded-t-md">
-                                    <p className="">Lougout</p>
+                                    <p className="">Logout</p>
                                     <RxExit className="mr-[2px]" />
                                 </button>
 
@@ -482,9 +492,12 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                             className="topbar relative z-30 w-full min-h-[70px] flex flex-row justify-between items-center px-6 border-b-2 border-bgPrimary bg-gradient-to-l from-gradientOne via-gradientTwo to-gradientThree"
                             style={{ 'position': 'relative' }}
                         >
-                            <button onClick={() => setProfileMenuOpen(false)}>
+                            <motion.button
+                                whileTap={{ backgroundColor: 'rgba(0, 0, 0, 0.32)' }}
+                                className="rounded-full w-[45px] h-[45px] flex justify-center items-center"
+                                onClick={() => setProfileMenuOpen(false)}>
                                 <IoChevronBackOutline className="min-w-[35px] min-h-[35px] text-bgPrimary" />
-                            </button>
+                            </motion.button>
                         </div>
 
                         {/* PROFILE VIEW & EDIT */}

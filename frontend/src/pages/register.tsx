@@ -33,7 +33,7 @@ const Register = () => {
     }
 
     const handleRouterReload = () => {
-        router.reload()
+        //router.reload()
     }
 
     useEffect(() => {

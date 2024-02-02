@@ -5,8 +5,9 @@ import dots from '@/dots.png'
 import close from '@/close.png'
 import { motion } from "framer-motion"
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { messageSend, uploadImages } from "@/store/actions/messengerAction";
+import { messageSend, uploadImages, seenMessage, updateMessage, getFriends, deliverUnsentMessages, getMessages } from "@/store/actions/messengerAction";
 import { getSharedMedia, updateSharedMedia } from '@/store/actions/selectedFriendAction'
+import { userLogout } from "@/store/actions/authAction";
 import LeftChatBubble from "./leftChatBubble";
 import RightChatBubble from "./rightChatBubble";
 import { Socket, io } from 'socket.io-client'
@@ -18,6 +19,7 @@ import { RiSendPlaneFill } from "react-icons/ri";
 import { PiSmileyLight } from "react-icons/pi";
 import { GoPaperclip } from "react-icons/go";
 import { IoMdArrowDropright, IoMdArrowDropdown } from "react-icons/io";
+import toast, { Toaster } from 'react-hot-toast'
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -41,9 +43,7 @@ interface Message {
 
 interface MessagesWindowProps {
     className?: string,
-    currentUserInfo?: Dictionary<string>
     activeUsers?: SocketUser[]
-    typying?: any
 }
 
 interface UserInfo {
@@ -63,8 +63,24 @@ interface SocketUser {
     userInfo: UserInfo
 }
 
-const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, activeUsers, typying }) => {
+type SocketMessage = {
+    senderId: string,
+    senderName: string,
+    receiverId: string,
+    createdAt: string,
+    updatedAt: string,
+    message: {
+        text: string,
+        image: string[]
+    }
+    __v: number,
+    _id: string,
+    status: string,
+}
 
+const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
+
+    const chatWindow = document.getElementById('chatWindow');
     const variantsMessagesWindow = {
         open: { width: '60%' },
         closed: { width: '100%' },
@@ -76,7 +92,12 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
     }
 
     const { selectedFriendData, sharedMedia } = useAppSelector(state => state.selectedFriend)
-    const { messages, messageSendSuccess, imagePaths } = useAppSelector(state => state.messenger)
+    const { myInfo } = useAppSelector(state => state.auth);
+    const { friends, messages, undeliveredMessages, messageSendSuccess, imagePaths } = useAppSelector(state => state.messenger)
+
+    const currentUserInfo: Dictionary<string> = myInfo
+
+    const [shouldScroll, setShouldScroll] = useState({state: true})
 
     const [newMessage, setNewMessage] = useState('')
     const [isContactInfoOpen, setContactInfoOpen] = useState(false)
@@ -98,60 +119,10 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
     const dispatch = useAppDispatch()
     const socketRef = useRef<Socket | null>(null)
+    const [socketMessage, setSocketMessage] = useState<Partial<SocketMessage>>({})
+    const [typingMessage, setTypingMessage] = useState<Partial<SocketTypyingMessage>>({})
 
-    useEffect(() => {
-        const socket = io("ws://localhost:8000", {
-            reconnection: true,
-            reconnectionAttempts: Infinity,
-            reconnectionDelay: 1000,
-        });
-        socketRef.current = socket
-    }, [])
-
-    useEffect(() => {
-        if (messageSendSuccess) {
-            if (socketRef.current && currentUserInfo) {
-                socketRef.current.emit('sendMessage', messages[messages.length - 1])
-                dispatch({
-                    type: 'UPDATE_FRIEND_MESSAGE',
-                    payload: {
-                        messageInfo: messages[messages.length - 1]
-                    }
-                })
-                dispatch({
-                    type: 'MESSAGE_SEND_SUCCESS_CLEAR',
-                })
-            }
-        }
-    }, [messageSendSuccess])
-
-    useEffect(() => {
-        scrollRefLeft.current?.scrollIntoView({ behavior: 'smooth' });
-        scrollRefRight.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages])
-
-    useEffect(() => {
-        if (imagePaths.length > 0) {
-            setMediaSelected(true)
-        } else {
-            setMediaSelected(false)
-        }
-    }, [imagePaths])
-
-    useEffect(() => {
-        if (isSharedMediaOpen === true) {
-            setSharedMediaLength(sharedMedia.length)
-        }
-    }, [sharedMedia])
-
-    useEffect(() => {
-        setGalleryImageSelected(false)
-        setMediaSelected(false)
-        setSharedMediaGallery(false)
-        setSharedMediaGalleryIndex(0)
-        setSharedMediaOpen(false)
-        setSharedMediaLength(3)
-    }, [selectedFriendData._id])
+    const [activeUsers, setActiveUsers] = useState<Array<SocketUser>>([])
 
     const inputHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setNewMessage(e.target.value)
@@ -182,6 +153,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                     message: ''
                 })
             }
+
+            updateShouldScroll()
 
             dispatch(messageSend(data))
 
@@ -242,16 +215,280 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
     }
 
     const sharedMediaHandler = () => {
-            let sharedMedia: string[] = []
-            for (let i = 0; i < messages.length; i++) {
-                if (messages[i].message.image.length > 0) {
-                    for (let j = 0; j < messages[i].message.image.length; j++) {
-                        sharedMedia = [...sharedMedia, messages[i].message.image[j]]
-                    }
+        let sharedMedia: string[] = []
+        for (let i = 0; i < messages.length; i++) {
+            if (messages[i].message.image.length > 0) {
+                for (let j = 0; j < messages[i].message.image.length; j++) {
+                    sharedMedia = [...sharedMedia, messages[i].message.image[j]]
                 }
             }
-            dispatch(getSharedMedia(sharedMedia))
+        }
+        dispatch(getSharedMedia(sharedMedia))
     }
+
+    function scrollToBottom() {
+        if (chatWindow) {
+            chatWindow.scroll({
+                top: chatWindow.scrollHeight,
+                left: 0,
+                behavior: "smooth",
+            });
+        }
+    }
+
+    function updateShouldScroll() {
+        if (chatWindow) {
+            let scrollTop = Math.floor(chatWindow.scrollTop)
+            let clientHeight = chatWindow.clientHeight
+            let totalHeigth = chatWindow.scrollHeight
+            if (scrollTop + clientHeight === totalHeigth || scrollTop + clientHeight === totalHeigth - 1) {
+                setShouldScroll(prevState => { return { ...prevState, state: true } })
+            } else {
+                setShouldScroll(prevState => { return { ...prevState, state: false } })
+            }
+        }
+    }
+
+    useEffect(() => {
+        const socket = io("ws://localhost:8000", {
+            reconnection: true,
+            reconnectionAttempts: Infinity,
+            reconnectionDelay: 1000,
+        });
+
+        socketRef.current = socket
+
+        socket.on('updateFriendList', (userId: string) => {
+            dispatch(getFriends())
+        })
+
+        socket.on('getMessage', (data: any) => {   
+            setSocketMessage(data)
+        })
+
+        socket.on('typingMessageGet', (data: any) => {
+            setTypingMessage(data)
+        })
+
+        socket.on('messageSeenResponse', (data: any) => {
+            dispatch({
+                type: 'SEEN_MESSAGE',
+                payload: {
+                    messageInfo: data
+                }
+            })
+        })
+
+        socket.on('messageDeliverResponse', (data: any) => {
+            dispatch({
+                type: 'DELIVER_MESSAGE',
+                payload: {
+                    messageInfo: data
+                }
+            })
+        })
+
+        socketRef.current.on('removeOtherActiveInstance', (data: any) => {
+            dispatch(userLogout());
+            if (socketRef.current && currentUserInfo) {
+                socketRef.current.emit('removeSocketInstance', currentUserInfo.id)
+            }
+        })
+
+        socketRef.current.on('getUser', (users: SocketUser[]) => {
+            const filteredUsers = users.filter((user: SocketUser) => user.userId !== currentUserInfo.id)
+            setActiveUsers(filteredUsers)
+        })
+
+        socketRef.current.on('newUserAdded', (data: boolean) => {
+            dispatch({
+                type: 'NEW_USER_ADDED',
+                payload: {
+                    newUserAdded: data
+                }
+            })
+        })
+    }, [socketMessage, typingMessage])
+
+    useEffect(() => {
+        setTimeout(() => {
+            if (socketRef.current && currentUserInfo) {
+                socketRef.current.emit('addUser', currentUserInfo.id, currentUserInfo)
+            }
+        }, 1000)
+    }, [])
+
+    useEffect(() => {
+        if (messageSendSuccess) {
+            if (socketRef.current && currentUserInfo) {
+                socketRef.current.emit('sendMessage', messages[messages.length - 1])
+                dispatch({
+                    type: 'UPDATE_FRIEND_MESSAGE',
+                    payload: {
+                        messageInfo: messages[messages.length - 1]
+                    }
+                })
+                dispatch({
+                    type: 'MESSAGE_SEND_SUCCESS_CLEAR',
+                })
+            }
+        }
+    }, [messageSendSuccess])
+
+    useEffect(() => {
+        if (shouldScroll.state === true) {
+            scrollToBottom();
+        }
+    }, [messages])
+
+    useEffect(() => {
+        if (imagePaths.length > 0) {
+            setMediaSelected(true)
+        } else {
+            setMediaSelected(false)
+        }
+    }, [imagePaths])
+
+    useEffect(() => {
+        if (isSharedMediaOpen === true) {
+            setSharedMediaLength(sharedMedia.length)
+        }
+    }, [sharedMedia])
+
+    useEffect(() => {
+        setGalleryImageSelected(false)
+        setMediaSelected(false)
+        setSharedMediaGallery(false)
+        setSharedMediaGalleryIndex(0)
+        setSharedMediaOpen(false)
+        setSharedMediaLength(3)
+    }, [selectedFriendData._id])
+
+    // GET SELECTED FRIEND MESSAGES
+    useEffect(() => {
+        if (selectedFriendData && Object.keys(selectedFriendData).length > 0) {
+            dispatch(getMessages(selectedFriendData._id))
+        }
+    }, [selectedFriendData])
+
+    // GET ALL UNDELIVERED MESSAGES
+    useEffect(() => {
+        if (friends) {
+            friends.forEach((friend: any) => {
+                if (friend.lastMessageInfo && friend.lastMessageInfo.status === 'unseen') {
+                    dispatch(deliverUnsentMessages(friend._id))
+                }
+            });
+        }
+    }, [friends])
+
+    // MARK ALL UNDELIVERED MESSAGES AS DELIVERED
+    useEffect(() => {
+        if (Object.keys(undeliveredMessages).length > 0) {
+            undeliveredMessages.forEach((undeliveredMessage: Message) => {
+                dispatch(updateMessage(undeliveredMessage))
+            })
+            if (socketRef.current) {
+                socketRef.current.emit('deliverMessage', undeliveredMessages[undeliveredMessages.length - 1])
+                dispatch({
+                    type: 'UPDATE_FRIEND_MESSAGE',
+                    payload: {
+                        messageInfo: undeliveredMessages[undeliveredMessages.length - 1],
+                        status: 'delivered'
+                    }
+                })
+            }
+            dispatch({
+                type: "UNDELIVERED_GET_SUCCESS_CLEAR",
+            })
+        }
+    }, [undeliveredMessages])
+
+    //Update real time message
+    useEffect(() => {
+        if (socketMessage && Object.keys(selectedFriendData).length > 0 && socketRef.current) {
+            if (socketMessage.senderId === selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
+
+                updateShouldScroll()
+            }
+        }
+    }, [socketMessage])
+
+    useEffect(() => {
+        if (socketMessage && Object.keys(selectedFriendData).length > 0 && socketRef.current) {
+            if (socketMessage.senderId === selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
+
+                dispatch({
+                    type: 'SOCKET_MESSAGE',
+                    payload: {
+                        message: socketMessage
+                    }
+                })
+
+                dispatch(seenMessage(socketMessage))
+
+                if (socketMessage.message?.image) {
+                    socketMessage.message?.image.forEach((image: string) => dispatch(updateSharedMedia(image)));
+                }
+
+                socketRef.current.emit('messageSeen', socketMessage)
+
+                dispatch({
+                    type: 'UPDATE_FRIEND_MESSAGE',
+                    payload: {
+                        messageInfo: socketMessage,
+                        status: 'seen'
+                    }
+                })
+            }
+        }
+    }, [shouldScroll])
+
+    //Update chunk of unseen and delivered messages as seen
+    useEffect(() => {
+        if (messages.length >= 1 && messages[messages.length - 1].status === "delivered" && messages[messages.length - 1].receiverId === currentUserInfo.id) {
+
+            for (let i = messages.length - 1; i >= 0; i--) {
+                if ((messages[i].status === 'delivered' || messages[i].status === 'unseen') && messages[i].receiverId === currentUserInfo.id) {
+                    dispatch(seenMessage(messages[i]))
+                } else if (messages[i].status === 'seen' && messages[i].receiverId === currentUserInfo.id) {
+                    break
+                }
+            }
+
+            if (socketRef.current) {
+                socketRef.current.emit('messageSeen', messages[messages.length - 1])
+            }
+            dispatch({
+                type: 'UPDATE_FRIEND_MESSAGE',
+                payload: {
+                    messageInfo: messages[messages.length - 1],
+                    status: 'seen'
+                }
+            })
+        }
+    }, [messages])
+
+    //Notify user of new unseen messages when online
+    useEffect(() => {
+        if (socketMessage && selectedFriendData && socketRef.current) {
+            if (socketMessage.senderId !== selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
+                toast.success(`${socketMessage.senderName} sent a new message`)
+
+                dispatch(updateMessage(socketMessage))
+
+                socketRef.current.emit('deliverMessage', socketMessage)
+
+                dispatch({
+                    type: 'UPDATE_FRIEND_MESSAGE',
+                    payload: {
+                        messageInfo: socketMessage,
+                        status: 'delivered'
+                    }
+                })
+            }
+        }
+    }, [socketMessage])
 
     return (
         <>
@@ -311,18 +548,21 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                         </div>
 
                         {/* OPEN CONTACT INFO BUTTON */}
-                        <button
-                            className={`${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'}`}
+                        <motion.button
+                            whileTap={{ backgroundColor: 'rgba(0, 0, 0, 0.32)' }}
+                            className={`${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'} rounded-full w-[45px] h-[45px] flex justify-center items-center`}
                             onClick={() => [setContactInfoOpen(true), sharedMediaHandler()]}
-                            disabled={Object.keys(selectedFriendData).length !== 0 ? false : true}
+                            disabled={isContactInfoOpen ? true : false}
                         >
                             <Image src={dots} alt='dotsIcon' width={25} height={25} className="rounded-full" priority />
-                        </button>
+                        </motion.button>
 
                     </div>
 
                     {/* CHAT WINDOW */}
-                    <div className={`chatWindow w-full h-full flex flex-col top-0 overflow-y-scroll no-scrollbar bg-bgMain ${isMediaSelected || isGalleryImageSelected || isSharedMediaGalleryOpen ? 'hidden' : 'flex'}`}>
+                    <div
+                        id="chatWindow"
+                        className={`chatWindow w-full h-full flex flex-col top-0 overflow-y-scroll no-scrollbar bg-bgMain ${isMediaSelected || isGalleryImageSelected || isSharedMediaGalleryOpen ? 'hidden' : 'flex'}`}>
                         {
                             messages && messages.map((e: Message, index: any) => {
                                 
@@ -355,7 +595,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
                     {/* TYPING NOTICE */}
                     {
-                        typying && typying.message && typying.senderId == selectedFriendData._id ?
+                        typingMessage && typingMessage.message && typingMessage.senderId == selectedFriendData._id ?
                             <p className={`mb-2 w-full text-semibold pl-6 text-lg text-left z-20 ${isMediaSelected || isGalleryImageSelected || isSharedMediaGalleryOpen ? 'hidden' : 'flex'}`}>Typing Message...</p> : ''
                     }
 
@@ -384,12 +624,17 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
 
 
                                 <button
+                                    className="relative"
                                     onClick={() => [sendMessage(), setNewMessage("")]}
                                 >
                                     <div className="w-[50px] h-[50px] flex justify-center items-center rounded-full rotate-45 bg-gradient-to-r from-gradientOne via-gradientTwo to-gradientThree  border-bgPrimary">
                                         <RiSendPlaneFill className="w-[45px] h-[45px] mr-[6px] mt-[6px] text-bgPrimary" />
                                     </div>
+                                    <motion.div
+                                        whileTap={{ backgroundColor: 'rgba(0, 0, 0, 0.32)' }}
+                                        className="w-[50px] h-[50px] absolute top-0 rounded-full">
 
+                                    </motion.div>
                                 </button>
 
                             </div>
@@ -469,14 +714,22 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, currentUserInfo, ac
                 >
                     <div className="w-full h-full flex flex-col justify-start items-center overflow-hidden">
                         {/* TOP BAR */}
-                        <div className="topbar w-full min-h-[70px] flex flex-row justify-start items-center px-6 gap-4 border-b-2 border-bgPrimary bg-gradient-to-l from-gradientOne via-gradientTwo to-gradientThree">
-                            <Image src={close} alt='closeIcon' width={20} height={20} className="rounded-full"
-                                priority
-                                sizes="(max-width: 768px) 100vw,
+                        <div
+                            
+                            className="topbar w-full min-h-[70px] flex flex-row justify-start items-center px-6 gap-4 border-b-2 border-bgPrimary bg-gradient-to-l from-gradientOne via-gradientTwo to-gradientThree">
+                            <motion.button
+                                whileTap={{ backgroundColor: 'rgba(0, 0, 0, 0.32)' }}
+                                className="rounded-full w-[45px] h-[45px] flex justify-center items-center"
+                            >
+                                <Image src={close} alt='closeIcon' width={20} height={20} className="rounded-full"
+                                    priority
+                                    sizes="(max-width: 768px) 100vw,
                                                     (max-width: 1200px) 50vw,
                                                     50vw"
-                                onClick={() => setContactInfoOpen(false)}
-                            />
+                                    onClick={() => setContactInfoOpen(false)}
+                                />
+                            </motion.button>
+
 
                         </div>
 

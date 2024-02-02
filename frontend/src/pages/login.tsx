@@ -10,6 +10,10 @@ import { ERRORS_CLEAR, SUCCESS_MESSAGE_CLEAR } from '@/store/types/authType'
 import { Socket, io } from 'socket.io-client'
 import toast, { Toaster } from 'react-hot-toast'
 
+interface Dictionary<T> {
+    [Key: string]: T;
+}
+
 const Login = () => {
     const router = useRouter()
     const dispatch = useAppDispatch()
@@ -31,11 +35,10 @@ const Login = () => {
     const login = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         dispatch(userLogin(state))
-
     }
 
     const handleRouterReload = () => {
-        router.reload()
+        //router.reload()
     }
 
     useEffect(() => {
