@@ -114,8 +114,6 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
     const [galleryIndex, setGalleryIndex] = useState(0)
     const [galleryImages, setGalleryImages] = useState<string[]>([])
 
-    const scrollRefLeft = useRef<HTMLDivElement | null>(null);
-    const scrollRefRight = useRef<HTMLDivElement | null>(null);
     const inputFile = useRef<HTMLInputElement | null>(null);
 
     const dispatch = useAppDispatch()
@@ -591,7 +589,6 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                                         e.message && e.senderId === selectedFriendData._id ? 
                                         
                                         <LeftChatBubble
-                                            scrollRef={scrollRefLeft}
                                             key={index}
                                             message={e.message.text}
                                             deliverTime={moment(e.createdAt).format('kk:mm')}
@@ -601,7 +598,6 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                                             />
                                         :
                                         <RightChatBubble
-                                            scrollRef={scrollRefRight}
                                             key={index}
                                             message={e.message.text}
                                             deliverTime={moment(e.createdAt).format('kk:mm')}

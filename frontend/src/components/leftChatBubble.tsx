@@ -7,13 +7,12 @@ interface LeftChatBubble {
     className?: string,
     message: string,
     deliverTime: string,
-    scrollRef: any
     imageUrl: string[]
     handleImageGalleryClick: (a: number, b: string[]) => void,
     userProfileImage?: string,
 }
 
-const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, scrollRef, imageUrl, handleImageGalleryClick, userProfileImage }) => {
+const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, imageUrl, handleImageGalleryClick, userProfileImage }) => {
     return (
         <div className="flex items-start gap-2.5 ml-4 mt-4 mb-4 z-20">
             {
@@ -73,7 +72,7 @@ const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, s
                         })}
                     </div>
                 }
-                <div ref={scrollRef} className="flex flex-row justify-start items-center">
+                <div className="flex flex-row justify-start items-center">
                     <span className="text-sm font-normal text-gray-500 dark:text-gray-400">{deliverTime}</span>
                 </div>
             </div>

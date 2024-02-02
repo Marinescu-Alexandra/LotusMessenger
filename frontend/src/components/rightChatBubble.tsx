@@ -10,12 +10,11 @@ interface RightChatBubble {
     message: string,
     deliverTime: string,
     status: string
-    scrollRef: any
     imageUrl: string[],
     handleImageGalleryClick: (a: number, b: string[]) => void,
 }
 
-const RightChatBubble: FC<RightChatBubble> = ({ className, message, deliverTime, status, scrollRef, imageUrl, handleImageGalleryClick }) => {
+const RightChatBubble: FC<RightChatBubble> = ({ className, message, deliverTime, status, imageUrl, handleImageGalleryClick }) => {
 
     return (
         <>
@@ -66,7 +65,7 @@ const RightChatBubble: FC<RightChatBubble> = ({ className, message, deliverTime,
                             })}
                         </div>
                     }
-                    <div ref={scrollRef} className="flex flex-row justify-end items-center gap-2 ml-4">
+                    <div className="flex flex-row justify-end items-center gap-2 ml-4">
                         <span className="text-sm font-normal text-gray-400">{deliverTime}</span>
                         {
                             status === 'seen' ?
