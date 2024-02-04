@@ -1,9 +1,15 @@
-const jwt = require('jsonwebtoken')
+import jwtPackage from 'jsonwebtoken';
+const { verify } = jwtPackage;
 
-module.exports.authMiddleware = async (req, res, next) => {
+export async function authMiddleware(req, res, next) {
+    try {
+
+    } catch (error) {
+        
+    }
     const { authToken } = req.cookies;
     if (authToken) {
-        const decodeToken = await jwt.verify(authToken, process.env.SECRET);
+        const decodeToken = await verify(authToken, process.env.SECRET);
         req.myId = decodeToken.id;
         next();
     } else {

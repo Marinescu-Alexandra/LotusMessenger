@@ -1,14 +1,20 @@
-const registerModel = require('../models/authModel')
-const bycrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
-const formidable = require('formidable')
-const path = require('path')
-const fs = require('fs')
-const validator = require('validator');
-const { BadRequestError } = require('../errors/errors');
+import { User } from '../models/authModel.js';
+import { hash, compare } from 'bcrypt'
+import formidable from 'formidable';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { join } from 'path'
+import { copyFile } from 'fs/promises'
+import { BadRequestError, ConflictError, UnauthorizedError } from '../errors/errors.js'
+import { verifyFilename } from '../utils/verifyFilename.js'
+import jwtPackage from 'jsonwebtoken';
+import validatorPackage from 'validator';
 
-async function signToken({ id, email, username, createdAt, profileImage, status, theme }) {
-    const token = jwt.sign({
+const { isEmail } = validatorPackage;
+const { sign } = jwtPackage;
+
+async function signToken(id, email, username, createdAt, profileImage, status, theme) {
+    const token = sign({
         id: id,
         email: email,
         username: username,
@@ -32,7 +38,7 @@ function checkForLoginErrors({ email, password }) {
     if (!password) {
         errors.push('Please provide a password.')
     }
-    if (email && !validator.isEmail(email)) {
+    if (email && !isEmail(email)) {
         errors.push('Please provide a valid email.')
     }
     return errors
@@ -50,44 +56,36 @@ function checkForRegisterErrors({ username, email, password }) {
         errors.push('Please provide a password.')
     }
 
-    if (email && !validator.isEmail(email)) {
+    if (email && !isEmail(email)) {
         errors.push('Plese provide a valid email.')
     }
 
     return errors
 }
 
-module.exports.userRegister = async (req, res, next) => {
+export async function userRegister(req, res, next) {
     const { username, email, password } = req.body;
     const errors = checkForRegisterErrors({ username, email, password })
+
     try {
         if (errors.length > 0) {
             throw new BadRequestError(errors);
         } else {
-            const checkUser = await registerModel.findOne({
+            const checkUser = await User.findOne({
                 email: email,
             })
             if (checkUser) {
-                throw new BadRequestError('The provided email is already in use.');
+                throw new ConflictError('The provided email is already in use.');
             } else {
 
-                const userCreate = await registerModel.create({
+                const userCreate = await User.create({
                     username,
                     email,
-                    password: await bycrypt.hash(password, 10),
+                    password: await hash(password, 10),
                 });
 
-                const [token, options] = await signToken(
-                    {
-                        id: userCreate._id,
-                        email: userCreate.email,
-                        username: userCreate.username,
-                        createdAt: userCreate.createdAt,
-                        profileImage: userCreate.profileImage,
-                        status: userCreate.status,
-                        theme: userCreate.theme
-                    }
-                )
+                const [token, options] = await signToken(userCreate._id, userCreate.email, userCreate.username, userCreate.createdAt, userCreate.profileImage, userCreate.status, userCreate.theme)
+
                 res.status(200).cookie('authToken', token, options).json({
                     successMessage: 'Registration complete.', token
                 })
@@ -98,36 +96,26 @@ module.exports.userRegister = async (req, res, next) => {
     }
 }
 
-module.exports.userLogin = async (req, res, next) => {
+export async function userLogin(req, res, next) {
     const { email, password } = req.body;
     const errors = checkForLoginErrors({ email, password })
     try {
         if (errors.length > 0) {
             throw new BadRequestError(errors);
         } else {
-            const checkUser = await registerModel.findOne({
+            const checkUser = await User.findOne({
                 email: email
             }).select('+password');
 
             if (checkUser) {
-                const matchPassword = await bycrypt.compare(password, checkUser.password);
+                const matchPassword = await compare(password, checkUser.password);
                 if (matchPassword) {
-                    const [token, options] = await signToken(
-                        {
-                            id: checkUser._id,
-                            email: checkUser.email,
-                            username: checkUser.username,
-                            createdAt: checkUser.createdAt,
-                            profileImage: checkUser.profileImage,
-                            status: checkUser.status,
-                            theme: checkUser.theme
-                        }
-                    )
+                    const [token, options] = await signToken(checkUser._id, checkUser.email, checkUser.username, checkUser.createdAt, checkUser.profileImage, checkUser.status, checkUser.theme)
                     res.status(200).cookie('authToken', token, options).json({
                         successMessage: 'Login successful', token
                     })
                 } else {
-                    throw new BadRequestError('Password not valid.');
+                    throw new UnauthorizedError('Password not valid.');
                 }
             } else {
                 throw new BadRequestError('Email not valid. Please use another email or register.');
@@ -138,144 +126,110 @@ module.exports.userLogin = async (req, res, next) => {
     }
 }
 
-module.exports.userLogout = (req, res) => {
+export function userLogout(req, res) {
     res.status(201).cookie('authToken', '').json({
         success: true
     })
 }
 
-module.exports.updateUserProfileImage = async (req, res, next) => {
+export async function updateUserProfileImage(req, res, next) {
     const currentUserId = req.myId;
-    const form = new formidable.IncomingForm();
+    var form = formidable({})
     try {
-        form.parse(req, async (err, fields, files) => {
-            if (err) {
-                throw new err;
-            }
-            const profileImageName = fields['profileImageName']
+        const [fields, files] = await form.parse(req)
 
-            const newPath = path.join(__dirname + `../../../frontend/public/userProfileImages/${profileImageName}`)
-            files['profileImage'][0].originalFilename = profileImageName
-            fs.copyFile(files['profileImage'][0].filepath, newPath, (err) => {
-                if (err) {
-                    throw new BadRequestError('Profile image upload fail.');
-                }
-            })
-            await registerModel.findByIdAndUpdate(currentUserId, {
-                profileImage: String(profileImageName)
-            })
-                .then(async (user) => {
-                    const [token, options] = await signToken(
-                        {
-                            id: user._id,
-                            email: user.email,
-                            username: user.username,
-                            createdAt: user.createdAt,
-                            profileImage: String(profileImageName),
-                            status: user.status,
-                            theme: user.theme
-                        }
-                    )
-                    res.status(200).cookie('authToken', token, options).json({
-                        successMessage: 'Cookie update successful',
-                        profileImagePath: profileImageName,
-                        token: token
-                    })
-                })
-        });
+        const profileImageName = fields['profileImageName']
+
+        const verify = verifyFilename(profileImageName[0], path.resolve('frontend/public/userProfileImages/'))
+        if (!verify) {
+            throw new UnauthorizedError("Ilegall file name")
+        }
+
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        const newPath = join(__dirname + `../../../frontend/public/userProfileImages/${profileImageName}`)
+
+        files['profileImage'][0].originalFilename = profileImageName
+        await copyFile(files['profileImage'][0].filepath, newPath)
+
+        const user = await User.findByIdAndUpdate(currentUserId, {
+            profileImage: String(profileImageName)
+        })
+
+        const [token, options] = await signToken(user._id, user.email, user.username, user.createdAt, String(profileImageName), user.status, user.theme)
+
+        res.status(200).cookie('authToken', token, options).json({
+            successMessage: 'Cookie update successful',
+            profileImagePath: profileImageName,
+            token: token
+        })
+
     } catch (error) {
         next(error)
     }
 }
 
-module.exports.updateUserTheme = async (req, res, next) => {
+export async function updateUserTheme(req, res, next) {
     const currentUserId = req.myId;
     const { theme } = req.body
 
     try {
-        await registerModel.findByIdAndUpdate(currentUserId, {
+        const user = await User.findByIdAndUpdate(currentUserId, {
             theme: String(theme)
         })
-            .then(async (user) => {
-                const [token, options] = await signToken(
-                    {
-                        id: user._id,
-                        email: user.email,
-                        username: user.username,
-                        createdAt: user.createdAt,
-                        profileImage: user.profileImage,
-                        status: user.status,
-                        theme: String(theme)
-                    }
-                )
-                res.status(200).cookie('authToken', token, options).json({
-                    successMessage: 'Cookie update successful',
-                    theme: theme,
-                    token: token
-                })
-            })
+
+        const [token, options] = await signToken(user._id, user.email, user.username, user.createdAt, user.profileImage, user.status, String(theme))
+
+        res.status(200).cookie('authToken', token, options).json({
+            successMessage: 'Cookie update successful',
+            theme: theme,
+            token: token
+        })
+
     } catch (error) {
         next(error)
     }
 }
 
-module.exports.updateUserName = async (req, res, next) => {
+export async function updateUserName(req, res, next) {
     const currentUserId = req.myId;
     const { name } = req.body
 
     try {
-        await registerModel.findByIdAndUpdate(currentUserId, {
+        const user = await User.findByIdAndUpdate(currentUserId, {
             username: String(name)
         })
-            .then(async (user) => {
-                const [token, options] = await signToken(
-                    {
-                        id: user._id,
-                        email: user.email,
-                        username: String(name),
-                        createdAt: user.createdAt,
-                        profileImage: user.profileImage,
-                        status: user.status,
-                        theme: user.theme
-                    }
-                )
-                res.status(200).cookie('authToken', token, options).json({
-                    successMessage: 'Cookie update successful',
-                    name: name,
-                    token: token
-                })
-            })
+
+        const [token, options] = await signToken(user._id, user.email, String(name), user.createdAt, user.profileImage, user.status, user.theme)
+
+        res.status(200).cookie('authToken', token, options).json({
+            successMessage: 'Cookie update successful',
+            name: name,
+            token: token
+        })
+
     } catch (error) {
         next(error)
     }
 }
 
-module.exports.updateUserStatus = async (req, res, next) => {
+export async function updateUserStatus(req, res, next) {
     const currentUserId = req.myId;
     const { status } = req.body
 
     try {
-        await registerModel.findByIdAndUpdate(currentUserId, {
+        const user = await User.findByIdAndUpdate(currentUserId, {
             status: String(status)
         })
-            .then(async (user) => {
-                const [token, options] = await signToken(
-                    {
-                        id: user._id,
-                        email: user.email,
-                        username: user.username,
-                        createdAt: user.createdAt,
-                        profileImage: user.profileImage,
-                        status: String(status),
-                        theme: user.theme
-                    }
-                )
-                res.status(200).cookie('authToken', token, options).json({
-                    successMessage: 'Cookie update successful',
-                    status: status,
-                    token: token
-                })
-            })
+
+        const [token, options] = await signToken(user._id, user.email, user.username, user.createdAt, user.profileImage, String(status), user.theme)
+
+        res.status(200).cookie('authToken', token, options).json({
+            successMessage: 'Cookie update successful',
+            status: status,
+            token: token
+        })
+
     } catch (error) {
         next(error)
     }

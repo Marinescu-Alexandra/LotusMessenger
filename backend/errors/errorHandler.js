@@ -1,6 +1,6 @@
-const { AppError } = require('./errors')
+import { AppError } from '../errors/errors.js'
 
-module.exports.errorHandler = async (error, request, response, next) => {
+export async function errorHandler (error, request, response, next) {
     if (error instanceof AppError) {
         let errors = error.message.split(',')
         response.status(error.status).json({

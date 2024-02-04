@@ -1,8 +1,9 @@
-const router = require('express').Router();
+import express from 'express';
+var router = express.Router();
 
-const { userRegister, userLogin, userLogout, updateUserProfileImage, updateUserTheme, updateUserName, updateUserStatus } = require('../controller/authController')
-const { authMiddleware } = require('../middleware/authMiddleware');
-const { errorHandler } = require('../errors/errorHandler');
+import { userRegister, userLogin, userLogout, updateUserProfileImage, updateUserTheme, updateUserName, updateUserStatus } from '../controller/authController.js';
+import { authMiddleware } from '../middleware/authMiddleware.js';
+import { errorHandler } from '../errors/errorHandler.js';
 
 router.post('/user-login', userLogin, errorHandler)
 router.post('/user-register', userRegister, errorHandler)
@@ -12,4 +13,4 @@ router.post('/update-user-theme', authMiddleware, updateUserTheme, errorHandler)
 router.post('/update-user-name', authMiddleware, updateUserName, errorHandler)
 router.post('/update-user-status', authMiddleware, updateUserStatus, errorHandler)
 
-module.exports = router;
+export default router;

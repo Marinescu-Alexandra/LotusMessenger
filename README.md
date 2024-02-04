@@ -1,5 +1,5 @@
 # LotusMessenger
 
-This project is still on work.
+This project is still in the works.
 
-Lotus Messenger is a simple chatting app, build using NextJs, Tailwind, NodeJS, MongoDB and Socket.io
+Lotus Messenger is a simple chatting app, built using NextJs, Tailwind, NodeJS, MongoDB and Socket.io

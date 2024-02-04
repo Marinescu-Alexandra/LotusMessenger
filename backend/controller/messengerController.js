@@ -1,42 +1,44 @@
-const path = require('path')
-const User = require('../models/authModel')
-const messageModel = require('../models/messageModel')
-const formidable = require('formidable')
-const fs = require('fs')
+import { join } from 'path'
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { User } from '../models/authModel.js';
+import { MessageModel } from '../models/messageModel.js'
+import formidable from 'formidable';
+import { copyFile } from 'fs/promises'
+import { verifyFilename } from '../utils/verifyFilename.js'
 
-const getLastMessage = async (myId, friendId) => {
-    const message = await messageModel.findOne({
-        $or: [{
-            $and: [{
-                senderId: {
-                    $eq: myId
-                }
-            }, {
-                receiverId: {
-                    $eq: friendId
-                }
-            }]
-        }, {
-            $and: [{
-                senderId: {
-                    $eq: friendId
-                }
-            }, {
-                receiverId: {
-                    $eq: myId
-                }
-            }]
-        }]
-    }).sort({
-        updatedAt: -1
-    });
+const getLastMessages = async (myId) => {
+    const lastMessages = await MessageModel.aggregate([
+        {
+            $match: {
+                $or: [
+                    { senderId: myId },
+                    { receiverId: myId }
+                ]
+            }
+        },
+        {
+            $sort: { updatedAt: -1 }
+        },
+        {
+            $group: {
+                "_id": {
+                    $cond: [
+                        { $eq: ["$senderId", myId] },
+                        { $concat: ["$senderId", "-", "$receiverId"] },
+                        { $concat: ["$receiverId", "-", "$senderId"] }
+                    ]
+                },
+                "lastMessage": { $first: "$$ROOT" }
+            }
+        }
+    ]);
 
-    return message;
+    return lastMessages;
 }
 
-module.exports.getFriends = async (req, res, next) => {
+export async function getFriends(req, res, next) {
     const myId = req.myId
-    const newUsers = []
 
     try {
         const friendGet = await User.find({
@@ -44,29 +46,29 @@ module.exports.getFriends = async (req, res, next) => {
                 $ne: myId
             }
         })
-        for (let i = 0; i < friendGet.length; i++) {
-            let lastMessage = await getLastMessage(myId, friendGet[i].id)
-            var newUser = friendGet[i]
-            if (lastMessage !== null) {
-                newUser = {
-                    ...newUser._doc,
-                    lastMessageInfo: lastMessage
-                }
-            } else {
-                newUser = {
-                    ...newUser._doc,
-                    lastMessageInfo: null
-                }
-            }
-            newUsers.push(newUser)
+
+        const lastMessages = await getLastMessages(myId);
+        const lastMessagesMap = {};
+
+        for (const foundMessage of lastMessages) {
+            const message = foundMessage.lastMessage
+            const key = message.senderId !== myId ? message.senderId : message.receiverId;
+            lastMessagesMap[key] = message;
         }
-        res.status(200).json({ success: true, friends: newUsers })
+
+        const friendList = friendGet.map((friend) => ({
+            ...friend._doc,
+            lastMessageInfo: lastMessagesMap[friend._id],
+        }))
+
+        res.status(200).json({ success: true, friends: friendList })
+
     } catch (error) {
         next(error)
     }
 }
 
-module.exports.messageUploadDB = async (req, res, next) => {
+export async function messageUploadDB(req, res, next) {
     const {
         senderId,
         receiverId,
@@ -76,7 +78,7 @@ module.exports.messageUploadDB = async (req, res, next) => {
     } = req.body
 
     try {
-        const insertMessage = await messageModel.create({
+        const insertMessage = await MessageModel.create({
             senderId: senderId,
             receiverId: receiverId,
             message: {
@@ -94,12 +96,12 @@ module.exports.messageUploadDB = async (req, res, next) => {
     }
 }
 
-module.exports.messageGet = async (req, res, next) => {
+export async function messageGet(req, res, next) {
     const currentUserId = req.myId;
     const friendId = req.params.id
 
     try {
-        let getAllMessages = await messageModel.find({
+        let getAllMessages = await MessageModel.find({
 
             $or: [{
                 $and: [{
@@ -124,7 +126,6 @@ module.exports.messageGet = async (req, res, next) => {
             }]
 
         })
-        //getAllMessages = getAllMessages.filter(e => e.senderId === currentUserId && e.receiverId === friendId || e.receiverId === currentUserId && e.senderId === friendId)
         res.status(200).json({
             success: true,
             messages: getAllMessages
@@ -134,12 +135,12 @@ module.exports.messageGet = async (req, res, next) => {
     }
 }
 
-module.exports.undeliveredMessagesGet = async (req, res, next) => {
+export async function undeliveredMessagesGet(req, res, next) {
     const currentUserId = req.myId;
     const friendId = req.params.id
 
     try {
-        let getAllUndeliveredMessages = await messageModel.find({
+        let getAllUndeliveredMessages = await MessageModel.find({
             $and: [{
                 senderId: {
                     $eq: friendId
@@ -161,66 +162,66 @@ module.exports.undeliveredMessagesGet = async (req, res, next) => {
     } catch (error) {
         next(error)
     }
-
 }
 
-module.exports.imagesUpload = async (req, res, next) => {
-    const form = new formidable.IncomingForm();
-
+export async function imagesUpload(req, res, next) {
+    var form = formidable({})
     try {
-        form.parse(req, async (err, fields, files) => {
-            if (err) {
-                throw new err;
-            }
-            const imageNames = fields['imageName[]']
+        const [fields, files] = await form.parse(req)
 
-            const paths = []
-            imageNames.forEach(function callback(name, index) {
-                const newPath = path.join(__dirname + `../../../frontend/public/userImages/${name}`)
-                files['fileToUpload[]'][index].originalFilename = name
-                paths.push(name)
-                fs.copyFile(files['fileToUpload[]'][index].filepath, newPath, (err) => {
-                    if (err) {
-                        throw new BadRequestError('Image upload fail.');
-                    }
-                })
-            })
-            res.status(200).json({
-                success: true,
-                paths: paths
-            })
-        });
+        const imageNames = fields['imageName[]']
+
+        const paths = []
+        imageNames.forEach(async function callback(name, index) {
+
+            const verify = verifyFilename(name, path.resolve('frontend/public/userImages/'))
+            if (!verify) {
+                throw new UnauthorizedError("Ilegall file name")
+            }
+
+            const __filename = fileURLToPath(import.meta.url);
+            const __dirname = path.dirname(__filename);
+            const newPath = join(__dirname + `../../../frontend/public/userImages/${name}`)
+            files['fileToUpload[]'][index].originalFilename = name
+            paths.push(name)
+            await copyFile(files['fileToUpload[]'][index].filepath, newPath)
+        })
+        res.status(200).json({
+            success: true,
+            paths: paths
+        })
+        
     } catch (error) {
         next(error)
     }
 }
 
-module.exports.messageSeen = async (req, res, next) => {
+export async function messageSeen(req, res, next) {
     const messageId = req.body._id
 
-    await messageModel.findByIdAndUpdate(messageId, {
-        status: 'seen'
-    })
-        .then(() => {
-            res.status(200).json({
-                success: true
-            })
-        }).catch((error) => {
-            next(error)
+    try {
+        await MessageModel.findByIdAndUpdate(messageId, {
+            status: 'seen'
         })
+        res.status(200).json({
+            success: true
+        })
+    } catch(error) {
+        next(error)
+    }
 }
 
-module.exports.messageDeliver = async (req, res, next) => {
+export async function messageDeliver(req, res, next) {
     const messageId = req.body._id
 
-    await messageModel.findByIdAndUpdate(messageId, {
-        status: 'delivered'
-    })
-        .then(() => {
-            res.status(200).json({
-                success: true
-            })
-        }).catch((error) => {
-            next(error)
+    try {
+        await MessageModel.findByIdAndUpdate(messageId, {
+            status: 'delivered'
         })
+        res.status(200).json({
+            success: true
+        })
+    } catch (error) {
+        next(error)
+    }
 }

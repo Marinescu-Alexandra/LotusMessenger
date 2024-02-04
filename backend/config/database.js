@@ -1,7 +1,7 @@
-const mongoose = require('mongoose')
+import { connect } from 'mongoose'
 
 const databaseConnect = () => {
-    mongoose.connect(process.env.DATABASE_URL)
+    connect(process.env.DATABASE_URL)
     .then(() => {
         console.log("Mongodb Database Connected")
     }).catch(error => {
@@ -9,4 +9,4 @@ const databaseConnect = () => {
     })
 }
 
-module.exports = databaseConnect;
+export default databaseConnect;

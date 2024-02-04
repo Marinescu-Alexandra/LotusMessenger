@@ -1,14 +1,19 @@
-const express = require('express')
-const app = express()
-const cors = require('cors')
-const databaseConnect = require("./config/database")
-const authRouter = require('./routes/authRoute')
-const messengerRouter = require('./routes/messengerRoute')
-const cookieParser = require('cookie-parser')
+import express, { json } from 'express'
+import cors from 'cors'
+import databaseConnect from "./config/database.js"
+import authRouter from './routes/authRoute.js'
+import messengerRouter from './routes/messengerRoute.js'
+import cookieParser from 'cookie-parser'
+import dotenv from 'dotenv'
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-require('dotenv').config({
-    path: `${__dirname}/.env`
-})
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({path: `${__dirname}/.env`})
+
+const app = express()
 
 app.use(cors({
     credentials: true,
@@ -29,7 +34,7 @@ app.use(function (req, res, next) {
 });
 
 app.use(cookieParser())
-app.use(express.json());
+app.use(json());
 
 app.use('/api/messenger', authRouter);
 app.use('/api/messenger', messengerRouter);

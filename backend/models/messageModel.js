@@ -1,4 +1,4 @@
-const { model, Schema } = require('mongoose')
+import mongoose, { Schema } from 'mongoose';
 
 const messageSchema = new Schema({
     senderId: {
@@ -30,4 +30,4 @@ const messageSchema = new Schema({
     }
 }, { timestamps: true });
 
-module.exports = model('message', messageSchema)
+export const MessageModel = mongoose.model('message', messageSchema);

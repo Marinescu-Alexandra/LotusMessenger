@@ -1,6 +1,6 @@
-const validator = require('validator')
+import { isEmail } from 'validator';
 
-module.exports.registerErrorHandler = async (req, res, next) => {
+export async function registerErrorHandler(req, res, next) {
     const { username, email, password } = req.body;
     const errors = [];
 
@@ -14,7 +14,7 @@ module.exports.registerErrorHandler = async (req, res, next) => {
         errors.push('Please provide a password.')
     }
 
-    if (email && !validator.isEmail(email)) {
+    if (email && !isEmail(email)) {
         errors.push('Plese provide a valid email.')
     }
     if (errors.length > 0) {
