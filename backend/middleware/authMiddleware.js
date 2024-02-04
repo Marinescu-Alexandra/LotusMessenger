@@ -2,21 +2,18 @@ import jwtPackage from 'jsonwebtoken';
 const { verify } = jwtPackage;
 
 export async function authMiddleware(req, res, next) {
-    try {
-
-    } catch (error) {
-        
-    }
     const { authToken } = req.cookies;
+
     if (authToken) {
-        const decodeToken = await verify(authToken, process.env.SECRET);
+        const decodeToken = verify(authToken, process.env.SECRET);
         req.myId = decodeToken.id;
         next();
     } else {
-        res.status(400).json({
+        res.status(401).json({
             error: {
                 errorMessage: ['Please login first.']
             }
         })
     }
+
 }

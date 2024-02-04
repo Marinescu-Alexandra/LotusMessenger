@@ -691,7 +691,11 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
 
                                     {imagePaths.map((image: string, index) => {
                                         return (
-                                            <button key={index} onClick={() => setImageIndex(Number(index))} className={`w-[60px] h-[60px] flex items-center justify-center rounded-lg ${imageIndex === Number(index) ? 'border-2 border-green-500' : 'border border-black'} `} id={String(index)}>
+                                            <button
+                                                key={index}
+                                                onClick={() => setImageIndex(Number(index))}
+                                                className={`w-[60px] h-[60px] flex items-center justify-center rounded-lg ${imageIndex === Number(index) ? 'border-2 border-green-500' : 'border border-black'} `}
+                                            >
                                                 <img src={`/userImages/${image}`} key={index} alt="messageImage" className="object-cover w-full h-full rounded-lg" />
                                             </button>
                                         )
@@ -702,8 +706,20 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                                         className="w-[60px] h-[60px] flex justify-center items-center border-2 border-brPrimary rounded-lg"
                                         onClick={() => selectInputMedia()}
                                     >
-                                        <input onChange={mediaSelected} multiple={true} type="file" id="inputFile" ref={inputFile} style={{ display: "none" }} />
-                                        <Image src={plus} alt='profilePicturePlaceholder' width={25} height={25} priority />
+                                        <input
+                                            onChange={mediaSelected}
+                                            multiple={true}
+                                            type="file"
+                                            id="inputFile"
+                                            ref={inputFile}
+                                            style={{ display: "none" }}
+                                            accept="image/png, image/gif, image/jpeg" />
+                                        <Image
+                                            src={plus}
+                                            alt='plusIcon'
+                                            width={25}
+                                            height={25}
+                                            priority />
                                     </button>
 
                                 </div>

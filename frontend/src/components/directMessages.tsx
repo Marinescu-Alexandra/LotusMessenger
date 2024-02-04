@@ -113,6 +113,8 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className }) => {
 
     const [activeUsers, setActiveUsers] = useState<Array<SocketUser>>([])
 
+    // User profile functions
+
     const editUsernameClicked = () => {
         setUsernameInputDisabled(false)
         setTimeout(() => {
@@ -177,7 +179,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className }) => {
         setMenuOpen(!isMenuOpen)
     }
 
-    const serachFriend = (e: ChangeEvent<HTMLInputElement>) => {
+    const searchFriend = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.value.length > 0) {
             setFriendList(friendsList.filter((friend: Friend) => friend.username.includes(e.target.value)))
         } else {
@@ -391,7 +393,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className }) => {
                                            50vw"
                             />
                             <div className="text-md text-white w-[85%] mr-4">
-                                <input className="w-full bg-bgPrimary" onChange={serachFriend} type="text">
+                                <input className="w-full bg-bgPrimary" onChange={searchFriend} type="text">
                                 </input>
                             </div>
                         </div>
