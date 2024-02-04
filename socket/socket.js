@@ -1,7 +1,8 @@
 const io = require('socket.io')(8000, {
     cors: {
         origin: '*',
-        methods: ['GET', 'POST']
+        methods: ['GET', 'POST'],
+        credentials: true
     }
 })
 
@@ -30,7 +31,6 @@ const userLogout = (userId) => {
 
 io.on('connection', (socket) => {
     socket.on('addUser', (userId, userInfo) => {
-        //console.log('User added... with socket id', socket.id)
         addUser(userId, socket.id, userInfo)
         io.emit('getUser', users)
 
@@ -61,13 +61,6 @@ io.on('connection', (socket) => {
         }
         
     })
-
-    // socket.on('checkUndeliveredMessages', (message) => {
-    //     const user = findFriend(message.senderId)
-    //     if (user !== undefined) {
-    //         socket.to(user.socketId).emit('getMessage', data)
-    //     }
-    // })
 
     socket.on('sendMessage', (data) => {
         const user = findFriend(data.receiverId)
@@ -107,7 +100,6 @@ io.on('connection', (socket) => {
     })
 
     socket.on('disconnect', () => {
-        //console.log('User is removed... with socket id', socket.id)
         userRemove(socket.id);
         io.emit('getUser', users);
     })

@@ -9,6 +9,7 @@ import { useRouter } from 'next/router'
 import { ERRORS_CLEAR, SUCCESS_MESSAGE_CLEAR } from '@/store/types/authType'
 import { Socket, io } from 'socket.io-client'
 import toast, { Toaster } from 'react-hot-toast'
+import { socket } from '@/socket';
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -18,7 +19,6 @@ const Login = () => {
     const router = useRouter()
     const dispatch = useAppDispatch()
     const { authenticate, errors, successMessage, myInfo } = useAppSelector(state => state.auth)
-    const socketRef = useRef<Socket | null>(null)
 
     const [state, setState] = useState({
         email: '',
@@ -56,16 +56,7 @@ const Login = () => {
     }, []);
 
     useEffect(() => {
-        const socket = io("ws://localhost:8000", {
-            reconnection: true,
-            reconnectionAttempts: Infinity,
-            reconnectionDelay: 1000,
-        });
-        socketRef.current = socket
-
-        if (socketRef.current) {
-            socketRef.current.emit('checkIfActiveInstance', myInfo)
-        }
+        socket.emit('checkIfActiveInstance', myInfo)
     }, [myInfo])
 
     useEffect(() => {

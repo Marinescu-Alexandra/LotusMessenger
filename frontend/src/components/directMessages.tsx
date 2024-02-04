@@ -19,6 +19,7 @@ import { IoChevronBackOutline } from "react-icons/io5";
 import { SlPencil } from "react-icons/sl";
 import { FaCheck } from "react-icons/fa6";
 import { motion } from "framer-motion"
+import { socket } from "@/socket"
 
 
 interface Dictionary<T> {
@@ -101,7 +102,6 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className }) => {
     const inputProfileImage = useRef<HTMLInputElement | null>(null);
     const inputUserName = useRef<HTMLInputElement | null>(null)
     const inputUserStatus = useRef<HTMLInputElement | null>(null)
-    const socketRef = useRef<Socket | null>(null)
 
     const [inputState, setInputState] = useState({
         username: String(currentUserInfo.username) || '',
@@ -170,8 +170,8 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className }) => {
 
     const logout = () => {
         dispatch(userLogout());
-        if (socketRef.current && myInfo) {
-            socketRef.current.emit('logout', currentUserInfo.id)
+        if (myInfo) {
+            socket.emit('logout', currentUserInfo.id)
         }
     }
 
@@ -188,17 +188,12 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className }) => {
     }
 
     useEffect(() => {
-        const socket = io("ws://localhost:8000", {
-            reconnection: true,
-            reconnectionAttempts: Infinity,
-            reconnectionDelay: 1000,
-        });
-        socketRef.current = socket
 
-        socketRef.current.on('getUser', (users: SocketUser[]) => {
+        socket.on('getUser', (users: SocketUser[]) => {
             const filteredUsers = users.filter((user: SocketUser) => user.userId !== currentUserInfo.id)
             setActiveUsers(filteredUsers)
         })
+
     }, [])
 
     useEffect(() => {
@@ -233,8 +228,8 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className }) => {
     }, [myInfo])
 
     useEffect(() => {
-        if (socketRef.current && currentUserInfo) {
-            socketRef.current.emit('userProfileInfoUpdate', currentUserInfo.id)
+        if (currentUserInfo) {
+            socket.emit('userProfileInfoUpdate', currentUserInfo.id)
         }
     }, [currentUserInfo.status, currentUserInfo.username, currentUserInfo.profileImage])
 

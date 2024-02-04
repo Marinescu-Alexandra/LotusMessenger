@@ -10,7 +10,6 @@ import { getSharedMedia, updateSharedMedia } from '@/store/actions/selectedFrien
 import { userLogout } from "@/store/actions/authAction";
 import LeftChatBubble from "./leftChatBubble";
 import RightChatBubble from "./rightChatBubble";
-import { Socket, io } from 'socket.io-client'
 import moment from 'moment'
 import imgBg from '@/bg.png'
 import plus from '@/plus.png'
@@ -20,6 +19,7 @@ import { PiSmileyLight } from "react-icons/pi";
 import { GoPaperclip } from "react-icons/go";
 import { IoMdArrowDropright, IoMdArrowDropdown } from "react-icons/io";
 import toast from 'react-hot-toast'
+import { socket } from "@/socket"
 
 interface Dictionary<T> {
     [Key: string]: T;
@@ -117,7 +117,6 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
     const inputFile = useRef<HTMLInputElement | null>(null);
 
     const dispatch = useAppDispatch()
-    const socketRef = useRef<Socket | null>(null)
     const [socketMessage, setSocketMessage] = useState<Partial<SocketMessage>>({})
     const [typingMessage, setTypingMessage] = useState<Partial<SocketTypyingMessage>>({})
 
@@ -125,8 +124,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
 
     const inputHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setNewMessage(e.target.value)
-        if (socketRef.current && currentUserInfo) {
-            socketRef.current.emit('typingMessage', {
+        if (currentUserInfo) {
+            socket.emit('typingMessage', {
                 senderId: currentUserInfo.id,
                 receiverId: selectedFriendData._id,
                 message: e.target.value
@@ -145,8 +144,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                 images: imagePaths
             }
 
-            if (socketRef.current && currentUserInfo) {
-                socketRef.current.emit('typingMessage', {
+            if (currentUserInfo) {
+                socket.emit('typingMessage', {
                     senderId: currentUserInfo.id,
                     receiverId: selectedFriendData._id,
                     message: ''
@@ -263,13 +262,6 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
 
     // SOCKET EMITORS
     useEffect(() => {
-        const socket = io("ws://localhost:8000", {
-            reconnection: true,
-            reconnectionAttempts: Infinity,
-            reconnectionDelay: 1000,
-        });
-
-        socketRef.current = socket
 
         socket.on('updateFriendList', (userId: string) => {
             dispatch(getFriends())
@@ -301,19 +293,19 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
             })
         })
 
-        socketRef.current.on('removeOtherActiveInstance', (data: any) => {
+        socket.on('removeOtherActiveInstance', (data: any) => {
             dispatch(userLogout());
-            if (socketRef.current && currentUserInfo) {
-                socketRef.current.emit('removeSocketInstance', currentUserInfo.id)
+            if (currentUserInfo) {
+                socket.emit('removeSocketInstance', currentUserInfo.id)
             }
         })
 
-        socketRef.current.on('getUser', (users: SocketUser[]) => {
+        socket.on('getUser', (users: SocketUser[]) => {
             const filteredUsers = users.filter((user: SocketUser) => user.userId !== currentUserInfo.id)
             setActiveUsers(filteredUsers)
         })
 
-        socketRef.current.on('newUserAdded', (data: boolean) => {
+        socket.on('newUserAdded', (data: boolean) => {
             dispatch({
                 type: 'NEW_USER_ADDED',
                 payload: {
@@ -326,8 +318,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
     // GIVE TIME TO DISSMISS OTHER ACTIVE INSTANCES WHEN USER IS TRYING TO LOGIN MULTIPLE TIMES
     useEffect(() => {
         setTimeout(() => {
-            if (socketRef.current && currentUserInfo) {
-                socketRef.current.emit('addUser', currentUserInfo.id, currentUserInfo)
+            if (currentUserInfo) {
+                socket.emit('addUser', currentUserInfo.id, currentUserInfo)
             }
         }, 1000)
     }, [])
@@ -335,8 +327,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
     // UPDATE THE USER IS CHATTING WITH WHEN NEW MESSAGE WAS SENT
     useEffect(() => {
         if (messageSendSuccess) {
-            if (socketRef.current && currentUserInfo) {
-                socketRef.current.emit('sendMessage', messages[messages.length - 1])
+            if (currentUserInfo) {
+                socket.emit('sendMessage', messages[messages.length - 1])
                 dispatch({
                     type: 'UPDATE_FRIEND_MESSAGE',
                     payload: {
@@ -407,16 +399,16 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
             undeliveredMessages.forEach((undeliveredMessage: Message) => {
                 dispatch(updateMessage(undeliveredMessage))
             })
-            if (socketRef.current) {
-                socketRef.current.emit('deliverMessage', undeliveredMessages[undeliveredMessages.length - 1])
-                dispatch({
-                    type: 'UPDATE_FRIEND_MESSAGE',
-                    payload: {
-                        messageInfo: undeliveredMessages[undeliveredMessages.length - 1],
-                        status: 'delivered'
-                    }
-                })
-            }
+            
+            socket.emit('deliverMessage', undeliveredMessages[undeliveredMessages.length - 1])
+            dispatch({
+                type: 'UPDATE_FRIEND_MESSAGE',
+                payload: {
+                    messageInfo: undeliveredMessages[undeliveredMessages.length - 1],
+                    status: 'delivered'
+                }
+            })
+            
             dispatch({
                 type: "UNDELIVERED_GET_SUCCESS_CLEAR",
             })
@@ -425,7 +417,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
 
     // GET REAL TIME MESSAGE AND DECIDE WHETHER SCROLL TO BOTTOM IS NEEDED OR NOT
     useEffect(() => {
-        if (socketMessage && Object.keys(selectedFriendData).length > 0 && socketRef.current) {
+        if (socketMessage && Object.keys(selectedFriendData).length > 0) {
             if (socketMessage.senderId === selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
                 updateShouldScroll()
             }
@@ -434,7 +426,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
 
     // AFTER SHOULDSCROLL WAS UPDATED SEND SOCKET MESSAGE
     useEffect(() => {
-        if (socketMessage && Object.keys(selectedFriendData).length > 0 && socketRef.current) {
+        if (socketMessage && Object.keys(selectedFriendData).length > 0) {
             if (socketMessage.senderId === selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
 
                 dispatch({
@@ -450,7 +442,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                     socketMessage.message?.image.forEach((image: string) => dispatch(updateSharedMedia(image)));
                 }
 
-                socketRef.current.emit('messageSeen', socketMessage)
+                socket.emit('messageSeen', socketMessage)
 
                 dispatch({
                     type: 'UPDATE_FRIEND_MESSAGE',
@@ -475,9 +467,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                 }
             }
 
-            if (socketRef.current) {
-                socketRef.current.emit('messageSeen', messages[messages.length - 1])
-            }
+            socket.emit('messageSeen', messages[messages.length - 1])
+            
             dispatch({
                 type: 'UPDATE_FRIEND_MESSAGE',
                 payload: {
@@ -490,13 +481,13 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
 
     // SENT USER NOTIFICATION WHEN RECEIVING REAL TIME MESSAGES FROM A DIFFERENT USER THAN CURRENT USER FROM ACTIVE CHAT WINDOW
     useEffect(() => {
-        if (socketMessage && selectedFriendData && socketRef.current) {
+        if (socketMessage && selectedFriendData) {
             if (socketMessage.senderId !== selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
                 toast.success(`${socketMessage.senderName} sent a new message`)
 
                 dispatch(updateMessage(socketMessage))
 
-                socketRef.current.emit('deliverMessage', socketMessage)
+                socket.emit('deliverMessage', socketMessage)
 
                 dispatch({
                     type: 'UPDATE_FRIEND_MESSAGE',

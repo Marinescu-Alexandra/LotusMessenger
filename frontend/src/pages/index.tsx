@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { getFriends } from "@/store/actions/messengerAction"
 import { useRouter } from 'next/router'
 import { Toaster } from 'react-hot-toast'
+import { socket } from "@/socket"
 
 interface Dictionary<T> {
     [Key: string]: T;
