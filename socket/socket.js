@@ -1,8 +1,16 @@
-const io = require('socket.io')(8000, {
+import { Server } from "socket.io";
+
+const io = new Server(8000, {
     cors: {
         origin: '*',
         methods: ['GET', 'POST'],
         credentials: true
+    },
+    connectionStateRecovery: {
+        // the backup duration of the sessions and the packets
+        maxDisconnectionDuration: 4 * 60 * 1000,
+        // whether to skip middlewares upon successful recovery
+        skipMiddlewares: true,
     }
 })
 
@@ -22,7 +30,6 @@ const userRemove = (socketId) => {
 
 const findFriend = (id) => {
     return users.find(user => user.userId === id);
-
 }
 
 const userLogout = (userId) => {

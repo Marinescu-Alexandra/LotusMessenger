@@ -12,7 +12,7 @@ interface LeftChatBubble {
     userProfileImage?: string,
 }
 
-const LeftChatBubble: FC<LeftChatBubble> = ({ className, message, deliverTime, imageUrl, handleImageGalleryClick, userProfileImage }) => {
+const LeftChatBubble: FC<LeftChatBubble> = ({ message, deliverTime, imageUrl, handleImageGalleryClick, userProfileImage }) => {
     return (
         <div className="flex items-start gap-2.5 ml-4 mt-4 mb-4 z-20">
             {

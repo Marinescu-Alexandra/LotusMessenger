@@ -25,7 +25,7 @@ interface Dictionary<T> {
     [Key: string]: T;
 }
 
-interface SocketTypyingMessage {
+interface SocketTypingMessage {
     senderId: string,
     receiverId: string,
     message: string
@@ -118,7 +118,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
 
     const dispatch = useAppDispatch()
     const [socketMessage, setSocketMessage] = useState<Partial<SocketMessage>>({})
-    const [typingMessage, setTypingMessage] = useState<Partial<SocketTypyingMessage>>({})
+    const [typingMessage, setTypingMessage] = useState<Partial<SocketTypingMessage>>({})
 
     const [activeUsers, setActiveUsers] = useState<Array<SocketUser>>([])
 
@@ -313,16 +313,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                 }
             })
         })
-    }, [socketMessage, typingMessage])
-
-    // GIVE TIME TO DISSMISS OTHER ACTIVE INSTANCES WHEN USER IS TRYING TO LOGIN MULTIPLE TIMES
-    useEffect(() => {
-        setTimeout(() => {
-            if (currentUserInfo) {
-                socket.emit('addUser', currentUserInfo.id, currentUserInfo)
-            }
-        }, 1000)
-    }, [])
+    }, [newMessage, typingMessage, socketMessage])
 
     // UPDATE THE USER IS CHATTING WITH WHEN NEW MESSAGE WAS SENT
     useEffect(() => {

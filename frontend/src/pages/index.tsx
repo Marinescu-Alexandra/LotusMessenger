@@ -24,6 +24,15 @@ export default function Home() {
     const dispatch = useAppDispatch()
     const router = useRouter()
 
+    // GIVE TIME TO DISSMISS OTHER ACTIVE INSTANCES WHEN USER IS TRYING TO LOGIN MULTIPLE TIMES
+    useEffect(() => {
+        setTimeout(() => {
+            if (currentUserInfo) {
+                socket.emit('addUser', currentUserInfo.id, currentUserInfo)
+            }
+        }, 1000)
+    }, [])
+
     useEffect(() => {
         setIsClient(true)
     }, [])
@@ -34,7 +43,6 @@ export default function Home() {
         }
     })
     
-
     useEffect(() => {
         dispatch(getFriends())
         if (newUserAdded === true) {

@@ -44,6 +44,7 @@ const tokenDecode = (token: any) => {
     }
     return tokenDecoded
 }
+
 if (typeof localStorage !== 'undefined') {
     const getToken = localStorage.getItem('authToken');
     if (getToken) {

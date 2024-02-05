@@ -14,7 +14,7 @@ interface RightChatBubble {
     handleImageGalleryClick: (a: number, b: string[]) => void,
 }
 
-const RightChatBubble: FC<RightChatBubble> = ({ className, message, deliverTime, status, imageUrl, handleImageGalleryClick }) => {
+const RightChatBubble: FC<RightChatBubble> = ({ message, deliverTime, status, imageUrl, handleImageGalleryClick }) => {
 
     return (
         <>

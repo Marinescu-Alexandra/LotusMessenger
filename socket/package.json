@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "socket.js",
+  "type": "module",
   "scripts": {
     "socket": "nodemon socket.js"
   },
