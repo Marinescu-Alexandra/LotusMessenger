@@ -1,8 +1,5 @@
 import React, { ChangeEvent, FC, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import profilePicturePlaceholder from '@/profilePicturePlaceholder.png'
-import dots from '@/dots.png'
-import searchIcon from '@/loupe.png'
 import { getSelectedFriend } from "@/store/actions/selectedFriendAction"
 import { userLogout, uploadUserProfileImage, updateUserTheme, updateUserName, updateUserStatus } from "@/store/actions/authAction";
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
@@ -10,7 +7,9 @@ import moment from 'moment'
 import seen from '@/seen.png'
 import delivered from '@/read.png'
 import defaultStatus from '@/default.png'
-import { Socket, io } from "socket.io-client";
+import profilePicturePlaceholder from '@/profilePicturePlaceholder.png'
+import dots from '@/dots.png'
+import searchIcon from '@/loupe.png'
 import { BsImage } from "react-icons/bs";
 import { RxExit } from "react-icons/rx";
 import { CiEdit } from "react-icons/ci";
@@ -20,11 +19,7 @@ import { SlPencil } from "react-icons/sl";
 import { FaCheck } from "react-icons/fa6";
 import { motion } from "framer-motion"
 import { socket } from "@/socket"
-
-
-interface Dictionary<T> {
-    [Key: string]: T;
-}
+import { Dictionary, Friend, SocketUser } from "@/ts/interfaces/interfaces";
 
 interface DirectMessagesProps {
     className?: string,
@@ -32,73 +27,36 @@ interface DirectMessagesProps {
     activeUsers?: SocketUser[]
 }
 
-interface LastMessage {
-    message: {
-        text: string,
-        image: string[]
-    },
-    _id: string,
-    senderId: string,
-    senderName: string,
-    receiverId: string,
-    status: string,
-    createdAt: string,
-    updatedAt: string,
-    __v: number
-}
-
-interface Friend {
-    _id: string,
-    username: string,
-    password: string,
-    profileImage: string,
-    status: string,
-    theme: string,
-    createdAt: string,
-    updatedAt: string,
-    __v: number,
-    lastMessageInfo: LastMessage
-}
-
-interface UserInfo {
-    id: string,
-    username: string,
-    registerTimer: string,
-    profileImage: string,
-    status: string,
-    theme: string,
-    iat: number,
-    exp: number
-}
-
-interface SocketUser {
-    userId: string,
-    socketId: string,
-    userInfo: UserInfo
-}
-
 const DirectMessages: FC<DirectMessagesProps> = ({ className }) => {
 
+    // ANIMATION VARIANTS  
     const variantsEditProfileMenu = {
         open: { width: ['0%', '100%'] },
         closed: { width: ['100%', '0%'] },
     }
 
+    // REDUX STATE & DISPATCH
+    const dispatch = useAppDispatch()
     const { myInfo } = useAppSelector(state => state.auth);
     const { friends } = useAppSelector(state => state.messenger)
     const { selectedFriendData } = useAppSelector(state => state.selectedFriend)
-    const [friendsList, setFriendList] = useState(friends)
-    const dispatch = useAppDispatch()
 
+
+    // CONSTANTS
+    const currentUserInfo: Dictionary<string> = myInfo
     const colorPalette = ['bg-bgMain', 'bg-bgPrimary', 'bg-gradientOne', 'bg-gradientTwo', 'bg-gradientThree']
 
+    // REACT STATES
     const [isClient, setIsClient] = useState(false)
-    const [isMenuOpen, setMenuOpen] = useState(false)
-    const [isProfileMenuOpen, setProfileMenuOpen] = useState(false)
+
+    const [friendsList, setFriendList] = useState(friends)
     const [friendIndex, setFriendIndex] = useState<React.Key | null>(null)
 
-    const currentUserInfo: Dictionary<string> = myInfo
+    const [activeUsers, setActiveUsers] = useState<Array<SocketUser>>([])
 
+    const [isMenuOpen, setMenuOpen] = useState(false)
+    const [isProfileMenuOpen, setProfileMenuOpen] = useState(false)
+    
     const inputProfileImage = useRef<HTMLInputElement | null>(null);
     const inputUserName = useRef<HTMLInputElement | null>(null)
     const inputUserStatus = useRef<HTMLInputElement | null>(null)
@@ -111,9 +69,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className }) => {
     const [isUsernameInputDisabled, setUsernameInputDisabled] = useState(true)
     const [isStatusInputDisabled, setStatusInputDisabled] = useState(true)
 
-    const [activeUsers, setActiveUsers] = useState<Array<SocketUser>>([])
-
-    // User profile functions
+    // HANDLERS
 
     const editUsernameClicked = () => {
         setUsernameInputDisabled(false)
@@ -459,9 +415,9 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className }) => {
                                                                             :
                                                                             <Image src={defaultStatus} alt='sentIcon' width={25} height={25} className="rounded-full" priority />
                                                                     :
-                                                                    '' //The message was sent by the other user, therefore no need for an status icon
+                                                                    <></> //The message was sent by the other user, therefore no need for an status icon
                                                                 :
-                                                                '' //There are no messages between the users
+                                                                <></> //There are no messages between the users
                                                         }
                                                     </div>
                                                 </div>

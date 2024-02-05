@@ -21,67 +21,19 @@ import { IoMdArrowDropright, IoMdArrowDropdown } from "react-icons/io";
 import toast from 'react-hot-toast'
 import { socket } from "@/socket"
 
-interface Dictionary<T> {
-    [Key: string]: T;
-}
-
-interface SocketTypingMessage {
-    senderId: string,
-    receiverId: string,
-    message: string
-}
-
-interface Message {
-    senderId: string,
-    message: {
-        text: string,
-        image: string[]
-    },
-    createdAt: string,
-    status: string
-}
+import { Dictionary, SocketMessage, SocketTypingMessage, Message, SocketUser } from "@/ts/interfaces/interfaces";
 
 interface MessagesWindowProps {
     className?: string,
     activeUsers?: SocketUser[]
 }
 
-interface UserInfo {
-    id: string,
-    username: string,
-    registerTimer: string,
-    profileImage: string,
-    status: string,
-    theme: string,
-    iat: number,
-    exp: number
-}
-
-interface SocketUser {
-    userId: string,
-    socketId: string,
-    userInfo: UserInfo
-}
-
-type SocketMessage = {
-    senderId: string,
-    senderName: string,
-    receiverId: string,
-    createdAt: string,
-    updatedAt: string,
-    message: {
-        text: string,
-        image: string[]
-    }
-    __v: number,
-    _id: string,
-    status: string,
-}
-
 const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
 
+    // DOM CONSTANTS
     const chatWindow = document.getElementById('chatWindow');
 
+    // ANIMATION VARIANTS 
     const variantsMessagesWindow = {
         open: { width: '60%' },
         closed: { width: '100%' },
@@ -92,36 +44,42 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         closed: { width: ['40%', '0%'] },
     }
 
-    const { selectedFriendData, sharedMedia } = useAppSelector(state => state.selectedFriend)
+    // REDUX STATE & DISPATCH
+    const dispatch = useAppDispatch()
     const { myInfo } = useAppSelector(state => state.auth);
+    const { selectedFriendData, sharedMedia } = useAppSelector(state => state.selectedFriend)
     const { friends, messages, undeliveredMessages, messageSendSuccess, imagePaths } = useAppSelector(state => state.messenger)
 
+    // CONSTANTS
     const currentUserInfo: Dictionary<string> = myInfo
 
+    // REACT STATES
     const [shouldScroll, setShouldScroll] = useState({state: true})
 
     const [newMessage, setNewMessage] = useState("")
+    
     const [isContactInfoOpen, setContactInfoOpen] = useState(false)
+
     const [isSharedMediaOpen, setSharedMediaOpen] = useState(false)
     const [sharedMediaLength, setSharedMediaLength] = useState(3)
-
     const [isSharedMediaGalleryOpen, setSharedMediaGallery] = useState(false)
     const [sharedMediaGalleryIndex, setSharedMediaGalleryIndex] = useState(0)
 
+    const inputFile = useRef<HTMLInputElement | null>(null);
     const [isMediaSelected, setMediaSelected] = useState(false)
     const [imageIndex, setImageIndex] = useState(0)
+    
     const [isGalleryImageSelected, setGalleryImageSelected] = useState(false)
     const [galleryIndex, setGalleryIndex] = useState(0)
     const [galleryImages, setGalleryImages] = useState<string[]>([])
 
-    const inputFile = useRef<HTMLInputElement | null>(null);
-
-    const dispatch = useAppDispatch()
     const [socketMessage, setSocketMessage] = useState<Partial<SocketMessage>>({})
     const [typingMessage, setTypingMessage] = useState<Partial<SocketTypingMessage>>({})
 
     const [activeUsers, setActiveUsers] = useState<Array<SocketUser>>([])
 
+
+    // HANDLERS
     const inputHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setNewMessage(e.target.value)
         if (currentUserInfo) {
@@ -224,6 +182,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         dispatch(getSharedMedia(sharedMedia))
     }
 
+    // FUNCTIONS
     function scrollToBottom() {
         if (chatWindow) {
             chatWindow.scroll({

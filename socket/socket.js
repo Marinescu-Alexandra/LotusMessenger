@@ -41,32 +41,37 @@ io.on('connection', (socket) => {
         addUser(userId, socket.id, userInfo)
         io.emit('getUser', users)
 
-        const filteredUsers = users.filter(user => user.userId !== userId)
-        for (var i = 0; i < filteredUsers.length; i++){
-            socket.to(filteredUsers[i].socketId).emit('newUserAdded', true)
+        for (var i = 0; i < users.length; i++){
+            if (users[i].userId !== userId) {
+                socket.to(users[i].socketId).emit('newUserAdded', true)
+            }
         }
     })
     
     socket.on('userProfileInfoUpdate', (userId) => {
-        const filteredUsers = users.filter(user => user.userId !== userId)
-        for (var i = 0; i < filteredUsers.length; i++) {
-            socket.to(filteredUsers[i].socketId).emit('updateFriendList', userId)
+        for (var i = 0; i < users.length; i++) {
+            if (users[i].userId !== userId) {
+                socket.to(users[i].socketId).emit('updateFriendList', userId)
+            }
         }
     })
 
     socket.on('checkIfActiveInstance', (userData) => {
-        otherInstance = users.find(user => user.userId === userData.id)
-        if (otherInstance) {
-            socket.to(otherInstance.socketId).emit('removeOtherActiveInstance', userData.id)
+        for (var i = 0; i < users.length; i++) {
+            if (users[i].userId === userData.id) {
+                socket.to(users[i].socketId).emit('removeOtherActiveInstance', userData.id)
+                break
+            }
         }
     })
 
     socket.on('removeSocketInstance', (userId) => {
-        otherInstance = users.find(user => user.userId === userId)
-        if (otherInstance) {
-            userRemove(otherInstance.socketId);
-        }
-        
+        for (var i = 0; i < users.length; i++) {
+            if (users[i].userId === userId) {
+                userRemove(users[i].socketId);
+                break
+            }
+        }        
     })
 
     socket.on('sendMessage', (data) => {
@@ -106,7 +111,8 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.on('disconnect', () => {
+    socket.on('disconnect', (reason) => {
+        console.log(reason);
         userRemove(socket.id);
         io.emit('getUser', users);
     })
