@@ -1,28 +1,15 @@
 
 import { REGISTER_FAIL, REGISTER_SUCCESS, SUCCESS_MESSAGE_CLEAR, ERRORS_CLEAR, LOGIN_FAIL, LOGIN_SUCCESS, LOGOUT_SUCCESS, UPLOAD_PROFILE_IMAGE_SUCCESS, UPDATE_USER_THEME_SUCCESS, UPDATE_USER_NAME_SUCCESS, UPDATE_USER_STATUS_SUCCESS } from "../types/authType"
 import { jwtDecode } from "jwt-decode";
-
-interface Dictionary<T> {
-    [Key: string]: T;
-}
-
-interface UserInfo {
-    id: string,
-    username: string,
-    registerTimer: string,
-    profileImage: string,
-    status: string,
-    theme: string,
-    iat: number,
-    exp: number
-}
+import { PayloadAction } from "@reduxjs/toolkit";
+import { UserInfo } from "@/ts/interfaces/interfaces";
 
 interface AuthState {
     loading: boolean,
     authenticate: boolean,
     errors: string[],
     successMessage: string,
-    myInfo: Dictionary<string>
+    myInfo: UserInfo
 }
 
 const authState: AuthState = {
@@ -30,10 +17,10 @@ const authState: AuthState = {
     authenticate: false,
     errors: [],
     successMessage: '',
-    myInfo: {},
+    myInfo: {} as UserInfo,
 }
 
-const tokenDecode = (token: any) => {
+const tokenDecode = (token: string) => {
     const tokenDecoded = jwtDecode(token);
     if (!tokenDecoded.exp) {
         return null;
@@ -50,21 +37,21 @@ if (typeof localStorage !== 'undefined') {
     if (getToken) {
         const getInfo = tokenDecode(getToken)
         if (getInfo) {
-            authState.myInfo = getInfo as Dictionary<string>
+            authState.myInfo = getInfo as UserInfo
             authState.authenticate = true;
             authState.loading = false;
         }
     }
 }
 
-export default function authReducer(state = authState, action: any) {
+export default function authReducer(state = authState, action: PayloadAction<{ error: string[], token: string, successMessage: string, profileImagePath: string, theme: string, name: string, status: string }>) {
     switch (action.type) {
         case REGISTER_FAIL:
             return {
                 ...state,
                 errors: action.payload.error,
                 authenticate: false,
-                myInfo: {},
+                myInfo: {} as UserInfo,
                 loading: true
             }
         case LOGIN_FAIL:
@@ -72,25 +59,25 @@ export default function authReducer(state = authState, action: any) {
                 ...state,
                 errors: action.payload.error,
                 authenticate: false,
-                myInfo: {},
+                myInfo: {} as UserInfo,
                 loading: true
             }
         case REGISTER_SUCCESS:
-            const reInfo = tokenDecode(action.playload.token)
+            const reInfo = tokenDecode(action.payload.token)
             return {
                 ...state,
-                myInfo: reInfo as Dictionary<string>,
-                successMessage: action.playload.successMessage,
+                myInfo: reInfo as UserInfo,
+                successMessage: action.payload.successMessage,
                 errors: [],
                 authenticate: true,
                 loading: false
             }
         case LOGIN_SUCCESS:
-            const logInfo = tokenDecode(action.playload.token)
+            const logInfo = tokenDecode(action.payload.token)
             return {
                 ...state,
-                myInfo: logInfo as Dictionary<string>,
-                successMessage: action.playload.successMessage,
+                myInfo: logInfo as UserInfo,
+                successMessage: action.payload.successMessage,
                 errors: [],
                 authenticate: true,
                 loading: false
@@ -109,7 +96,7 @@ export default function authReducer(state = authState, action: any) {
             return {
                 ...state,
                 authenticate: false,
-                myInfo: {},
+                myInfo: {} as UserInfo,
                 successMessage: 'Logout Successfull'
             }
         case UPLOAD_PROFILE_IMAGE_SUCCESS:
@@ -117,7 +104,7 @@ export default function authReducer(state = authState, action: any) {
                 ...state,
                 myInfo: {
                     ...state.myInfo,
-                    profileImage: String(action.payload.profileImagePath)
+                    profileImage: action.payload.profileImagePath
                 }
             }
         case UPDATE_USER_THEME_SUCCESS:
@@ -125,7 +112,7 @@ export default function authReducer(state = authState, action: any) {
                 ...state,
                 myInfo: {
                     ...state.myInfo,
-                    theme: String(action.payload.theme)
+                    theme: action.payload.theme
                 }   
             }
         case UPDATE_USER_NAME_SUCCESS: {
@@ -133,7 +120,7 @@ export default function authReducer(state = authState, action: any) {
                 ...state,
                 myInfo: {
                     ...state.myInfo,
-                    username: String(action.payload.name)
+                    username: action.payload.name
                 }
             }
         }
@@ -142,7 +129,7 @@ export default function authReducer(state = authState, action: any) {
                 ...state,
                 myInfo: {
                     ...state.myInfo,
-                    status: String(action.payload.status)
+                    status: action.payload.status
                 }
             }
         }

@@ -1,4 +1,5 @@
 import axios from "axios"
+import { useAppDispatch } from "../hooks"
 import {  FRIEND_GET_SUCCESS, MESSAGE_GET_SUCCESS, SEND_MESSAGE_SUCCESS, UNDELIVERED_GET_SUCCESS, UPLOAD_IMAGES_SUCCESS } from '../types/messengerType'
 
 const config = {
@@ -10,7 +11,15 @@ const config = {
     
 }
 
-export const getFriends = () => async (dispatch: any) => {
+interface MessageData {
+    senderName: string,
+    senderId: string,
+    receiverId: string,
+    message: string,
+    images: string[]
+}
+
+export const getFriends = () => async (dispatch = useAppDispatch()) => {
     try {
         const response = await axios.get('http://localhost:5000/api/messenger/get-friends', config);
         dispatch({
@@ -24,7 +33,7 @@ export const getFriends = () => async (dispatch: any) => {
     }
 }
 
-export const messageSend = (data: any) => async (dispatch: any) => {
+export const messageSend = (data: MessageData) => async (dispatch = useAppDispatch()) => {
     try {
         const response = await axios.post('http://localhost:5000/api/messenger/send-message', data, config);
         dispatch({
@@ -39,7 +48,7 @@ export const messageSend = (data: any) => async (dispatch: any) => {
 }
 
 export const getMessages = (id: string) => {
-    return async (dispatch: any) => {
+    return async (dispatch = useAppDispatch()) => {
         try {
             const response = await axios.get(`http://localhost:5000/api/messenger/get-message/${id}`, config);
             dispatch({
@@ -54,7 +63,7 @@ export const getMessages = (id: string) => {
     }
 }
 
-export const uploadImages = (data: any) => async (dispatch: any) => {
+export const uploadImages = (data: FormData) => async (dispatch = useAppDispatch()) => {
     const newConfig = {
         withCredentials: true,
         headers: {
@@ -78,23 +87,23 @@ export const uploadImages = (data: any) => async (dispatch: any) => {
     }
 }
 
-export const seenMessage = (data: any) => async (dispatch: any) => {
+export const seenMessage = (_id: string) => async (dispatch = useAppDispatch()) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/messenger/seen-message', data, config);
+        const response = await axios.post('http://localhost:5000/api/messenger/seen-message', { _id }, config);
     } catch (error) {
         console.log(error)
     }
 }
 
-export const updateMessage = (data: any) => async (dispatch: any) => {
+export const updateMessage = (_id: string) => async (dispatch = useAppDispatch()) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/messenger/deliver-message', data, config);
+        const response = await axios.post('http://localhost:5000/api/messenger/deliver-message', { _id }, config);
     } catch (error) {
         console.log(error)
     }
 }
 
-export const deliverUnsentMessages = (id: string) => async (dispatch: any) => {
+export const deliverUnsentMessages = (id: string) => async (dispatch = useAppDispatch()) => {
     try {
         const response = await axios.get(`http://localhost:5000/api/messenger/get-undelivered-messages/${id}`, config);
         dispatch({
@@ -108,7 +117,7 @@ export const deliverUnsentMessages = (id: string) => async (dispatch: any) => {
     }
 }
 
-export const getUnseenMessages = (id: string) => async (dispatch: any) => {
+export const getUnseenMessages = (id: string) => async (dispatch = useAppDispatch()) => {
     try {
         const response = await axios.get(`http://localhost:5000/api/messenger/get-undelivered-messages/${id}`, config);
         dispatch({

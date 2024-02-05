@@ -8,16 +8,10 @@ import { useRouter } from 'next/router'
 import { Toaster } from 'react-hot-toast'
 import { socket } from "@/socket"
 
-interface Dictionary<T> {
-    [Key: string]: T;
-}
-
 export default function Home() {
 
     const { newUserAdded } = useAppSelector(state => state.messenger)
     const { authenticate, myInfo } = useAppSelector(state => state.auth);
-
-    const currentUserInfo: Dictionary<string> = myInfo
 
     const [isClient, setIsClient] = useState(false)
 
@@ -27,8 +21,8 @@ export default function Home() {
     // GIVE TIME TO DISSMISS OTHER ACTIVE INSTANCES WHEN USER IS TRYING TO LOGIN MULTIPLE TIMES
     useEffect(() => {
         setTimeout(() => {
-            if (currentUserInfo) {
-                socket.emit('addUser', currentUserInfo.id, currentUserInfo)
+            if (myInfo) {
+                socket.emit('addUser', myInfo.id, myInfo)
             }
         }, 1000)
     }, [])
@@ -59,7 +53,7 @@ export default function Home() {
                     <title>Messenger</title>
                     <meta name="login page" content="content" />
                 </Head>
-                <main className={`w-full min-h-[100px] min-w-[1280px] bg-neutral-800 flex flex-row ${currentUserInfo.theme}`}>
+                <main className={`w-full min-h-[100px] min-w-[1280px] bg-neutral-800 flex flex-row ${myInfo.theme}`}>
                     <Toaster
                         position={'top-right'}
                         reverseOrder={false}

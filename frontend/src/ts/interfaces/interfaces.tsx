@@ -2,21 +2,6 @@ export interface Dictionary<T> {
     [Key: string]: T;
 }
 
-export interface LastMessage {
-    message: {
-        text: string,
-        image: string[]
-    },
-    _id: string,
-    senderId: string,
-    senderName: string,
-    receiverId: string,
-    status: string,
-    createdAt: string,
-    updatedAt: string,
-    __v: number
-}
-
 export interface Friend {
     _id: string,
     username: string,
@@ -27,7 +12,7 @@ export interface Friend {
     createdAt: string,
     updatedAt: string,
     __v: number,
-    lastMessageInfo: LastMessage
+    lastMessageInfo: Message
 }
 
 export interface UserInfo {
@@ -47,7 +32,7 @@ export interface SocketUser {
     userInfo: UserInfo
 }
 
-export interface SocketMessage {
+export interface Message {
     senderId: string,
     senderName: string,
     receiverId: string,
@@ -67,14 +52,4 @@ export interface SocketTypingMessage {
     senderId: string,
     receiverId: string,
     message: string
-}
-
-export interface Message {
-    senderId: string,
-    message: {
-        text: string,
-        image: string[]
-    },
-    createdAt: string,
-    status: string
 }

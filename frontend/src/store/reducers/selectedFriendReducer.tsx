@@ -1,21 +1,19 @@
 import { GET_SELECTED_FRIEND_SUCCESS, GET_SHARED_MEDIA_SUCCESS, UPDATE_SHARED_MEDIA_SUCCESS } from '../types/selectedFriendType'
 import { LOGOUT_SUCCESS } from '../types/authType'
-
-interface Dictionary<T> {
-    [Key: string]: T;
-}
+import { PayloadAction } from '@reduxjs/toolkit';
+import { Friend } from '@/ts/interfaces/interfaces'
 
 interface SelectedFriendState {
-    selectedFriendData: Dictionary<string>,
+    selectedFriendData: Friend,
     sharedMedia: string[]
 }
 
 const selectedFriendState: SelectedFriendState = {
-    selectedFriendData: {},
+    selectedFriendData: {} as Friend,
     sharedMedia: []
 }
 
-export const selectedFriendReducer = (state = selectedFriendState, action: any) => {
+export const selectedFriendReducer = (state = selectedFriendState, action: PayloadAction<{ selectedFriendData: Friend, sharedMedia: string[], imagePath: string }>) => {
     switch (action.type) {
         case GET_SELECTED_FRIEND_SUCCESS:
             return {
@@ -25,7 +23,7 @@ export const selectedFriendReducer = (state = selectedFriendState, action: any) 
         case LOGOUT_SUCCESS:
             return {
                 ...state,
-                selectedFriendData: {}
+                selectedFriendData: {} as Friend
             }
         case GET_SHARED_MEDIA_SUCCESS:
             return {

@@ -21,7 +21,7 @@ import { IoMdArrowDropright, IoMdArrowDropdown } from "react-icons/io";
 import toast from 'react-hot-toast'
 import { socket } from "@/socket"
 
-import { Dictionary, SocketMessage, SocketTypingMessage, Message, SocketUser } from "@/ts/interfaces/interfaces";
+import { SocketTypingMessage, Message, SocketUser, Friend } from "@/ts/interfaces/interfaces";
 
 interface MessagesWindowProps {
     className?: string,
@@ -50,9 +50,6 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
     const { selectedFriendData, sharedMedia } = useAppSelector(state => state.selectedFriend)
     const { friends, messages, undeliveredMessages, messageSendSuccess, imagePaths } = useAppSelector(state => state.messenger)
 
-    // CONSTANTS
-    const currentUserInfo: Dictionary<string> = myInfo
-
     // REACT STATES
     const [shouldScroll, setShouldScroll] = useState({state: true})
 
@@ -73,7 +70,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
     const [galleryIndex, setGalleryIndex] = useState(0)
     const [galleryImages, setGalleryImages] = useState<string[]>([])
 
-    const [socketMessage, setSocketMessage] = useState<Partial<SocketMessage>>({})
+    const [socketMessage, setSocketMessage] = useState<Partial<Message>>({})
     const [typingMessage, setTypingMessage] = useState<Partial<SocketTypingMessage>>({})
 
     const [activeUsers, setActiveUsers] = useState<Array<SocketUser>>([])
@@ -82,9 +79,9 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
     // HANDLERS
     const inputHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setNewMessage(e.target.value)
-        if (currentUserInfo) {
+        if (myInfo) {
             socket.emit('typingMessage', {
-                senderId: currentUserInfo.id,
+                senderId: myInfo.id,
                 receiverId: selectedFriendData._id,
                 message: e.target.value
             })
@@ -95,16 +92,16 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         newMessage.trim()
         if ((newMessage !== "" && newMessage !== '\n') || imagePaths.length > 0) {
             const data = {
-                senderName: currentUserInfo?.username,
-                senderId: currentUserInfo?.id,
+                senderName: myInfo.username,
+                senderId: myInfo.id,
                 receiverId: selectedFriendData._id,
                 message: newMessage,
                 images: imagePaths
             }
 
-            if (currentUserInfo) {
+            if (myInfo) {
                 socket.emit('typingMessage', {
-                    senderId: currentUserInfo.id,
+                    senderId: myInfo.id,
                     receiverId: selectedFriendData._id,
                     message: ''
                 })
@@ -226,15 +223,15 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
             dispatch(getFriends())
         })
 
-        socket.on('getMessage', (data: any) => {   
+        socket.on('getMessage', (data: Message) => {   
             setSocketMessage(data)
         })
 
-        socket.on('typingMessageGet', (data: any) => {
+        socket.on('typingMessageGet', (data: SocketTypingMessage) => {
             setTypingMessage(data)
         })
 
-        socket.on('messageSeenResponse', (data: any) => {
+        socket.on('messageSeenResponse', (data: Message) => {
             dispatch({
                 type: 'SEEN_MESSAGE',
                 payload: {
@@ -243,7 +240,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
             })
         })
 
-        socket.on('messageDeliverResponse', (data: any) => {
+        socket.on('messageDeliverResponse', (data: Message) => {
             dispatch({
                 type: 'DELIVER_MESSAGE',
                 payload: {
@@ -252,15 +249,15 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
             })
         })
 
-        socket.on('removeOtherActiveInstance', (data: any) => {
+        socket.on('removeOtherActiveInstance', (id: string) => {
             dispatch(userLogout());
-            if (currentUserInfo) {
-                socket.emit('removeSocketInstance', currentUserInfo.id)
+            if (myInfo) {
+                socket.emit('removeSocketInstance', myInfo.id)
             }
         })
 
         socket.on('getUser', (users: SocketUser[]) => {
-            const filteredUsers = users.filter((user: SocketUser) => user.userId !== currentUserInfo.id)
+            const filteredUsers = users.filter((user: SocketUser) => user.userId !== myInfo.id)
             setActiveUsers(filteredUsers)
         })
 
@@ -277,7 +274,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
     // UPDATE THE USER IS CHATTING WITH WHEN NEW MESSAGE WAS SENT
     useEffect(() => {
         if (messageSendSuccess) {
-            if (currentUserInfo) {
+            if (myInfo) {
                 socket.emit('sendMessage', messages[messages.length - 1])
                 dispatch({
                     type: 'UPDATE_FRIEND_MESSAGE',
@@ -335,7 +332,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
     // GET ALL UNDELIVERED MESSAGES
     useEffect(() => {
         if (friends) {
-            friends.forEach((friend: any) => {
+            friends.forEach((friend: Friend) => {
                 if (friend.lastMessageInfo && friend.lastMessageInfo.status === 'unseen') {
                     dispatch(deliverUnsentMessages(friend._id))
                 }
@@ -347,7 +344,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
     useEffect(() => {
         if (Object.keys(undeliveredMessages).length > 0) {
             undeliveredMessages.forEach((undeliveredMessage: Message) => {
-                dispatch(updateMessage(undeliveredMessage))
+                dispatch(updateMessage(undeliveredMessage._id))
             })
             
             socket.emit('deliverMessage', undeliveredMessages[undeliveredMessages.length - 1])
@@ -368,7 +365,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
     // GET REAL TIME MESSAGE AND DECIDE WHETHER SCROLL TO BOTTOM IS NEEDED OR NOT
     useEffect(() => {
         if (socketMessage && Object.keys(selectedFriendData).length > 0) {
-            if (socketMessage.senderId === selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
+            if (socketMessage.senderId === selectedFriendData._id && socketMessage.receiverId === myInfo.id) {
                 updateShouldScroll()
             }
         }
@@ -377,7 +374,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
     // AFTER SHOULDSCROLL WAS UPDATED SEND SOCKET MESSAGE
     useEffect(() => {
         if (socketMessage && Object.keys(selectedFriendData).length > 0) {
-            if (socketMessage.senderId === selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
+            if (socketMessage.senderId === selectedFriendData._id && socketMessage.receiverId === myInfo.id) {
 
                 dispatch({
                     type: 'SOCKET_MESSAGE',
@@ -386,7 +383,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                     }
                 })
 
-                dispatch(seenMessage(socketMessage))
+                dispatch(seenMessage(socketMessage._id || ''))
 
                 if (socketMessage.message?.image) {
                     socketMessage.message?.image.forEach((image: string) => dispatch(updateSharedMedia(image)));
@@ -407,12 +404,12 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
 
     // UPDATE UNSEEN MESSAGES FROM ACTIVE WINDOW AS SEEN 
     useEffect(() => {
-        if (messages.length >= 1 && messages[messages.length - 1].status === "delivered" && messages[messages.length - 1].receiverId === currentUserInfo.id) {
+        if (messages.length >= 1 && messages[messages.length - 1].status === "delivered" && messages[messages.length - 1].receiverId === myInfo.id) {
 
             for (let i = messages.length - 1; i >= 0; i--) {
-                if ((messages[i].status === 'delivered' || messages[i].status === 'unseen') && messages[i].receiverId === currentUserInfo.id) {
-                    dispatch(seenMessage(messages[i]))
-                } else if (messages[i].status === 'seen' && messages[i].receiverId === currentUserInfo.id) {
+                if ((messages[i].status === 'delivered' || messages[i].status === 'unseen') && messages[i].receiverId === myInfo.id) {
+                    dispatch(seenMessage(messages[i]._id))
+                } else if (messages[i].status === 'seen' && messages[i].receiverId === myInfo.id) {
                     break
                 }
             }
@@ -432,10 +429,10 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
     // SENT USER NOTIFICATION WHEN RECEIVING REAL TIME MESSAGES FROM A DIFFERENT USER THAN CURRENT USER FROM ACTIVE CHAT WINDOW
     useEffect(() => {
         if (socketMessage && selectedFriendData) {
-            if (socketMessage.senderId !== selectedFriendData._id && socketMessage.receiverId === currentUserInfo.id) {
+            if (socketMessage.senderId !== selectedFriendData._id && socketMessage.receiverId === myInfo.id) {
                 toast.success(`${socketMessage.senderName} sent a new message`)
 
-                dispatch(updateMessage(socketMessage))
+                dispatch(updateMessage(socketMessage._id || ''))
 
                 socket.emit('deliverMessage', socketMessage)
 
@@ -524,7 +521,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                         id="chatWindow"
                         className={`chatWindow w-full h-full flex flex-col top-0 overflow-y-scroll no-scrollbar bg-bgMain ${isMediaSelected || isGalleryImageSelected || isSharedMediaGalleryOpen ? 'hidden' : 'flex'}`}>
                         {
-                            messages && messages.map((e: Message, index: any) => {
+                            messages && messages.map((e: Message, index) => {
                                 
                                     return (
                                         e.message && e.senderId === selectedFriendData._id ? 

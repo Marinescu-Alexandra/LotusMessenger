@@ -3,17 +3,15 @@ import {
     MESSAGE_SEND_SUCCESS_CLEAR, SEEN_MESSAGE, DELIVER_MESSAGE, NEW_USER_ADDED, NEW_USER_ADDED_CLEAR, UNDELIVERED_GET_SUCCESS, UNDELIVERED_GET_SUCCESS_CLEAR
 } from '../types/messengerType'
 import { LOGOUT_SUCCESS } from '../types/authType'
-
-interface Dictionary<T> {
-    [Key: string]: T;
-}
+import { PayloadAction } from '@reduxjs/toolkit';
+import { Friend, Message } from '@/ts/interfaces/interfaces'
 
 interface MessengerState {
-    friends: Dictionary<string>[],
-    messages: Dictionary<string>[],
+    friends: Friend[],
+    messages: Message[],
     messageSendSuccess: boolean,
     newUserAdded: boolean,
-    undeliveredMessages: Dictionary<string>[],
+    undeliveredMessages: Message[],
     imagePaths: string[]
 }
 
@@ -26,7 +24,7 @@ const messengerState: MessengerState = {
     imagePaths: []
 }
 
-export const messengerReducer = (state = messengerState, action: any) => {
+export const messengerReducer = (state = messengerState, action: PayloadAction<{ friends: Friend[], newUserAdded: Friend, message: Message, paths: string[], messages: Message[], messageInfo: Message, status: string, undeliveredMessages: Message[]   }>) => {
     if (action.type === FRIEND_GET_SUCCESS) {
         return {
             ...state,
