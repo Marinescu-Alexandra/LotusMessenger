@@ -10,24 +10,29 @@ interface LeftChatBubble {
     imageUrl: string[]
     handleImageGalleryClick: (a: number, b: string[]) => void,
     userProfileImage?: string,
+    displayProfileImage?: boolean,
 }
 
-const LeftChatBubble: FC<LeftChatBubble> = ({ message, deliverTime, imageUrl, handleImageGalleryClick, userProfileImage }) => {
+const LeftChatBubble: FC<LeftChatBubble> = ({ message, deliverTime, imageUrl, handleImageGalleryClick, userProfileImage, displayProfileImage }) => {
+
     return (
-        <div className="flex items-start gap-2.5 ml-4 mt-4 mb-4 z-20">
+        <div className="flex items-start gap-2.5 ml-4 mb-4 z-20">
             {
-                userProfileImage ?
-                    <img
-                        src={`/userProfileImages/${userProfileImage}`}
-                        alt="profilePicturePlaceholder"
-                        className="rounded-full w-10 h-10 object-cover" />
+                displayProfileImage ?
+                    userProfileImage ?
+                        <img
+                            src={`/userProfileImages/${userProfileImage}`}
+                            alt="profilePicturePlaceholder"
+                            className="rounded-full w-10 h-10 object-cover" />
+                        :
+                        <Image className="w-10 h-10 rounded-full object-cover" src={profilePlaceholder} alt="profilePicPlaceholder" />
                     :
-                    <Image className="w-8 h-8 rounded-full object-cover" src={profilePlaceholder} alt="profilePicPlaceholder" />
+                    <span className="w-10 h-10"></span>
             }
             
 
-            <div className={`min-w-[30px] ${imageUrl && imageUrl.length <= 4 ? 'max-w-[380px]' : 'max-w-[580px]'}  leading-1.5 p-4 border-gray-200 bg-bgPrimary rounded-r-xl rounded-b-xl rounded-es-xl`}>
-                <p className="text-normal font-normal pb-2.5 text-textLeftBubble break-words">{message}</p>
+            <div className={`min-w-[30px] ${imageUrl && imageUrl.length <= 4 && imageUrl.length >= 1  ? 'max-w-[380px]' : 'max-w-[580px]'}  leading-1.5 p-4 border-gray-200 bg-bgPrimary rounded-r-xl rounded-b-xl rounded-es-xl`}>
+                <p className="text-normal font-normal pb-2 text-textLeftBubble break-words">{message}</p>
                 {
                     (imageUrl && imageUrl.length <= 4) &&
 

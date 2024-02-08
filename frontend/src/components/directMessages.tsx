@@ -194,14 +194,14 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                                         <img
                                             src={`/userProfileImages/${myInfo.profileImage}`}
                                             alt="profilePicturePlaceholder"
-                                            className="object-cover rounded-full border-[2.5px] border-darkBgMain min-w-[50px] min-h-[50px] max-w-[50px] 
+                                            className="object-cover rounded-full min-w-[50px] min-h-[50px] max-w-[50px] 
                                             max-h-[50px]" />
                                         :
                                         <Image
                                             src={profilePicturePlaceholder}
                                             alt='profilePicturePlaceholder'
                                             width={50} height={50}
-                                            className="object-cover rounded-full border-[2.5px] border-darkBgMain min-w-[50px] min-h-[50px] max-w-[50px] 
+                                            className="object-cover rounded-full min-w-[50px] min-h-[50px] max-w-[50px] 
                                             max-h-[50px]"
                                             priority />
                                 }

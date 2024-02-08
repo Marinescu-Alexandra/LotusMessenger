@@ -77,13 +77,12 @@ export const messengerReducer = (state = messengerState, action: PayloadAction<{
         case UPDATE_MESSAGES:
             let updatedMessages = [...state.messages]
             for (let i = updatedMessages.length - 1; i >= 0; i--) {
-                if (updatedMessages[i].status !== action.payload.status) {
-                    updatedMessages[i] = {
-                        ...updatedMessages[i],
-                        status: action.payload.status
-                    }
-                } else {
-                    break;
+                if (updatedMessages[i].status === action.payload.status) {
+                    break
+                }
+                updatedMessages[i] = {
+                    ...updatedMessages[i],
+                    status: action.payload.status
                 }
             }
             return {

@@ -5,7 +5,7 @@ import dots from '@/dots.png'
 import close from '@/close.png'
 import { motion } from "framer-motion"
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { messageSend, uploadImages, seenMessage, deliverMessage, getMessages, getFriends, getLastMessages, deliverUnsentMessages, markUnseenMessagesAsRead } from "@/store/actions/messengerAction";
+import { messageSend, uploadImages, seenMessage, deliverMessage, getFriends, getLastMessages, deliverUnsentMessages, markUnseenMessagesAsRead } from "@/store/actions/messengerAction";
 import { getSharedMedia, updateSharedMedia } from '@/store/actions/selectedFriendAction'
 import LeftChatBubble from "./leftChatBubble";
 import RightChatBubble from "./rightChatBubble";
@@ -46,7 +46,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
     const dispatch = useAppDispatch()
     const { myInfo } = useAppSelector(state => state.auth);
     const { selectedFriendData, sharedMedia } = useAppSelector(state => state.selectedFriend)
-    const { friendsGetSuccess, messages, updateUndeliveredMessages, messageSendSuccess, imagePaths, lastMessages, messagesGetSuccess, lastMessagesGetSuccess } = useAppSelector(state => state.messenger)
+    const { friendsGetSuccess, messages, messageSendSuccess, imagePaths, lastMessages, messagesGetSuccess, lastMessagesGetSuccess } = useAppSelector(state => state.messenger)
 
     // REACT STATES
     const [shouldScroll, setShouldScroll] = useState({state: true})
@@ -360,7 +360,6 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
                         id: selectedFriendData._id
                     }
                 })
-
             }
             dispatch({
                 type: 'MESSAGE_SEND_SUCCESS_CLEAR'
@@ -400,7 +399,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
         }
     }, [shouldScroll])
 
-    // SENT USER NOTIFICATION WHEN RECEIVING REAL TIME MESSAGES FROM A DIFFERENT USER OTHER THAN USER FROM ACTIVE CHAT WINDOW THEN MARK SOCKETMESSAGE AS DELIVERED
+    // SEND USER NOTIFICATION WHEN RECEIVING REAL TIME MESSAGES FROM A DIFFERENT USER OTHER THAN USER FROM ACTIVE CHAT WINDOW THEN MARK SOCKETMESSAGE AS DELIVERED
     useEffect(() => {
         if (socketMessage && selectedFriendData) {
             if (socketMessage.senderId !== selectedFriendData._id && socketMessage.receiverId === myInfo.id) {
@@ -484,7 +483,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
                     {/* CHAT WINDOW */}
                     <div
                         id="chatWindow"
-                        className={`chatWindow w-full h-full flex flex-col top-0 overflow-y-scroll no-scrollbar bg-bgMain ${isMediaSelected || isGalleryImageSelected || isSharedMediaGalleryOpen ? 'hidden' : 'flex'}`}>
+                        className={`chatWindow w-full h-full flex flex-col top-0 overflow-y-scroll no-scrollbar pt-2 bg-bgMain ${isMediaSelected || isGalleryImageSelected || isSharedMediaGalleryOpen ? 'hidden' : 'flex'}`}>
                         {
                             messages && messages.map((e: Message, index) => {
                                     return (
@@ -496,7 +495,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
                                             deliverTime={moment(e.createdAt).format('kk:mm')}
                                             imageUrl={e.message.image}
                                             handleImageGalleryClick={handleImageGalleryClick}
-                                            userProfileImage={selectedFriendData.profileImage}
+                                                userProfileImage={selectedFriendData.profileImage}
+                                                displayProfileImage={index === 0 || (index > 0 && messages[index - 1].senderId === myInfo.id) ? true : false}
                                             />
                                         :
                                         <RightChatBubble
@@ -547,9 +547,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
                                         onChange={handleTextAreaInputChange}
                                         value={newMessage}
                                     />
-
                                 </div>
-
 
                                 <button
                                     className="relative"

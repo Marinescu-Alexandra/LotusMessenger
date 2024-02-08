@@ -18,9 +18,9 @@ const RightChatBubble: FC<RightChatBubble> = ({ message, deliverTime, status, im
 
     return (
         <>
-            <div className="flex items-end gap-2.5 ml-4 mt-4 mb-4 justify-end mr-4 z-20">
-                <div className={`min-w-[30px] ${imageUrl && imageUrl.length <= 4 ? 'max-w-[380px]' : 'max-w-[580px]'}  leading-1.5 p-4 border-gray-200 bg-bgPrimary rounded-l-xl rounded-b-xl rounded-es-xl`}>
-                    <p className="text-normal font-normal pb-2.5 text-textRightBubble break-words text-wrap">{message}</p>
+            <div className="flex items-end gap-2.5 ml-4 mb-4 justify-end mr-4 z-20">
+                <div className={`min-w-[30px] ${imageUrl && imageUrl.length <= 4 && imageUrl.length >= 1 ? 'max-w-[380px]' : 'max-w-[580px]'} relative leading-1.5 p-4 border-gray-200 bg-bgPrimary rounded-l-xl rounded-b-xl rounded-es-xl`}>
+                    <p className="text-normal font-normal pb-2 text-textRightBubble break-words text-wrap flex justify-end">{message}</p>
                     {
                         (imageUrl && imageUrl.length <= 4) &&
 
@@ -65,7 +65,7 @@ const RightChatBubble: FC<RightChatBubble> = ({ message, deliverTime, status, im
                             })}
                         </div>
                     }
-                    <div className="flex flex-row justify-end items-center gap-2 ml-4">
+                    <div className="flex flex-row justify-end items-center gap-2">
                         <span className="text-sm font-normal text-gray-400">{deliverTime}</span>
                         {
                             status === 'seen' ?

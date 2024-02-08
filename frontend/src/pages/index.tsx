@@ -84,7 +84,7 @@ export default function Home() {
                     <title>Messenger</title>
                     <meta name="login page" content="content" />
                 </Head>
-                <main className={`w-full min-h-[100px] min-w-[1280px] bg-neutral-800 flex flex-row ${myInfo.theme}`}>
+                <main className={`w-full min-h-[800px] min-w-[1680px] bg-neutral-800 flex flex-row ${myInfo.theme}`}>
                     <Toaster
                         position={'top-right'}
                         reverseOrder={false}
