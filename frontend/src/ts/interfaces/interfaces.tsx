@@ -47,7 +47,6 @@ export interface Message {
     status: string,
 }
 
-
 export interface SocketTypingMessage {
     senderId: string,
     receiverId: string,

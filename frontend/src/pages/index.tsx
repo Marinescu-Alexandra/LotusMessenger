@@ -3,15 +3,19 @@ import React, { useEffect, useState } from "react"
 import DirectMessages from "@/components/directMessages"
 import MessagesWinow from "@/components/messagesWindow"
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { getFriends } from "@/store/actions/messengerAction"
+import { getFriends, getLastMessages } from "@/store/actions/messengerAction"
+import { userLogout } from "@/store/actions/authAction"
 import { useRouter } from 'next/router'
 import { Toaster } from 'react-hot-toast'
 import { socket } from "@/socket"
+import { SocketUser } from "@/ts/interfaces/interfaces"
 
 export default function Home() {
 
     const { newUserAdded } = useAppSelector(state => state.messenger)
     const { authenticate, myInfo } = useAppSelector(state => state.auth);
+
+    const [activeUsers, setActiveUsers] = useState<Array<SocketUser>>([])
 
     const [isClient, setIsClient] = useState(false)
 
@@ -25,7 +29,23 @@ export default function Home() {
                 socket.emit('addUser', myInfo.id, myInfo)
             }
         }, 1000)
-    }, [])
+
+        socket.on('removeOtherActiveInstance', (id: string) => {
+            dispatch(userLogout());
+            if (myInfo) {
+                socket.emit('removeSocketInstance', myInfo.id)
+            }
+        })
+
+        socket.on('newUserAdded', (data: boolean) => {
+            dispatch({
+                type: 'NEW_USER_ADDED',
+                payload: {
+                    newUserAdded: data
+                }
+            })
+        })
+    }, [myInfo])
 
     useEffect(() => {
         setIsClient(true)
@@ -39,12 +59,23 @@ export default function Home() {
     
     useEffect(() => {
         dispatch(getFriends())
+        dispatch(getLastMessages())
+    }, []);
+
+    useEffect(() => {
+        socket.on('getUser', (users: SocketUser[]) => {
+            const filteredUsers = users.filter((user: SocketUser) => user.userId !== myInfo.id)
+            setActiveUsers(filteredUsers)
+        })
+    }, [activeUsers])
+
+    useEffect(() => {
         if (newUserAdded === true) {
             dispatch({
                 type: 'NEW_USER_ADDED_CLEAR'
             })
         }
-    }, [newUserAdded]);
+    }, [newUserAdded])
 
     if (authenticate && isClient) {
         return (
@@ -63,8 +94,8 @@ export default function Home() {
                             }
                         }}
                     />
-                    <DirectMessages className="w-[28%] min-h-[100%]"/>
-                    <MessagesWinow className="w-[72%] min-h-[100%] z-10"/>
+                    <DirectMessages className="w-[28%] min-h-[100%]" activeUsers={activeUsers}/>
+                    <MessagesWinow className="w-[72%] min-h-[100%] z-10" activeUsers={activeUsers}/>
                 </main>
             </>
         )

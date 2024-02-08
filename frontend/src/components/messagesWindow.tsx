@@ -5,9 +5,8 @@ import dots from '@/dots.png'
 import close from '@/close.png'
 import { motion } from "framer-motion"
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
-import { messageSend, uploadImages, seenMessage, updateMessage, getFriends, deliverUnsentMessages, getMessages } from "@/store/actions/messengerAction";
+import { messageSend, uploadImages, seenMessage, deliverMessage, getMessages, getFriends, getLastMessages, deliverUnsentMessages, markUnseenMessagesAsRead } from "@/store/actions/messengerAction";
 import { getSharedMedia, updateSharedMedia } from '@/store/actions/selectedFriendAction'
-import { userLogout } from "@/store/actions/authAction";
 import LeftChatBubble from "./leftChatBubble";
 import RightChatBubble from "./rightChatBubble";
 import moment from 'moment'
@@ -20,15 +19,14 @@ import { GoPaperclip } from "react-icons/go";
 import { IoMdArrowDropright, IoMdArrowDropdown } from "react-icons/io";
 import toast from 'react-hot-toast'
 import { socket } from "@/socket"
-
-import { SocketTypingMessage, Message, SocketUser, Friend } from "@/ts/interfaces/interfaces";
+import { SocketTypingMessage, Message, SocketUser } from "@/ts/interfaces/interfaces";
 
 interface MessagesWindowProps {
     className?: string,
     activeUsers?: SocketUser[]
 }
 
-const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
+const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
 
     // DOM CONSTANTS
     const chatWindow = document.getElementById('chatWindow');
@@ -48,7 +46,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
     const dispatch = useAppDispatch()
     const { myInfo } = useAppSelector(state => state.auth);
     const { selectedFriendData, sharedMedia } = useAppSelector(state => state.selectedFriend)
-    const { friends, messages, undeliveredMessages, messageSendSuccess, imagePaths } = useAppSelector(state => state.messenger)
+    const { friendsGetSuccess, messages, updateUndeliveredMessages, messageSendSuccess, imagePaths, lastMessages, messagesGetSuccess, lastMessagesGetSuccess } = useAppSelector(state => state.messenger)
 
     // REACT STATES
     const [shouldScroll, setShouldScroll] = useState({state: true})
@@ -73,11 +71,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
     const [socketMessage, setSocketMessage] = useState<Partial<Message>>({})
     const [typingMessage, setTypingMessage] = useState<Partial<SocketTypingMessage>>({})
 
-    const [activeUsers, setActiveUsers] = useState<Array<SocketUser>>([])
-
-
     // HANDLERS
-    const inputHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    const handleTextAreaInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setNewMessage(e.target.value)
         if (myInfo) {
             socket.emit('typingMessage', {
@@ -88,7 +83,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         }
     }
 
-    const sendMessage = () => {
+    const handleSendMessage = () => {
         newMessage.trim()
         if ((newMessage !== "" && newMessage !== '\n') || imagePaths.length > 0) {
             const data = {
@@ -117,7 +112,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         }
     }
 
-    const selectInputMedia = () => {
+    const handleSelectMediaCliked = () => {
         if (inputFile.current) {
             inputFile.current.click()
         }
@@ -149,7 +144,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         setGalleryImageSelected(false)
     }
 
-    const mediaSelected = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleMediaSelected = (e: ChangeEvent<HTMLInputElement>) => {
 
         const formData = new FormData()
         if (e.target.files) {
@@ -167,7 +162,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
 
     }
 
-    const sharedMediaHandler = () => {
+    const handleGetSharedMedia = () => {
         let sharedMedia: string[] = []
         for (let i = 0; i < messages.length; i++) {
             if (messages[i].message.image.length > 0) {
@@ -206,7 +201,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
     function keyPressed(e: React.KeyboardEvent<HTMLTextAreaElement>) {
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault()
-            sendMessage()
+            handleSendMessage()
             setNewMessage("")
 
             if (isMediaSelected === true) {
@@ -216,78 +211,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         }
     }
 
-    // SOCKET EMITORS
-    useEffect(() => {
 
-        socket.on('updateFriendList', (userId: string) => {
-            dispatch(getFriends())
-        })
-
-        socket.on('getMessage', (data: Message) => {   
-            setSocketMessage(data)
-        })
-
-        socket.on('typingMessageGet', (data: SocketTypingMessage) => {
-            setTypingMessage(data)
-        })
-
-        socket.on('messageSeenResponse', (data: Message) => {
-            dispatch({
-                type: 'SEEN_MESSAGE',
-                payload: {
-                    messageInfo: data
-                }
-            })
-        })
-
-        socket.on('messageDeliverResponse', (data: Message) => {
-            dispatch({
-                type: 'DELIVER_MESSAGE',
-                payload: {
-                    messageInfo: data
-                }
-            })
-        })
-
-        socket.on('removeOtherActiveInstance', (id: string) => {
-            dispatch(userLogout());
-            if (myInfo) {
-                socket.emit('removeSocketInstance', myInfo.id)
-            }
-        })
-
-        socket.on('getUser', (users: SocketUser[]) => {
-            const filteredUsers = users.filter((user: SocketUser) => user.userId !== myInfo.id)
-            setActiveUsers(filteredUsers)
-        })
-
-        socket.on('newUserAdded', (data: boolean) => {
-            dispatch({
-                type: 'NEW_USER_ADDED',
-                payload: {
-                    newUserAdded: data
-                }
-            })
-        })
-    }, [newMessage, typingMessage, socketMessage])
-
-    // UPDATE THE USER IS CHATTING WITH WHEN NEW MESSAGE WAS SENT
-    useEffect(() => {
-        if (messageSendSuccess) {
-            if (myInfo) {
-                socket.emit('sendMessage', messages[messages.length - 1])
-                dispatch({
-                    type: 'UPDATE_FRIEND_MESSAGE',
-                    payload: {
-                        messageInfo: messages[messages.length - 1]
-                    }
-                })
-                dispatch({
-                    type: 'MESSAGE_SEND_SUCCESS_CLEAR',
-                })
-            }
-        }
-    }, [messageSendSuccess])
+    // ===================================================================REACT HOOKS===================================================================
 
     // SCROLL IF NEEDED WHEN NEW MESSAGES ARE ADDED
     useEffect(() => {
@@ -322,47 +247,129 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         setSharedMediaLength(3)
     }, [selectedFriendData._id])
 
-    // GET MESSAGES OF ACTIVE CHAT WINDOW
     useEffect(() => {
-        if (selectedFriendData && Object.keys(selectedFriendData).length > 0) {
-            dispatch(getMessages(selectedFriendData._id))
-        }
-    }, [selectedFriendData])
-
-    // GET ALL UNDELIVERED MESSAGES
-    useEffect(() => {
-        if (friends) {
-            friends.forEach((friend: Friend) => {
-                if (friend.lastMessageInfo && friend.lastMessageInfo.status === 'unseen') {
-                    dispatch(deliverUnsentMessages(friend._id))
-                }
-            });
-        }
-    }, [friends])
-
-    // MARK ALL UNDELIVERED MESSAGES AS DELIVERED
-    useEffect(() => {
-        if (Object.keys(undeliveredMessages).length > 0) {
-            undeliveredMessages.forEach((undeliveredMessage: Message) => {
-                dispatch(updateMessage(undeliveredMessage._id))
-            })
-            
-            socket.emit('deliverMessage', undeliveredMessages[undeliveredMessages.length - 1])
+        if (messagesGetSuccess) {
             dispatch({
-                type: 'UPDATE_FRIEND_MESSAGE',
+                type: 'MESSAGE_GET_SUCCESS_CLEAR',
+            })
+        }
+    }, [messagesGetSuccess])
+
+    //IF LAST MESSAGE INFO OF CURRENT ACTIVE CHAT IS UPDATED, UPDATE MESSAGES OF CURRENT ACTIVE CHAT ALSO
+    useEffect(() => {
+        if (messages.length > 0 && lastMessages[selectedFriendData._id] && messages[messages.length - 1]._id === lastMessages[selectedFriendData._id]._id) {
+            
+            if (messages[messages.length - 1].status !== lastMessages[selectedFriendData._id].status) {
+                dispatch({
+                    type: 'UPDATE_MESSAGES',
+                    payload: {
+                        status: lastMessages[selectedFriendData._id].status
+                    }
+                })
+            } 
+        }
+    }, [messageSendSuccess, messagesGetSuccess, [lastMessages[selectedFriendData._id]]])
+
+    // ===================================================================REAL TIME UPDATES FROM SOCKET SERVER===================================================================
+
+    // GET LAST MESSAGES WHEN SOCKET USER RECEIVED OR SAW THE MESSAGES OF THE CURRENT USER AFTER GETTING ONLINE
+    useEffect(() => {
+        socket.on('updateLastMessageAsSeen', (data: Message) => { 
+            dispatch(getLastMessages())
+        })
+
+        socket.on('updateLastMessageAsDelivered', (data: Message) => {
+            dispatch(getLastMessages())
+        })
+    }, [lastMessagesGetSuccess])
+
+    // UPDATE FRIEND LIST WHEN USERS CHANGE THEIR PROFILE INFO
+    useEffect(() => {
+        socket.on('updateFriendList', (userId: string) => {
+            dispatch(getFriends())
+        })
+    },[friendsGetSuccess])
+
+    // RECEIVE SOCKET MESSAGE, AND UPDATE LASTMESSAGE IF SOCKET USER IS ACTIVELY CHATTING WITH CURRENT USER
+    useEffect(() => {
+        socket.on('getMessage', (data: Message) => {
+            setSocketMessage(data)
+        })
+
+        socket.on('socketMessageSeen', (data: Message) => {
+            dispatch({
+                type: 'UPDATE_LAST_MESSAGE_INFO',
                 payload: {
-                    messageInfo: undeliveredMessages[undeliveredMessages.length - 1],
-                    status: 'delivered'
+                    id: data.receiverId,
+                    messageInfo: data
                 }
             })
-            
+        })
+
+        socket.on('socketMessageDelivered', (data: Message) => {
             dispatch({
-                type: "UNDELIVERED_GET_SUCCESS_CLEAR",
+                type: 'UPDATE_LAST_MESSAGE_INFO',
+                payload: {
+                    id: data.receiverId,
+                    messageInfo: data
+                }
+            })
+        })
+    }, [socketMessage])
+
+    // SET TYPING MESSAGE
+    useEffect(() => {
+        socket.on('typingMessageGet', (data: SocketTypingMessage) => {
+            setTypingMessage(data)
+        })
+    }, [typingMessage])
+
+    // ===================================================================SOCKET EMITORS===================================================================
+
+    // UPDATE ALL UNUNDELIVERED MESSAGES AS DELIVERED ON EACH RENDER
+    useEffect(() => {
+        for (const friendId in lastMessages) {
+            if (lastMessages[friendId].status === 'undelivered' && lastMessages[friendId].receiverId === myInfo.id) {
+                dispatch(deliverUnsentMessages(friendId))
+
+                // REAL TIME UPDATE
+                socket.emit('deliverMessages', lastMessages[friendId])
+            }
+        }
+    }, [lastMessagesGetSuccess])
+
+    // UPDATE ALL DELIVERED MESSAGES AS SEEN FOR FIRST RENDER OF ACTIVE CHAT WINDOW
+    useEffect(() => {
+        if (lastMessages[selectedFriendData._id] && selectedFriendData && (lastMessages[selectedFriendData._id].status === 'delivered' || lastMessages[selectedFriendData._id].status === 'undelivered') && lastMessages[selectedFriendData._id].receiverId === myInfo.id) {
+            dispatch(markUnseenMessagesAsRead(selectedFriendData._id))
+            dispatch(getLastMessages())
+
+            // REAL TIME UPDATE
+            socket.emit('seenMessages', lastMessages[selectedFriendData._id])
+        }
+    }, [selectedFriendData._id])
+
+    // UPDATE THE SELECTED FRIEND WHEN NEW MESSAGE WAS SENT AND UPDATE LAST MESSAGE INFO OF SELECTED FRIEND
+    useEffect(() => {
+        if (messageSendSuccess) {
+            if (myInfo) {
+                socket.emit('sendMessage', messages[messages.length - 1])
+                dispatch({
+                    type: 'UPDATE_LAST_MESSAGE_INFO',
+                    payload: {
+                        messageInfo: messages[messages.length - 1],
+                        id: selectedFriendData._id
+                    }
+                })
+
+            }
+            dispatch({
+                type: 'MESSAGE_SEND_SUCCESS_CLEAR'
             })
         }
-    }, [undeliveredMessages])
+    }, [messageSendSuccess])
 
-    // GET REAL TIME MESSAGE AND DECIDE WHETHER SCROLL TO BOTTOM IS NEEDED OR NOT
+    // GET REAL TIME MESSAGE IN ACTIVE CHAT WINDOW AND DECIDE WHETHER SCROLL TO BOTTOM IS NEEDED OR NOT
     useEffect(() => {
         if (socketMessage && Object.keys(selectedFriendData).length > 0) {
             if (socketMessage.senderId === selectedFriendData._id && socketMessage.receiverId === myInfo.id) {
@@ -371,7 +378,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
         }
     }, [socketMessage])
 
-    // AFTER SHOULDSCROLL WAS UPDATED SEND SOCKET MESSAGE
+    // AFTER SHOULDSCROLL WAS UPDATED GET SOCKET MESSAGE AND MARK IT AS SEEN
     useEffect(() => {
         if (socketMessage && Object.keys(selectedFriendData).length > 0) {
             if (socketMessage.senderId === selectedFriendData._id && socketMessage.receiverId === myInfo.id) {
@@ -389,60 +396,20 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                     socketMessage.message?.image.forEach((image: string) => dispatch(updateSharedMedia(image)));
                 }
 
-                socket.emit('messageSeen', socketMessage)
-
-                dispatch({
-                    type: 'UPDATE_FRIEND_MESSAGE',
-                    payload: {
-                        messageInfo: socketMessage,
-                        status: 'seen'
-                    }
-                })
+                socket.emit('messageSeen', { ...socketMessage, status: 'seen' })
             }
         }
     }, [shouldScroll])
 
-    // UPDATE UNSEEN MESSAGES FROM ACTIVE WINDOW AS SEEN 
-    useEffect(() => {
-        if (messages.length >= 1 && messages[messages.length - 1].status === "delivered" && messages[messages.length - 1].receiverId === myInfo.id) {
-
-            for (let i = messages.length - 1; i >= 0; i--) {
-                if ((messages[i].status === 'delivered' || messages[i].status === 'unseen') && messages[i].receiverId === myInfo.id) {
-                    dispatch(seenMessage(messages[i]._id))
-                } else if (messages[i].status === 'seen' && messages[i].receiverId === myInfo.id) {
-                    break
-                }
-            }
-
-            socket.emit('messageSeen', messages[messages.length - 1])
-            
-            dispatch({
-                type: 'UPDATE_FRIEND_MESSAGE',
-                payload: {
-                    messageInfo: messages[messages.length - 1],
-                    status: 'seen'
-                }
-            })
-        }
-    }, [messages])
-
-    // SENT USER NOTIFICATION WHEN RECEIVING REAL TIME MESSAGES FROM A DIFFERENT USER THAN CURRENT USER FROM ACTIVE CHAT WINDOW
+    // SENT USER NOTIFICATION WHEN RECEIVING REAL TIME MESSAGES FROM A DIFFERENT USER OTHER THAN USER FROM ACTIVE CHAT WINDOW THEN MARK SOCKETMESSAGE AS DELIVERED
     useEffect(() => {
         if (socketMessage && selectedFriendData) {
             if (socketMessage.senderId !== selectedFriendData._id && socketMessage.receiverId === myInfo.id) {
                 toast.success(`${socketMessage.senderName} sent a new message`)
 
-                dispatch(updateMessage(socketMessage._id || ''))
+                dispatch(deliverMessage(socketMessage._id || ''))
 
-                socket.emit('deliverMessage', socketMessage)
-
-                dispatch({
-                    type: 'UPDATE_FRIEND_MESSAGE',
-                    payload: {
-                        messageInfo: socketMessage,
-                        status: 'delivered'
-                    }
-                })
+                socket.emit('deliverMessage', { ...socketMessage, status: 'delivered' })
             }
         }
     }, [socketMessage])
@@ -508,12 +475,11 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                         <motion.button
                             whileTap={{ backgroundColor: 'rgba(0, 0, 0, 0.32)' }}
                             className={`${Object.keys(selectedFriendData).length === 0 ? 'hidden' : 'flex'} rounded-full w-[45px] h-[45px] flex justify-center items-center`}
-                            onClick={() => [setContactInfoOpen(true), sharedMediaHandler()]}
+                            onClick={() => [setContactInfoOpen(true), handleGetSharedMedia()]}
                             disabled={isContactInfoOpen ? true : false}
                         >
                             <Image src={dots} alt='dotsIcon' width={25} height={25} className="rounded-full" priority />
                         </motion.button>
-
                     </div>
 
                     {/* CHAT WINDOW */}
@@ -522,7 +488,6 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                         className={`chatWindow w-full h-full flex flex-col top-0 overflow-y-scroll no-scrollbar bg-bgMain ${isMediaSelected || isGalleryImageSelected || isSharedMediaGalleryOpen ? 'hidden' : 'flex'}`}>
                         {
                             messages && messages.map((e: Message, index) => {
-                                
                                     return (
                                         e.message && e.senderId === selectedFriendData._id ? 
                                         
@@ -561,8 +526,14 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                             <div className="w-[95%] rounded-xl h-[75%] flex flex-row justify-between items-center">
                                 <div className="w-full h-full flex flex-row mx-4 rounded-lg border justify-center items-center gap-2 bg-bgPrimary border-gray-600 focus-within:ring-2 focus-within:ring-white">
 
-                                    <button onClick={() => selectInputMedia()}>
-                                        <input onChange={mediaSelected} multiple={true} type="file" id="inputFile" ref={inputFile} style={{ display: "none" }} />
+                                    <button onClick={() => handleSelectMediaCliked()}>
+                                        <input
+                                            onChange={handleMediaSelected}
+                                            multiple={true}
+                                            type="file"
+                                            id="inputFile"
+                                            ref={inputFile}
+                                            style={{ display: "none" }} />
                                         <GoPaperclip className="h-[30px] w-[30px] text-neutral-400 ml-2" />
                                     </button>
                                     <button>
@@ -574,7 +545,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                                         rows={3}
                                         className="w-full h-full mr-2 pt-6 flex items-center justify-start align-middle resize-none text-md rounded-lg ml-2 bg-bgPrimary placeholder-gray-400 text-white no-scrollbar outline-none"
                                         placeholder="Your message..."
-                                        onChange={inputHandler}
+                                        onChange={handleTextAreaInputChange}
                                         value={newMessage}
                                     />
 
@@ -583,7 +554,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
 
                                 <button
                                     className="relative"
-                                    onClick={() => [sendMessage(), setNewMessage("")]}
+                                    onClick={() => [handleSendMessage(), setNewMessage("")]}
                                 >
                                     <div className="w-[50px] h-[50px] flex justify-center items-center rounded-full rotate-45 bg-gradient-to-r from-gradientOne via-gradientTwo to-gradientThree  border-bgPrimary">
                                         <RiSendPlaneFill className="w-[45px] h-[45px] mr-[6px] mt-[6px] text-bgPrimary" />
@@ -591,7 +562,6 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                                     <motion.div
                                         whileTap={{ backgroundColor: 'rgba(0, 0, 0, 0.32)' }}
                                         className="w-[50px] h-[50px] absolute top-0 rounded-full">
-
                                     </motion.div>
                                 </button>
 
@@ -607,19 +577,27 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                             <button
                                 className="mt-4 mr-auto ml-4"
                                 onClick={() => [dispatch({ type: "UPLOAD_IMAGES_SUCCESS_CLEAR" }), setNewMessage("")]}>
-                                <Image src={close} alt='profilePicturePlaceholder' width={20} height={20} priority />
+                                <Image
+                                    src={close}
+                                    alt='closeIcon'
+                                    width={20}
+                                    height={20}
+                                    priority />
                             </button>
                             <div className="w-[480px] h-[480px] flex items-center justify-center">
-                                <img src={`/userImages/${imagePaths[imageIndex]}`} alt="messageImage" className="object-contain w-full h-full" />
+                                <img
+                                    src={`/userImages/${imagePaths[imageIndex]}`}
+                                    alt="messageImage"
+                                    className="object-contain w-full h-full" />
                             </div>
                             <textarea
                                 onKeyDown={keyPressed}
                                 rows={3}
                                 className="mx-4 p-2.5 w-[60%] h-[7%] resize-none text-md text-gray-900 rounded-lg border
-                                 border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-bgPrimary dark:border-gray-600
-                                  dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 no-scrollbar"
+                                           border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-bgPrimary dark:border-gray-600
+                                           dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 no-scrollbar"
                                 placeholder="Your message..."
-                                onChange={inputHandler}
+                                onChange={handleTextAreaInputChange}
                                 value={newMessage}
                             >
                             </textarea>
@@ -634,18 +612,20 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                                                 onClick={() => setImageIndex(Number(index))}
                                                 className={`w-[60px] h-[60px] flex items-center justify-center rounded-lg ${imageIndex === Number(index) ? 'border-2 border-green-500' : 'border border-black'} `}
                                             >
-                                                <img src={`/userImages/${image}`} key={index} alt="messageImage" className="object-cover w-full h-full rounded-lg" />
+                                                <img
+                                                    src={`/userImages/${image}`}
+                                                    key={index} alt="messageImage"
+                                                    className="object-cover w-full h-full rounded-lg" />
                                             </button>
                                         )
-
                                     })}
 
                                     <button
                                         className="w-[60px] h-[60px] flex justify-center items-center border-2 border-brPrimary rounded-lg"
-                                        onClick={() => selectInputMedia()}
+                                        onClick={() => handleSelectMediaCliked()}
                                     >
                                         <input
-                                            onChange={mediaSelected}
+                                            onChange={handleMediaSelected}
                                             multiple={true}
                                             type="file"
                                             id="inputFile"
@@ -659,17 +639,15 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                                             height={25}
                                             priority />
                                     </button>
-
                                 </div>
                                 
                                 <button
                                     className="mt-5 mr-4"
-                                    onClick={() => [sendMessage(), setNewMessage(""), setMediaSelected(false), dispatch({ type: "UPLOAD_IMAGES_SUCCESS_CLEAR" })]}>
-                                    <div className="w-[50px] h-[50px] flex justify-center items-center rounded-full rotate-45 bg-gradient-to-r from-gradientOne via-gradientTwo to-gradientThree  border-bgPrimary">
+                                    onClick={() => [handleSendMessage(), setNewMessage(""), setMediaSelected(false), dispatch({ type: "UPLOAD_IMAGES_SUCCESS_CLEAR" })]}>
+                                    <div className="w-[50px] h-[50px] flex justify-center items-center rounded-full rotate-45 bg-gradient-to-r from-gradientOne via-gradientTwo to-gradientThree border-bgPrimary">
                                         <RiSendPlaneFill className="w-[45px] h-[45px] mr-[6px] mt-[6px] text-bgPrimary" />
                                     </div>
                                 </button>
-                                
                             </div>
                         </div>
                     </div>
@@ -692,17 +670,20 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                     <div className="w-full h-full flex flex-col justify-start items-center overflow-hidden">
                         {/* TOP BAR */}
                         <div
-                            
                             className="topbar w-full min-h-[70px] flex flex-row justify-start items-center px-6 gap-4 border-b-2 border-bgPrimary bg-gradient-to-l from-gradientOne via-gradientTwo to-gradientThree">
                             <motion.button
                                 whileTap={{ backgroundColor: 'rgba(0, 0, 0, 0.32)' }}
                                 className="rounded-full w-[45px] h-[45px] flex justify-center items-center"
                                 onClick={() => setContactInfoOpen(false)}
                             >
-                                <Image src={close} alt='closeIcon' width={20} height={20} className="rounded-full" priority />
+                                <Image
+                                    src={close}
+                                    alt='closeIcon'
+                                    width={20}
+                                    height={20}
+                                    className="rounded-full"
+                                    priority />
                             </motion.button>
-
-
                         </div>
 
                         {/* AVATAR NAME AND SHARED MEDIA */}
@@ -757,9 +738,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                                                 }
                                             </div>
                                         </button>
-
-
                                     </div>
+
                                     <div className={`flex flex-col w-[100%] h-auto justify-center items-center ${isSharedMediaOpen ? '-space-y-[0px]' : '-space-y-[155px]'}`}>
                                         <div className={` ${isSharedMediaOpen? 'hidden' : 'relative'} w-[100%] h-[160px] bg-gradient-to-t from-bgPrimary to-transparent rounded-lg`}/>
                                         <div className="w-[100%] grid grid-cols-3 gap-2 mb-4">
@@ -770,7 +750,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                                                     className="w-[160px] h-[150px] rounded-md flex items-center justify-center  desktop:w-[130px]" >
                                                         {
                                                             sharedMedia[index] ?
-                                                                <img src={`/userImages/${sharedMedia[index]}`} key={index} alt="sharedMedia" className="object-cover w-[150px] h-[140px] rounded-md" />
+                                                                <img src={`/userImages/${sharedMedia[index]}`} key={index} alt="sharedMedia" className="object-cover w-[150px] h-[140px] rounded-md"/>
                                                                 :
                                                                 <Image src={profilePicturePlaceholder} key={index} width={140} height={140} className="rounded-md" alt="alt" />
                                                         }
@@ -782,7 +762,6 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className }) => {
                             </div>
                         </div>
                     </div>
-
                 </motion.div>
             </div>
         </>

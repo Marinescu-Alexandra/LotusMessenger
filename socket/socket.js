@@ -2,7 +2,7 @@ import { Server } from "socket.io";
 
 const io = new Server(8000, {
     cors: {
-        origin: '*',
+        origin: 'http://localhost:3000',
         methods: ['GET', 'POST'],
         credentials: true
     },
@@ -66,38 +66,13 @@ io.on('connection', (socket) => {
     })
 
     socket.on('removeSocketInstance', (userId) => {
+        console.log('removeSocketInstance', userId)
         for (var i = 0; i < users.length; i++) {
             if (users[i].userId === userId) {
                 userRemove(users[i].socketId);
                 break
             }
         }        
-    })
-
-    socket.on('sendMessage', (data) => {
-        const user = findFriend(data.receiverId)
-        if (user !== undefined) {
-            socket.to(user.socketId).emit('getMessage', data)
-        }
-    })
-
-    socket.on('messageSeen', (data) => {
-        const user = findFriend(data.senderId)
-        if (user !== undefined) {
-            socket.to(user.socketId).emit('messageSeenResponse', data)
-        }
-    })
-
-    socket.on('deliverMessage', (data) => {
-        const user = findFriend(data.senderId)
-        if (user !== undefined) {
-            socket.to(user.socketId).emit('messageDeliverResponse', data)
-        }
-    })
-
-    socket.on('logout', (userId) => {
-        userLogout(userId)
-        io.emit('getUser', users)
     })
 
     socket.on('typingMessage', (data) => {
@@ -109,6 +84,46 @@ io.on('connection', (socket) => {
                 message: data.message
             })
         }
+    })
+
+    socket.on('sendMessage', (data) => {
+        const user = findFriend(data.receiverId)
+        if (user !== undefined) {
+            socket.to(user.socketId).emit('getMessage', data)
+        }
+    })
+
+    socket.on('deliverMessage', (data) => {
+        const user = findFriend(data.senderId)
+        if (user !== undefined) {
+            socket.to(user.socketId).emit('socketMessageDelivered', data)
+        }
+    })
+
+    socket.on('messageSeen', (data) => {
+        const user = findFriend(data.senderId)
+        if (user !== undefined) {
+            socket.to(user.socketId).emit('socketMessageSeen', data)
+        }
+    })
+
+    socket.on('deliverMessages', (data) => {
+        const user = findFriend(data.senderId)
+        if (user !== undefined) {
+            socket.to(user.socketId).emit('updateLastMessageAsDelivered', data)
+        }
+    })
+
+    socket.on('seenMessages', (data) => {
+        const user = findFriend(data.senderId)
+        if (user !== undefined) {
+            socket.to(user.socketId).emit('updateLastMessageAsSeen', data)
+        }
+    })
+
+    socket.on('logout', (userId) => {
+        userLogout(userId)
+        io.emit('getUser', users)
     })
 
     socket.on('disconnect', (reason) => {

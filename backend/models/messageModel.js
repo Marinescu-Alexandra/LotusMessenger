@@ -26,7 +26,7 @@ const messageSchema = new Schema({
     },
     status: {
         type: String,
-        default: 'unseen'
+        default: 'undelivered'
     }
 }, { timestamps: true });
 

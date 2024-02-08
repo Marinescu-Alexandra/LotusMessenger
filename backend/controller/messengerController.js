@@ -7,34 +7,51 @@ import formidable from 'formidable';
 import { copyFile } from 'fs/promises'
 import { verifyFilename } from '../utils/verifyFilename.js'
 
-const getLastMessages = async (myId) => {
-    const lastMessages = await MessageModel.aggregate([
-        {
-            $match: {
-                $or: [
-                    { senderId: myId },
-                    { receiverId: myId }
-                ]
-            }
-        },
-        {
-            $sort: { updatedAt: -1 }
-        },
-        {
-            $group: {
-                "_id": {
-                    $cond: [
-                        { $eq: ["$senderId", myId] },
-                        { $concat: ["$senderId", "-", "$receiverId"] },
-                        { $concat: ["$receiverId", "-", "$senderId"] }
-                    ]
-                },
-                "lastMessage": { $first: "$$ROOT" }
-            }
-        }
-    ]);
+export async function getLastMessages(req, res, next) {
+    const myId = req.myId
 
-    return lastMessages;
+    try {
+        const lastMessages = await MessageModel.aggregate([
+            {
+                $match: {
+                    $or: [
+                        { senderId: myId },
+                        { receiverId: myId }
+                    ]
+                }
+            },
+            {
+                $sort: { createdAt: -1 }
+            },
+            {
+                $group: {
+                    "_id": {
+                        $cond: [
+                            { $eq: ["$senderId", myId] },
+                            { $concat: ["$senderId", "-", "$receiverId"] },
+                            { $concat: ["$receiverId", "-", "$senderId"] }
+                        ]
+                    },
+                    "lastMessage": { $first: "$$ROOT" }
+                }
+            }
+        ]);
+
+        const lastMessagesMap = {};
+
+        for (const foundMessage of lastMessages) {
+            const message = foundMessage.lastMessage
+            const key = message.senderId !== myId ? message.senderId : message.receiverId;
+            lastMessagesMap[key] = message;
+        }
+
+        res.status(200).json({
+            lastMessages: lastMessagesMap
+        })
+
+    } catch(error) {
+        next(error)
+    }
 }
 
 export async function getFriends(req, res, next) {
@@ -47,21 +64,14 @@ export async function getFriends(req, res, next) {
             }
         })
 
-        const lastMessages = await getLastMessages(myId);
-        const lastMessagesMap = {};
-
-        for (const foundMessage of lastMessages) {
-            const message = foundMessage.lastMessage
-            const key = message.senderId !== myId ? message.senderId : message.receiverId;
-            lastMessagesMap[key] = message;
-        }
-
         const friendList = friendGet.map((friend) => ({
             ...friend._doc,
-            lastMessageInfo: lastMessagesMap[friend._id],
         }))
 
-        res.status(200).json({ success: true, friends: friendList })
+        res.status(200).json({
+            success: true,
+            friends: friendList
+        })
 
     } catch (error) {
         next(error)
@@ -96,7 +106,7 @@ export async function messageUploadDB(req, res, next) {
     }
 }
 
-export async function messageGet(req, res, next) {
+export async function getMessages(req, res, next) {
     const currentUserId = req.myId;
     const friendId = req.params.id
 
@@ -135,29 +145,66 @@ export async function messageGet(req, res, next) {
     }
 }
 
-export async function undeliveredMessagesGet(req, res, next) {
+export async function updateUndeliveredMessages(req, res, next) {
     const currentUserId = req.myId;
     const friendId = req.params.id
 
     try {
-        let getAllUndeliveredMessages = await MessageModel.find({
-            $and: [{
-                senderId: {
-                    $eq: friendId
-                }
-            }, {
-                receiverId: {
-                    $eq: currentUserId
-                }
-            }, {
-                status: {
-                    $eq: 'unseen'
-                }
-            }]
-        })
+        await MessageModel.updateMany(
+            {
+                $and: [{
+                    senderId: {
+                        $eq: friendId
+                    }
+                }, {
+                    receiverId: {
+                        $eq: currentUserId
+                    }
+                }, {
+                    status: {
+                        $eq: 'undelivered'
+                    }
+                }]
+            }, 
+            {
+                status: 'delivered'
+            }
+        )
         res.status(200).json({
             success: true,
-            undeliveredMessages: getAllUndeliveredMessages
+        })
+    } catch (error) {
+        next(error)
+    }
+}
+
+export async function updateUnseenMessages(req, res, next) {
+    const currentUserId = req.myId;
+    const friendId = req.params.id
+
+    try {
+        await MessageModel.updateMany(
+            {
+                $and: [{
+                    senderId: {
+                        $eq: friendId
+                    }
+                }, {
+                    receiverId: {
+                        $eq: currentUserId
+                    }
+                }, {
+                    status: {
+                        $eq: 'delivered'
+                    }
+                }]
+            },
+            {
+                status: 'seen'
+            }
+        )
+        res.status(200).json({
+            success: true,
         })
     } catch (error) {
         next(error)
@@ -203,7 +250,9 @@ export async function messageSeen(req, res, next) {
         await MessageModel.findByIdAndUpdate(messageId, {
             status: 'seen'
         })
+        const message = await MessageModel.findById(messageId)
         res.status(200).json({
+            message: message,
             success: true
         })
     } catch(error) {
@@ -218,7 +267,9 @@ export async function messageDeliver(req, res, next) {
         await MessageModel.findByIdAndUpdate(messageId, {
             status: 'delivered'
         })
+        const message = await MessageModel.findById(messageId)
         res.status(200).json({
+            message: message,
             success: true
         })
     } catch (error) {
