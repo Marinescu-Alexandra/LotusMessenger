@@ -75,11 +75,20 @@ export const messengerReducer = (state = messengerState, action: PayloadAction<{
             }
 
         case UPDATE_MESSAGES:
+            let updatedMessages = [...state.messages]
+            for (let i = updatedMessages.length - 1; i >= 0; i--) {
+                if (updatedMessages[i].status !== action.payload.status) {
+                    updatedMessages[i] = {
+                        ...updatedMessages[i],
+                        status: action.payload.status
+                    }
+                } else {
+                    break;
+                }
+            }
             return {
                 ...state,
-                messages: state.messages.map(
-                    (message) => message.status !== action.payload.status && message.status !== 'seen' ? { ...message, status: action.payload.status } : message
-                )
+                messages: updatedMessages
             }
     
         case UPLOAD_IMAGES_SUCCESS:

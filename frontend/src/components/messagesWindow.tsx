@@ -211,7 +211,6 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
         }
     }
 
-
     // ===================================================================REACT HOOKS===================================================================
 
     // SCROLL IF NEEDED WHEN NEW MESSAGES ARE ADDED
