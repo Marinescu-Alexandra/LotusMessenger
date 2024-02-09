@@ -46,7 +46,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
     const dispatch = useAppDispatch()
     const { myInfo } = useAppSelector(state => state.auth);
     const { selectedFriendData, sharedMedia } = useAppSelector(state => state.selectedFriend)
-    const { friendsGetSuccess, messages, messageSendSuccess, imagePaths, lastMessages, messagesGetSuccess, lastMessagesGetSuccess } = useAppSelector(state => state.messenger)
+    const { friendsGetSuccess, messages, messageSendSuccess, imagePaths, lastMessages, messagesGetSuccess, lastMessagesGetSuccess, socketGetSuccess } = useAppSelector(state => state.messenger)
 
     // REACT STATES
     const [shouldScroll, setShouldScroll] = useState({state: true})
@@ -267,7 +267,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
                 })
             } 
         }
-    }, [messageSendSuccess, messagesGetSuccess, [lastMessages[selectedFriendData._id]]])
+    }, [messageSendSuccess, messagesGetSuccess, socketGetSuccess, [lastMessages[selectedFriendData._id]]])
 
     // ===================================================================REAL TIME UPDATES FROM SOCKET SERVER===================================================================
 
@@ -396,6 +396,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
 
                 socket.emit('messageSeen', { ...socketMessage, status: 'seen' })
             }
+
+            setSocketMessage({})
         }
     }, [shouldScroll])
 
@@ -408,9 +410,17 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
                 dispatch(deliverMessage(socketMessage._id || ''))
 
                 socket.emit('deliverMessage', { ...socketMessage, status: 'delivered' })
+
+                setSocketMessage({})
             }
         }
     }, [socketMessage])
+
+    useEffect(() => {
+        dispatch({
+            type: 'SOCKET_GET_SUCCESS_CLEAR',
+        })
+    }, [socketGetSuccess])
 
     return (
         <>
@@ -495,9 +505,9 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
                                             deliverTime={moment(e.createdAt).format('kk:mm')}
                                             imageUrl={e.message.image}
                                             handleImageGalleryClick={handleImageGalleryClick}
-                                                userProfileImage={selectedFriendData.profileImage}
-                                                displayProfileImage={index === 0 || (index > 0 && messages[index - 1].senderId === myInfo.id) ? true : false}
-                                            />
+                                            userProfileImage={selectedFriendData.profileImage}
+                                            displayProfileImage={index === 0 || (index > 0 && messages[index - 1].senderId === myInfo.id) ? true : false}
+                                        />
                                         :
                                         <RightChatBubble
                                             key={index}
@@ -568,11 +578,11 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
                     </div>
 
                     {/* GALLERY UPLOAD VIEW */}
-                    <div className={`${isMediaSelected ? 'flex' : 'hidden'} z-20 w-full h-full bg-bgMain overflow-y-scroll no-scrollbar`}>
+                    <div className={`${isMediaSelected ? 'flex' : 'hidden'} z-20 w-full bg-bgMain`}>
 
-                        <div className="flex flex-col justify-between items-center w-full min-h-[800px] gap-10">
+                        <div className="flex flex-col justify-between items-center w-full">
                             <button
-                                className="mt-4 mr-auto ml-4"
+                                className="mt-4 ml-auto mr-9"
                                 onClick={() => [dispatch({ type: "UPLOAD_IMAGES_SUCCESS_CLEAR" }), setNewMessage("")]}>
                                 <Image
                                     src={close}
@@ -581,11 +591,11 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
                                     height={20}
                                     priority />
                             </button>
-                            <div className="w-[480px] h-[480px] flex items-center justify-center">
+                            <div className="w-[80%] min-h-[550px] max-h-[550px] flex items-center justify-center">
                                 <img
                                     src={`/userImages/${imagePaths[imageIndex]}`}
                                     alt="messageImage"
-                                    className="object-contain w-full h-full" />
+                                    className="object-contain h-full rounded-md" />
                             </div>
                             <textarea
                                 onKeyDown={keyPressed}
@@ -599,7 +609,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
                             >
                             </textarea>
 
-                            <div className="flex flex-row w-[90%] justify-between gap-4 items-start h-[120px] border-t-2 border-bgPrimary ">
+                            <div className="flex flex-row w-[80%] justify-between gap-4 items-start h-[100px] border-t-2 border-bgPrimary">
                                 <div className="grid grid-rows-1 grid-flow-col w-auto h-auto gap-5 mt-4 mb-6 overflow-x-auto no-scrollbar">
 
                                     {imagePaths.map((image: string, index) => {

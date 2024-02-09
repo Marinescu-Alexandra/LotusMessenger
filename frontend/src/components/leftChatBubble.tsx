@@ -16,7 +16,7 @@ interface LeftChatBubble {
 const LeftChatBubble: FC<LeftChatBubble> = ({ message, deliverTime, imageUrl, handleImageGalleryClick, userProfileImage, displayProfileImage }) => {
 
     return (
-        <div className="flex items-start gap-2.5 ml-4 mb-4 z-20">
+        <div className="flex items-start gap-2.5 ml-4 mb-1.5 z-20">
             {
                 displayProfileImage ?
                     userProfileImage ?
@@ -27,12 +27,12 @@ const LeftChatBubble: FC<LeftChatBubble> = ({ message, deliverTime, imageUrl, ha
                         :
                         <Image className="w-10 h-10 rounded-full object-cover" src={profilePlaceholder} alt="profilePicPlaceholder" />
                     :
-                    <span className="w-10 h-10"></span>
+                    <span className="w-10"></span>
             }
             
 
-            <div className={`min-w-[30px] ${imageUrl && imageUrl.length <= 4 && imageUrl.length >= 1  ? 'max-w-[380px]' : 'max-w-[580px]'}  leading-1.5 p-4 border-gray-200 bg-bgPrimary rounded-r-xl rounded-b-xl rounded-es-xl`}>
-                <p className="text-normal font-normal pb-2 text-textLeftBubble break-words">{message}</p>
+            <div className={`min-w-[30px] ${imageUrl && imageUrl.length <= 4 && imageUrl.length >= 1 ? 'max-w-[380px]' : 'max-w-[680px]'}  leading-1.5 py-2 px-4 border-gray-200 bg-bgPrimary rounded-r-xl rounded-b-xl rounded-es-xl ${message.length <= 80 && imageUrl.length === 0 ? 'flex flex-row gap-2 !px-2.5 !py-1.5 !max-w-[810px]' : ''} ${displayProfileImage ? 'mb-[4px]' : ''}`}>
+                <p className="text-normal font-normal text-textLeftBubble break-words break-all">{message}</p>
                 {
                     (imageUrl && imageUrl.length <= 4) &&
 
@@ -77,8 +77,8 @@ const LeftChatBubble: FC<LeftChatBubble> = ({ message, deliverTime, imageUrl, ha
                         })}
                     </div>
                 }
-                <div className="flex flex-row justify-start items-center">
-                    <span className="text-sm font-normal text-gray-500 dark:text-gray-400">{deliverTime}</span>
+                <div className="flex flex-row justify-end items-center">
+                    <span className="text-sm font-normal text-gray-500 dark:text-gray-400 text-center pt-[3px]">{deliverTime}</span>
                 </div>
             </div>
         </div>

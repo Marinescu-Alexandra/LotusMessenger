@@ -18,9 +18,9 @@ const RightChatBubble: FC<RightChatBubble> = ({ message, deliverTime, status, im
 
     return (
         <>
-            <div className="flex items-end gap-2.5 ml-4 mb-4 justify-end mr-4 z-20">
-                <div className={`min-w-[30px] ${imageUrl && imageUrl.length <= 4 && imageUrl.length >= 1 ? 'max-w-[380px]' : 'max-w-[580px]'} relative leading-1.5 p-4 border-gray-200 bg-bgPrimary rounded-l-xl rounded-b-xl rounded-es-xl`}>
-                    <p className="text-normal font-normal pb-2 text-textRightBubble break-words text-wrap flex justify-end">{message}</p>
+            <div className="flex items-end gap-2.5 ml-4 mb-1.5 justify-end mr-4 z-20">
+                <div className={`min-w-[30px] ${imageUrl && imageUrl.length <= 4 && imageUrl.length >= 1 ? 'max-w-[380px]' : 'max-w-[680px]'} relative leading-1.5 py-2 px-4 border-gray-200 bg-bgPrimary rounded-l-xl rounded-b-xl rounded-es-xl ${message.length <= 80 && imageUrl.length === 0 ? 'flex flex-row gap-2 !px-2.5 !py-1.5 !max-w-[810px]' : ''}`}>
+                    <p className="text-normal font-normal text-textRightBubble break-words text-wrap">{message}</p>
                     {
                         (imageUrl && imageUrl.length <= 4) &&
 
@@ -65,16 +65,16 @@ const RightChatBubble: FC<RightChatBubble> = ({ message, deliverTime, status, im
                             })}
                         </div>
                     }
-                    <div className="flex flex-row justify-end items-center gap-2">
-                        <span className="text-sm font-normal text-gray-400">{deliverTime}</span>
+                    <div className="flex flex-row justify-end items-center gap-1.5">
+                        <span className="text-sm font-normal text-gray-400 text-center pt-[2px]">{deliverTime}</span>
                         {
                             status === 'seen' ?
-                                <Image src={seenIcon} alt='readIcon' width={25} height={25} className="rounded-full" priority />
+                                <Image src={seenIcon} alt='readIcon' width={20} height={20} className="rounded-full" priority />
                                 :
                                 status === 'delivered' ?
-                                    <Image src={delivered} alt='readIcon' width={25} height={25} className="rounded-full" priority />
+                                    <Image src={delivered} alt='readIcon' width={20} height={20} className="rounded-full " priority />
                                     :
-                                    <Image src={defaultStatus} alt='readIcon' width={25} height={25} className="rounded-full" priority />
+                                    <Image src={defaultStatus} alt='readIcon' width={20} height={20} className="rounded-full " priority />
                         }
                     </div>
                 </div>

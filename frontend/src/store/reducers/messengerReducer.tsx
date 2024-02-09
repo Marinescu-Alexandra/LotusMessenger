@@ -1,6 +1,6 @@
 import {
     FRIEND_GET_SUCCESS, MESSAGE_GET_SUCCESS, SEND_MESSAGE_SUCCESS, SOCKET_MESSAGE, UPDATE_LAST_MESSAGE_INFO, UPLOAD_IMAGES_SUCCESS, UPLOAD_IMAGES_SUCCESS_CLEAR, MESSAGE_GET_SUCCESS_CLEAR,
-    MESSAGE_SEND_SUCCESS_CLEAR, NEW_USER_ADDED, NEW_USER_ADDED_CLEAR, UPDATE_UNDELIVERED_SUCCESS, UPDATE_UNDELIVERED_SUCCESS_CLEAR, LAST_MESSAGES_GET_SUCCESS, UPDATE_MESSAGES
+    MESSAGE_SEND_SUCCESS_CLEAR, NEW_USER_ADDED, NEW_USER_ADDED_CLEAR, UPDATE_UNDELIVERED_SUCCESS, UPDATE_UNDELIVERED_SUCCESS_CLEAR, LAST_MESSAGES_GET_SUCCESS, UPDATE_MESSAGES, SOCKET_GET_SUCCESS_CLEAR
 } from '../types/messengerType'
 import { LOGOUT_SUCCESS } from '../types/authType'
 import { PayloadAction } from '@reduxjs/toolkit';
@@ -14,6 +14,7 @@ interface MessengerState {
     messages: Message[],
     messagesGetSuccess: boolean,
     messageSendSuccess: boolean,
+    socketGetSuccess: boolean,
     newUserAdded: boolean,
     updateUndeliveredMessages: boolean,
     imagePaths: string[]
@@ -27,6 +28,7 @@ const messengerState: MessengerState = {
     messages: [],
     messagesGetSuccess: false,
     messageSendSuccess: false,
+    socketGetSuccess: false,
     newUserAdded: false,
     updateUndeliveredMessages: false,
     imagePaths: []
@@ -77,12 +79,13 @@ export const messengerReducer = (state = messengerState, action: PayloadAction<{
         case UPDATE_MESSAGES:
             let updatedMessages = [...state.messages]
             for (let i = updatedMessages.length - 1; i >= 0; i--) {
-                if (updatedMessages[i].status === action.payload.status) {
-                    break
-                }
-                updatedMessages[i] = {
-                    ...updatedMessages[i],
-                    status: action.payload.status
+                if (updatedMessages[i].status !== action.payload.status) {
+                    updatedMessages[i] = {
+                        ...updatedMessages[i],
+                        status: action.payload.status
+                    }
+                } else {
+                    break;
                 }
             }
             return {
@@ -105,8 +108,16 @@ export const messengerReducer = (state = messengerState, action: PayloadAction<{
         case SOCKET_MESSAGE:
             return {
                 ...state,
-                messages: [...state.messages, action.payload.message]
+                messages: [...state.messages, action.payload.message],
+                socketGetSuccess: true
             }
+        
+        case SOCKET_GET_SUCCESS_CLEAR: {
+            return {
+                ...state,
+                socketGetSuccess: false
+            }
+        }
     
         case MESSAGE_GET_SUCCESS:
             return {
