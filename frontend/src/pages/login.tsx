@@ -101,9 +101,9 @@ const Login = () => {
                                     <form onSubmit={handleLogin}>
                                         <p className="mb-4">Please login to your account</p>
                                         {
-                                            fields.map((field) => {
+                                            fields.map((field, index) => {
                                                 return (
-                                                    <div className="relative mb-4" >
+                                                    <div className="relative mb-4" key={index}>
                                                         <input
                                                             onChange={handleInputChanges}
                                                             value={field.name === 'email' ? formInputState.email : formInputState.password}
@@ -118,7 +118,7 @@ const Login = () => {
                                                             className="absolute text-nm text-white duration-300 transform -translate-y-4 scale-[0.9] top-1 z-10 origin-[0] ml-2 px-1
                                                                        peer-focus:ml-2 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 bg-darkBgPrimary
                                                                        peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-1 peer-focus:scale-[0.9] peer-focus:-translate-y-4
-                                                                     peer-focus:text-primary rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 ">
+                                                                     peer-focus:text-primary rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto start-1 pointer-events-none">
                                                             {field.placeholder}
                                                         </label>
                                                     </div>  
