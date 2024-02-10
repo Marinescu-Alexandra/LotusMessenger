@@ -139,8 +139,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
     }
 
     const handleSharedMediaImageClicked = (index: number) => {
-        setSharedMediaGallery(true)
         setSharedMediaGalleryIndex(index)
+        setSharedMediaGallery(true)
         setGalleryImageSelected(false)
     }
 
@@ -218,7 +218,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
         if (shouldScroll.state === true) {
             scrollToBottom();
         }
-    }, [messages])
+    }, [messageSendSuccess, messagesGetSuccess, socketGetSuccess])
 
     // OPEN GALERY VIEW WHEN USER FINISHED CHOOSING MEDIA TO SHARE
     useEffect(() => {
@@ -578,9 +578,9 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
                     </div>
 
                     {/* GALLERY UPLOAD VIEW */}
-                    <div className={`${isMediaSelected ? 'flex' : 'hidden'} z-20 w-full bg-bgMain`}>
+                    <div className={`${isMediaSelected ? 'flex' : 'hidden'} z-20 w-full h-full bg-bgMain`}>
 
-                        <div className="flex flex-col justify-between items-center w-full">
+                        <div className="flex flex-col justify-between items-center w-full h-full">
                             <button
                                 className="mt-4 ml-auto mr-9"
                                 onClick={() => [dispatch({ type: "UPLOAD_IMAGES_SUCCESS_CLEAR" }), setNewMessage("")]}>
@@ -600,7 +600,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
                             <textarea
                                 onKeyDown={keyPressed}
                                 rows={3}
-                                className="mx-4 p-2.5 w-[60%] h-[7%] resize-none text-md text-gray-900 rounded-lg border
+                                className="mx-4 p-2.5 w-[70%] h-[7%] resize-none text-md text-gray-900 rounded-lg border
                                            border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-bgPrimary dark:border-gray-600
                                            dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 no-scrollbar"
                                 placeholder="Your message..."

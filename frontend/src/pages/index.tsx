@@ -94,8 +94,8 @@ export default function Home() {
                             }
                         }}
                     />
-                    <DirectMessages className="w-[28%] min-h-[100%]" activeUsers={activeUsers}/>
-                    <MessagesWinow className="w-[72%] min-h-[100%] z-10" activeUsers={activeUsers}/>
+                    <DirectMessages className="w-[28%] h-full" activeUsers={activeUsers}/>
+                    <MessagesWinow className="w-[72%] h-full z-10" activeUsers={activeUsers}/>
                 </main>
             </>
         )

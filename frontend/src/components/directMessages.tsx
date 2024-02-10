@@ -45,7 +45,6 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
     const colorPalette = ['bg-bgMain', 'bg-bgPrimary', 'bg-gradientOne', 'bg-gradientTwo', 'bg-gradientThree']
 
     // REACT STATES
-
     const [friendsList, setFriendList] = useState(friends)
     const [friendIndex, setFriendIndex] = useState<React.Key | null>(null)
 
