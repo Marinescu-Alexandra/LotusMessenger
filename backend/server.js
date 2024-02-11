@@ -45,7 +45,7 @@ app.get('/', (req, res) => {
     res.send('Server')
 })
 
-databaseConnect();
+await databaseConnect();
 
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`)

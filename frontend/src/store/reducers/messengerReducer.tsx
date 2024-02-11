@@ -1,8 +1,8 @@
 import {
     FRIEND_GET_SUCCESS, MESSAGE_GET_SUCCESS, SEND_MESSAGE_SUCCESS, SOCKET_MESSAGE, UPDATE_LAST_MESSAGE_INFO, UPLOAD_IMAGES_SUCCESS, UPLOAD_IMAGES_SUCCESS_CLEAR, MESSAGE_GET_SUCCESS_CLEAR,
     MESSAGE_SEND_SUCCESS_CLEAR, NEW_USER_ADDED, NEW_USER_ADDED_CLEAR, UPDATE_UNDELIVERED_SUCCESS, UPDATE_UNDELIVERED_SUCCESS_CLEAR, LAST_MESSAGES_GET_SUCCESS, UPDATE_MESSAGES, SOCKET_GET_SUCCESS_CLEAR
-} from '../types/messengerType'
-import { LOGOUT_SUCCESS } from '../types/authType'
+} from '../actionTypes/messengerType'
+import { LOGOUT_SUCCESS } from '../actionTypes/authType'
 import { PayloadAction } from '@reduxjs/toolkit';
 import { Friend, Message, Dictionary } from '@/ts/interfaces/interfaces'
 
@@ -77,15 +77,14 @@ export const messengerReducer = (state = messengerState, action: PayloadAction<{
             }
 
         case UPDATE_MESSAGES:
-            let updatedMessages = [...state.messages]
+            const updatedMessages = [...state.messages]
             for (let i = updatedMessages.length - 1; i >= 0; i--) {
-                if (updatedMessages[i].status !== action.payload.status) {
-                    updatedMessages[i] = {
-                        ...updatedMessages[i],
-                        status: action.payload.status
-                    }
-                } else {
-                    break;
+                if (updatedMessages[i].status === action.payload.status || updatedMessages[i].status === 'seen') {
+                    break
+                }
+                updatedMessages[i] = {
+                    ...updatedMessages[i],
+                    status: action.payload.status
                 }
             }
             return {

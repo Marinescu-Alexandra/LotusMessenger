@@ -21,6 +21,7 @@ import toast from 'react-hot-toast'
 import { socket } from "@/socket"
 import { SocketTypingMessage, Message, SocketUser } from "@/ts/interfaces/interfaces";
 
+
 interface MessagesWindowProps {
     className?: string,
     activeUsers?: SocketUser[]
@@ -71,15 +72,21 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
     const [socketMessage, setSocketMessage] = useState<Partial<Message>>({})
     const [typingMessage, setTypingMessage] = useState<Partial<SocketTypingMessage>>({})
 
+    const [lastThrottleTime, setThrottleLastTime] = useState(0)
+
     // HANDLERS
     const handleTextAreaInputChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
         setNewMessage(e.target.value)
         if (myInfo) {
-            socket.emit('typingMessage', {
-                senderId: myInfo.id,
-                receiverId: selectedFriendData._id,
-                message: e.target.value
-            })
+            throttle(e.target.value, 3000)
+            if (e.target.value === '') {
+                socket.emit('typingMessage', {
+                    senderId: myInfo.id,
+                    receiverId: selectedFriendData._id,
+                    message: ''
+                })
+                setThrottleLastTime(0)
+            }
         }
     }
 
@@ -101,6 +108,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
                     message: ''
                 })
             }
+
+            setThrottleLastTime(0)
 
             updateShouldScroll()
 
@@ -148,11 +157,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
 
         const formData = new FormData()
         if (e.target.files) {
-            let length = e.target.files.length
-            if (e.target.files.length > 10) {
-                length = 10
-            }
-
+            const length = Math.min(e.target.files.length, 10)
             for (let i = 0; i < length; i++) {
                 formData.append('fileToUpload[]', e.target.files[i]);
                 formData.append('imageName[]', Date.now() + e.target.files[i].name);
@@ -166,9 +171,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
         let sharedMedia: string[] = []
         for (let i = 0; i < messages.length; i++) {
             if (messages[i].message.image.length > 0) {
-                for (let j = 0; j < messages[i].message.image.length; j++) {
-                    sharedMedia = [...sharedMedia, messages[i].message.image[j]]
-                }
+                sharedMedia.push(...messages[i].message.image)
             }
         }
         dispatch(getSharedMedia(sharedMedia))
@@ -187,9 +190,9 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
 
     function updateShouldScroll() {
         if (chatWindow) {
-            let scrollTop = Math.floor(chatWindow.scrollTop)
-            let clientHeight = chatWindow.clientHeight
-            let totalHeigth = chatWindow.scrollHeight
+            const scrollTop = Math.floor(chatWindow.scrollTop)
+            const clientHeight = chatWindow.clientHeight
+            const totalHeigth = chatWindow.scrollHeight
             if (scrollTop + clientHeight === totalHeigth || scrollTop + clientHeight === totalHeigth - 1) {
                 setShouldScroll(prevState => { return { ...prevState, state: true } })
             } else {
@@ -208,6 +211,22 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
                 setMediaSelected(false)
                 dispatch({ type: "UPLOAD_IMAGES_SUCCESS_CLEAR" })
             }
+        }
+    }
+
+    function emitTypingMessage(val: string) {
+        socket.emit('typingMessage', {
+            senderId: myInfo.id,
+            receiverId: selectedFriendData._id,
+            message: val
+        })
+    }
+
+    function throttle(val: string, ms: number) {
+        const now = Date.now();
+        if (now - lastThrottleTime >= ms) {
+            emitTypingMessage(val);
+            setThrottleLastTime(now)
         }
     }
 
@@ -267,7 +286,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
                 })
             } 
         }
-    }, [messageSendSuccess, messagesGetSuccess, socketGetSuccess, [lastMessages[selectedFriendData._id]]])
+    }, [messageSendSuccess, messagesGetSuccess, [lastMessages[selectedFriendData._id]]])
 
     // ===================================================================REAL TIME UPDATES FROM SOCKET SERVER===================================================================
 
@@ -390,10 +409,8 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
 
                 dispatch(seenMessage(socketMessage._id || ''))
 
-                if (socketMessage.message?.image) {
-                    socketMessage.message?.image.forEach((image: string) => dispatch(updateSharedMedia(image)));
-                }
-
+                socketMessage.message?.image?.forEach((image: string) => dispatch(updateSharedMedia(image)));
+                
                 socket.emit('messageSeen', { ...socketMessage, status: 'seen' })
             }
 
@@ -524,7 +541,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
 
                     {/* TYPING NOTICE */}
                     {
-                        typingMessage && typingMessage.message && typingMessage.senderId == selectedFriendData._id ?
+                        typingMessage && typingMessage.message !== '' && typingMessage.senderId == selectedFriendData._id ?
                             <p className={`mb-2 w-full text-semibold pl-6 text-lg text-left z-20 ${isMediaSelected || isGalleryImageSelected || isSharedMediaGalleryOpen ? 'hidden' : 'flex'}`}>Typing Message...</p> : ''
                     }
 

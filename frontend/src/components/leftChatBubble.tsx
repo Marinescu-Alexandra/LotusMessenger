@@ -51,29 +51,21 @@ const LeftChatBubble: FC<LeftChatBubble> = ({ message, deliverTime, imageUrl, ha
                     (imageUrl && imageUrl.length > 4) &&
                     <div className="grid gap-4 grid-cols-2 my-2.5">
                             {[...Array(4)].map((item, index) => {
-                            if (index <= 2) {
-                                return (
-                                    <button onClick={() => handleImageGalleryClick(index, imageUrl)} key={index}>
-                                        <div className="group relative">
-                                            <div className="absolute w-full h-full bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center">
-                                            </div>
-                                            <img src={`/userImages/${imageUrl[index]}`} alt="messageImage" className="rounded-lg object-cover w-[240px] h-[240px]" />
-                                        </div>
-                                    </button>
-
-                                )
-                            } else if (index === 3) {
-                                return (
-                                    <button onClick={() => handleImageGalleryClick(index, imageUrl)} key={index}>
-                                        <div className="group relative">
-                                            <div className="absolute w-full h-full bg-gray-900/90 hover:bg-gray-900/50 transition-all duration-300 rounded-lg flex items-center justify-center">
-                                                <span className="text-3xl font-medium text-white">+{imageUrl.length - 4}</span>
-                                            </div>
-                                            <img src={`/userImages/${imageUrl[index]}`} alt="messageImage" className="rounded-lg object-cover w-[240px] h-[240px]" />
-                                        </div>
-                                    </button>
-                                )
-                            }
+                            return (
+                                <button onClick={() => handleImageGalleryClick(index, imageUrl)} key={index}>
+                                    <div className="group relative">
+                                        {
+                                            index <= 2 ?
+                                                <div className="absolute w-full h-full bg-gray-900/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg flex items-center justify-center" />
+                                            :
+                                                <div className="absolute w-full h-full bg-gray-900/90 hover:bg-gray-900/50 transition-all duration-300 rounded-lg flex items-center justify-center">
+                                                    <span className="text-3xl font-medium text-white">+{imageUrl.length - 4}</span>
+                                                </div>
+                                        }
+                                        <img src={`/userImages/${imageUrl[index]}`} alt="messageImage" className="rounded-lg object-cover w-[240px] h-[240px]" />
+                                    </div>
+                                </button>
+                            )
                         })}
                     </div>
                 }

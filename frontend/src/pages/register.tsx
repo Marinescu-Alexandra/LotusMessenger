@@ -7,7 +7,7 @@ import { userRegister } from '@/store/actions/authAction'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { useRouter } from 'next/router'
 import toast, { Toaster } from 'react-hot-toast'
-import { ERRORS_CLEAR, SUCCESS_MESSAGE_CLEAR } from '@/store/types/authType';
+import { ERRORS_CLEAR, SUCCESS_MESSAGE_CLEAR } from '@/store/actionTypes/authType';
 
 const Register = () => {
     const router = useRouter()

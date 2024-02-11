@@ -1,9 +1,10 @@
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
+import api from '@/axiosConfig';
 import { useAppDispatch } from "../hooks"
 import {
     REGISTER_FAIL, REGISTER_SUCCESS, LOGIN_SUCCESS, LOGIN_FAIL, UPLOAD_PROFILE_IMAGE_SUCCESS, UPDATE_USER_THEME_SUCCESS,
     UPDATE_USER_STATUS_SUCCESS, UPDATE_USER_NAME_SUCCESS
-} from '../types/authType';
+} from '../actionTypes/authType';
 
 const config = {
     withCredentials: true,
@@ -28,7 +29,7 @@ export const userRegister = (data: RegisterData) => {
     return async (dispatch = useAppDispatch()) => {
 
         try {
-            const response = await axios.post('http://localhost:5000/api/messenger/user-register', data, config);
+            const response = await api.post('/api/messenger/user-register', data, config);
             localStorage.setItem('authToken', response.data.token);
             dispatch({
                 type: REGISTER_SUCCESS,
@@ -55,7 +56,7 @@ export const userLogin = (data: LoginData) => {
     return async (dispatch = useAppDispatch()) => {
         
         try {
-            const response = await axios.post('http://localhost:5000/api/messenger/user-login', data, config);
+            const response = await api.post('/api/messenger/user-login', data, config);
             localStorage.setItem('authToken', response.data.token);            
             dispatch({
                 type: LOGIN_SUCCESS,
@@ -81,7 +82,7 @@ export const userLogin = (data: LoginData) => {
 export const userLogout = () => async (dispatch = useAppDispatch()) => {
     const data = {}
     try {
-        const response = await axios.post('http://localhost:5000/api/messenger/user-logout', data, config)
+        const response = await api.post('/api/messenger/user-logout', data, config)
         if (response.data.success) {
             localStorage.removeItem('authToken');
             dispatch({
@@ -105,7 +106,7 @@ export const uploadUserProfileImage = (data: FormData) => async (dispatch = useA
         },
     }
     try {
-        const response = await axios.post('http://localhost:5000/api/messenger/update-user-profile-picture', data, newConfig);
+        const response = await api.post('/api/messenger/update-user-profile-picture', data, newConfig);
         localStorage.setItem('authToken', response.data.token);
         dispatch({
             type: UPLOAD_PROFILE_IMAGE_SUCCESS,
@@ -120,7 +121,7 @@ export const uploadUserProfileImage = (data: FormData) => async (dispatch = useA
 
 export const updateUserTheme = (theme: string) => async (dispatch = useAppDispatch()) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/messenger/update-user-theme', theme, config);
+        const response = await api.post('/api/messenger/update-user-theme', theme, config);
         localStorage.setItem('authToken', response.data.token);
         dispatch({
             type: UPDATE_USER_THEME_SUCCESS,
@@ -135,7 +136,7 @@ export const updateUserTheme = (theme: string) => async (dispatch = useAppDispat
 
 export const updateUserName = (name: string) => async (dispatch = useAppDispatch()) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/messenger/update-user-name', name, config);
+        const response = await api.post('/api/messenger/update-user-name', name, config);
         localStorage.setItem('authToken', response.data.token);
         dispatch({
             type: UPDATE_USER_NAME_SUCCESS,
@@ -150,7 +151,7 @@ export const updateUserName = (name: string) => async (dispatch = useAppDispatch
 
 export const updateUserStatus = (status: string) => async (dispatch = useAppDispatch()) => {
     try {
-        const response = await axios.post('http://localhost:5000/api/messenger/update-user-status', status, config);
+        const response = await api.post('/api/messenger/update-user-status', status, config);
         localStorage.setItem('authToken', response.data.token);
         dispatch({
             type: UPDATE_USER_STATUS_SUCCESS,

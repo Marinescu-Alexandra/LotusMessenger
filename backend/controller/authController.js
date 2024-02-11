@@ -41,13 +41,16 @@ function checkForLoginErrors({ email, password }) {
     if (email && !isEmail(email)) {
         errors.push('Please provide a valid email.')
     }
-    return errors
+
+    if (errors.length > 0) {
+        throw new BadRequestError(errors);
+    } 
 }
 
 function checkForRegisterErrors({ username, email, password }) {
     const errors = []
     if (!username) {
-        errors.push('Please provide an user name.')
+        errors.push('Please provide a user name.')
     }
     if (!email) {
         errors.push('Please provide an email.')
@@ -60,37 +63,38 @@ function checkForRegisterErrors({ username, email, password }) {
         errors.push('Plese provide a valid email.')
     }
 
-    return errors
+    if (errors.length > 0) {
+        throw new BadRequestError(errors);
+    }
 }
 
 export async function userRegister(req, res, next) {
     const { username, email, password } = req.body;
-    const errors = checkForRegisterErrors({ username, email, password })
 
     try {
-        if (errors.length > 0) {
-            throw new BadRequestError(errors);
-        } else {
-            const checkUser = await User.findOne({
-                email: email,
-            })
-            if (checkUser) {
-                throw new ConflictError('The provided email is already in use.');
-            } else {
+        checkForRegisterErrors({ username, email, password })
 
-                const userCreate = await User.create({
-                    username,
-                    email,
-                    password: await hash(password, 10),
-                });
+        const checkUser = await User.findOne({
+            email: email,
+        })
 
-                const [token, options] = await signToken(userCreate._id, userCreate.email, userCreate.username, userCreate.createdAt, userCreate.profileImage, userCreate.status, userCreate.theme)
-
-                res.status(200).cookie('authToken', token, options).json({
-                    successMessage: 'Registration complete.', token
-                })
-            }
+        if (checkUser) {
+            throw new ConflictError('The provided email is already in use.');
         }
+
+        const userCreate = await User.create({
+            username,
+            email,
+            password: await hash(password, 10),
+        });
+
+        const [token, options] = await signToken(userCreate._id, userCreate.email, userCreate.username, userCreate.createdAt, userCreate.profileImage, userCreate.status, userCreate.theme)
+
+        res.status(200).cookie('authToken', token, options).json({
+            successMessage: 'Registration complete.', token
+        })
+        
+        
     } catch (error) {
         next(error)
     }
@@ -98,29 +102,29 @@ export async function userRegister(req, res, next) {
 
 export async function userLogin(req, res, next) {
     const { email, password } = req.body;
-    const errors = checkForLoginErrors({ email, password })
-    try {
-        if (errors.length > 0) {
-            throw new BadRequestError(errors);
-        } else {
-            const checkUser = await User.findOne({
-                email: email
-            }).select('+password');
 
-            if (checkUser) {
-                const matchPassword = await compare(password, checkUser.password);
-                if (matchPassword) {
-                    const [token, options] = await signToken(checkUser._id, checkUser.email, checkUser.username, checkUser.createdAt, checkUser.profileImage, checkUser.status, checkUser.theme)
-                    res.status(200).cookie('authToken', token, options).json({
-                        successMessage: 'Login successful', token
-                    })
-                } else {
-                    throw new UnauthorizedError('Password not valid.');
-                }
-            } else {
-                throw new BadRequestError('Email not valid. Please use another email or register.');
-            }
+    try {
+        checkForLoginErrors({ email, password })
+
+        const checkUser = await User.findOne({
+            email: email
+        }).select('+password');
+
+        if (!checkUser) {
+            throw new BadRequestError('Email not valid. Please use another email or register.');
         }
+
+        const matchPassword = await compare(password, checkUser.password);
+
+        if (!matchPassword) {
+            throw new UnauthorizedError('Password not valid.');    
+        }
+
+        const [token, options] = await signToken(checkUser._id, checkUser.email, checkUser.username, checkUser.createdAt, checkUser.profileImage, checkUser.status, checkUser.theme)
+        res.status(200).cookie('authToken', token, options).json({
+            successMessage: 'Login successful', token
+        })
+        
     } catch (error) {
         next(error)
     }

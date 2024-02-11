@@ -139,7 +139,7 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
 
     // ORDER FRIENDLIST BY NEWEST CONVERSATION
     useEffect(() => {
-        var sortedFriendList = friends.slice(0);
+        const sortedFriendList = friends.slice(0);
         sortedFriendList.sort(function (a: Friend, b: Friend) {
             if (lastMessages[a._id] && lastMessages[b._id]) {
                 var dateA = new Date(lastMessages[a._id].createdAt).getTime()

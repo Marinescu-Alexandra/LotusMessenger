@@ -1,5 +1,5 @@
-import { GET_SELECTED_FRIEND_SUCCESS, GET_SHARED_MEDIA_SUCCESS, UPDATE_SHARED_MEDIA_SUCCESS } from '../types/selectedFriendType'
-import { LOGOUT_SUCCESS } from '../types/authType'
+import { GET_SELECTED_FRIEND_SUCCESS, GET_SHARED_MEDIA_SUCCESS, UPDATE_SHARED_MEDIA_SUCCESS } from '../actionTypes/selectedFriendType'
+import { LOGOUT_SUCCESS } from '../actionTypes/authType'
 import { PayloadAction } from '@reduxjs/toolkit';
 import { Friend } from '@/ts/interfaces/interfaces'
 

@@ -2,7 +2,7 @@ import { AppError } from '../errors/errors.js'
 
 export async function errorHandler (error, request, response, next) {
     if (error instanceof AppError) {
-        let errors = error.message.split(',')
+        const errors = error.message.split(',')
         response.status(error.status).json({
             error: {
                 errorMessage: errors
