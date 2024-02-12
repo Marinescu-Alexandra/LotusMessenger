@@ -40,16 +40,20 @@
 This project is an online messaging web application. This application lets users engage in a real time conversation with another users, where they can share messages, images, and basic information about themselves, such as, profile pictures, current status and shared media between them. The project is divided in three components, a backend server that handles all users requests, a client server that provides the user interface and a socket server that handles all real time updates.
 	
 ## Technologies
-* NODEJS/JAVASCRIPT/EXPRESS
-* NEXTJS/REACT
-* REDUX
-* TYPESCRIPT
-* MONGODB
-* TAILWIND
-* SOCKET.IO
-* DOCKER
+* NodeJS/JavaScript/Express
+* NextJS/React
+* Redux
+* Typescript
+* MongoDB
+* Tailwind
+* Socket.io
+* Docker
+
+## Instalation
 
 ## User Interface
+
+A complete demo video can be found here:
 
 ### Register
 ![register](https://github.com/Marinescu-Alexandra/LotusMessenger/assets/73072605/50595365-395f-4c36-9c2e-4c38416d5cfc)
@@ -80,10 +84,26 @@ This project is an online messaging web application. This application lets users
 
 
 ## Database
-MongoDB was used to create the database of this project.
-
 - ### Models
   - User Model
+    - `username`
+      - type: string
+      - required: true
+    - `email`
+      - type: string
+      - required: true
+    - `password`
+      - type: string
+      - required: true
+    - `profileImage`
+      - type: string
+      - default: ''
+    - `status`
+      - type: string
+      - default: 'Hello, I am using Lotus Messenger :)'
+    - `theme`
+      - type: string
+      - default: 'sunset'
 
   - Message Model
     - `senderId`
@@ -97,15 +117,26 @@ MongoDB was used to create the database of this project.
       - required: true
     - `message`
       - `text`
-     		type: string
-        	default: ''
+     	- type: string
+        - default: ''
       - `image`
-	    	type: array
-	    	default: []
+	    - type: array
+	    - default: []
     - `status`
       - type: string
       - default: 'undelivered'
-## Instalation
+
+## Socket Server
+
+- ### Features
+
+    - Real-time communication between clients
+    - Adding and removing users
+    - Broadcasting messages to all connected clients
+    - Updating user profile information
+    - Typing indicators for messaging
+    - Message delivery and read receipts
+    - Handling disconnections and reconnecting
 
 ## Backend
 
