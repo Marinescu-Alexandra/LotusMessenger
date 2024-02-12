@@ -13,6 +13,9 @@
   - [Profile Info](profile-info)
   - [Theme Option Two](theme-option-two)
   - [Theme Option Three](theme-option-three)
+* [Database](#database)
+  - [Models](models)
+* [Socket Server](#socket-server)
 * [Backend](#backend)
   - [Endpoints Details](#endpoints-details)
     - [User Login](#user-login)
@@ -31,8 +34,6 @@
     - [Update Undelivered Messages](#update-undelivered-messages)
     - [Update Unseen Messages](#update-unseen-messages)
     - [Images Upload](#images-upload)
-* [Database](#database)
-* [Socket Server](#socket-server)
 
 
 ## General info
@@ -78,8 +79,32 @@ This project is an online messaging web application. This application lets users
 ![midnight](https://github.com/Marinescu-Alexandra/LotusMessenger/assets/73072605/5a67ae06-cd56-4054-bd42-af5eeabffe6a)
 
 
+## Database
+MongoDB was used to create the database of this project.
 
+- ### Models
+  - User Model
 
+  - Message Model
+    - `senderId`
+      - type: string
+      - required: true
+    - `senderName`
+      - type: string
+      - required: true
+    - `receiverId`
+      - type: string
+      - required: true
+    - `message`
+      - `text`
+     		type: string
+        	default: ''
+      - `image`
+	    	type: array
+	    	default: []
+    - `status`
+      - type: string
+      - default: 'undelivered'
 ## Instalation
 
 ## Backend
@@ -92,55 +117,55 @@ This project is an online messaging web application. This application lets users
 - **Method**: POST
 - **URL**: `/user-login`
 
-**Description**:  
-This endpoint allows users to sign in to the application.
+- **Description**:  
+	This endpoint allows users to sign in to the application.
 
-### Query Parameters:
+- ### Query Parameters:
 
-#### `email`
-- **Type**: string
-- **Description**: The email of the registered user.
-- **Validation**: Must be a valid email format and existing in the database.
-- **Required**: Yes
+	#### `email`
+	- **Type**: string
+	- **Description**: The email of the registered user.
+	- **Validation**: Must be a valid email format and existing in the database.
+	- **Required**: Yes
 
-#### `password`
-- **Type**: string
-- **Description**: The password of the registered user.
-- **Validation**: Must match the password corespoding with the email used.
-- **Required**: Yes
+	#### `password`
+	- **Type**: string
+	- **Description**: The password of the registered user.
+	- **Validation**: Must match the password corespoding with the email used.
+	- **Required**: Yes
 
-### Response:
+- ### Response:
 
-**Status Code**: `200 OK`
+	**Status Code**: `200 OK`
+	
+	Upon successful execution, the API will return a success message 'Login successful' followed by the JWT token containing all relevant user information. 
+	Upon successful execution, the JTW token will be stored inside the cookies of the browser as well as inside the local storage.
+	Contents inside the JWT token:
+	- `_id`: ID of the database entry for the registered user. Type: `string`.
+	- `email`: Email of the registered user. Type: `string`.
+	- `username`: Username of the registered user. Type: `string`.
+	- `createdAt`: Date of the creation of the account. Type: `date`.
+	- `profileImage`: URL string pointing to the user profile image. Type: `string`.
+	- `status`: Status of the registered user. Type: `string`. Default: `Hello I am using Lotus Messenger :)`.
+	- `theme`: Theme of the registered user. Type: `string`. Default: `sunset`.
 
-Upon successful execution, the API will return a success message 'Login successful' followed by the JWT token containing all relevant user information. 
-Upon successful execution, the JTW token will be stored inside the cookies of the browser as well as inside the local storage.
-Contents inside the JWT token:
-- `_id`: ID of the database entry for the registered user. Type: `string`.
-- `email`: Email of the registered user. Type: `string`.
-- `username`: Username of the registered user. Type: `string`.
-- `createdAt`: Date of the creation of the account. Type: `date`.
-- `profileImage`: URL string pointing to the user profile image. Type: `string`.
-- `status`: Status of the registered user. Type: `string`. Default: `Hello I am using Lotus Messenger :)`.
-- `theme`: Theme of the registered user. Type: `string`. Default: `sunset`.
+- ### Potential Errors:
 
-### Potential Errors:
-
-**Status Code**: `400 Bad Request`  
-**Description**: The request was formed incorrectly or included invalid parameters.  
-**Possible Reasons**:  
-- The user did not provide an email.
-- The user did not provide a password.
-- The user did not provide a valid email.
-- The user provided an email that does not exist in the database.
-
-**Status Code**: `401 Unauthorized`  
-**Description**: The authenticating process can't be performed with the login credentials provided by the user.  
-**Reason**:  
-- The user did not provide a matching password for the provided email.
-
-**Status Code**: `500 Internal Server Error`  
-**Description**: An unexpected error occurred on the server side.
+	**Status Code**: `400 Bad Request`  
+	**Description**: The request was formed incorrectly or included invalid parameters.  
+	**Possible Reasons**:  
+	- The user did not provide an email.
+	- The user did not provide a password.
+	- The user did not provide a valid email.
+	- The user provided an email that does not exist in the database.
+	
+	**Status Code**: `401 Unauthorized`  
+	**Description**: The authenticating process can't be performed with the login credentials provided by the user.  
+	**Reason**:  
+	- The user did not provide a matching password for the provided email.
+	
+	**Status Code**: `500 Internal Server Error`  
+	**Description**: An unexpected error occurred on the server side.
 
 ### **`User Register`**
 
@@ -148,60 +173,60 @@ Contents inside the JWT token:
 - **Method**: POST
 - **URL**: `/user-register`
 
-**Description**:  
-This endpoint allows users to create an account that will be used to sign in the aplication.
+- **Description**:  
+	This endpoint allows users to create an account that will be used to sign in the aplication.
 
-### Query Parameters:
+- ### Query Parameters:
 
-#### `username`
-- **Type**: string
-- **Description**: The user name of the account.
-- **Required**: Yes
+	#### `username`
+	- **Type**: string
+	- **Description**: The user name of the account.
+	- **Required**: Yes
+	
+	#### `password`
+	- **Type**: string
+	- **Description**: The password of the account.
+	- **Required**: Yes
+	
+	#### `email`
+	- **Type**: string
+	- **Description**: The email of the account.
+	- **Validation**: Must be a valid email format and not existing in the database.
+	- **Required**: Yes
 
-#### `password`
-- **Type**: string
-- **Description**: The password of the account.
-- **Required**: Yes
+- ### Response:
 
-#### `email`
-- **Type**: string
-- **Description**: The email of the account.
-- **Validation**: Must be a valid email format and not existing in the database.
-- **Required**: Yes
+	**Status Code**: `200 OK`
+	
+	Upon successful execution, the API will return a success message 'Registration complete' followed by the JWT token containing all relevant user information. 
+	Upon successful execution, the JTW token will be stored inside the cookies of the browser as well as inside the local storage.
+	Contents inside the JWT token:
+	- `_id`: ID of the database entry for the registered user. Type: `string`.
+	- `email`: Email of the registered user. Type: `string`.
+	- `username`: Username of the registered user. Type: `string`.
+	- `createdAt`: Date of the creation of the account. Type: `date`.
+	- `profileImage`: URL string pointing to the user profile image. Type: `string`.
+	- `status`: Status of the registered user. Type: `string`. Default: `Hello I am using Lotus Messenger :)`.
+	- `theme`: Theme of the registered user. Type: `string`. Default: `sunset`.
 
-### Response:
+- ### Potential Errors:
 
-**Status Code**: `200 OK`
-
-Upon successful execution, the API will return a success message 'Registration complete' followed by the JWT token containing all relevant user information. 
-Upon successful execution, the JTW token will be stored inside the cookies of the browser as well as inside the local storage.
-Contents inside the JWT token:
-- `_id`: ID of the database entry for the registered user. Type: `string`.
-- `email`: Email of the registered user. Type: `string`.
-- `username`: Username of the registered user. Type: `string`.
-- `createdAt`: Date of the creation of the account. Type: `date`.
-- `profileImage`: URL string pointing to the user profile image. Type: `string`.
-- `status`: Status of the registered user. Type: `string`. Default: `Hello I am using Lotus Messenger :)`.
-- `theme`: Theme of the registered user. Type: `string`. Default: `sunset`.
-
-### Potential Errors:
-
-**Status Code**: `400 Bad Request`  
-**Description**: The request was formed incorrectly or included invalid parameters.  
-**Possible Reasons**:  
-- The user did not provide an email.
-- The user did not provide a password.
-- The user did not provide a valid email.
-- The user provided an email already in use.
-
-
-**Status Code**: `409 Conflict`  
-**Description**: The request wasn't completed because of a conflict with the resource's current state.  
-**Reason**:  
-- The user provided an email already registered in the database.
-
-**Status Code**: `500 Internal Server Error`  
-**Description**: An unexpected error occurred on the server side.
+	**Status Code**: `400 Bad Request`  
+	**Description**: The request was formed incorrectly or included invalid parameters.  
+	**Possible Reasons**:  
+	- The user did not provide an email.
+	- The user did not provide a password.
+	- The user did not provide a valid email.
+	- The user provided an email already in use.
+	
+	
+	**Status Code**: `409 Conflict`  
+	**Description**: The request wasn't completed because of a conflict with the resource's current state.  
+	**Reason**:  
+	- The user provided an email already registered in the database.
+	
+	**Status Code**: `500 Internal Server Error`  
+	**Description**: An unexpected error occurred on the server side.
 
 ### **`User Logout`**
 
@@ -209,12 +234,12 @@ Contents inside the JWT token:
 - **Method**: POST
 - **URL**: `/user-logout`
 
-**Description**:  
-This endpoint allows users to logout from the current instance of the application.
+- **Description**:  
+	This endpoint allows users to logout from the current instance of the application.
+	
+- **Status Code**: `201 OK`
 
-**Status Code**: `201 OK`
-
-Upon successful execution, the API will return 'success: true' and cookie 'authToken' is removed, when the cookie is removed the client will redirect the user to the login page.
+	Upon successful execution, the API will return 'success: true' and cookie 'authToken' is removed, when the cookie is removed the client will redirect the user to the login page.
 
 ### **`Update User Profile Picture`**
 
@@ -222,37 +247,37 @@ Upon successful execution, the API will return 'success: true' and cookie 'authT
 - **Method**: POST
 - **URL**: `/update-user-profile-picture`
 
-**Description**:  
-This endpoint allows users change their profile picture by uploading the image provided by the user, sending back the new path of the uploaded image and the updated JTW token of the user.
+- **Description**:  
+	This endpoint allows users change their profile picture by uploading the image provided by the user, sending back the new path of the uploaded image and the updated JTW token of the user.
 
-### Query Parameters:
+- ### Query Parameters:
 
-#### `myId`
-- **Type**: string
-- **Description**: The id of the current user signed in the application.
-- **Required**: Yes
+	#### `myId`
+	- **Type**: string
+	- **Description**: The id of the current user signed in the application.
+	- **Required**: Yes
+	
+	#### `data`
+	- **Type**: FormData
+	- **Description**: FormData containing the information of the profile picture provided by the user.
+	- **Required**: Yes
+	
+	- **Status Code**: `200 OK`
+	
+	- Upon successful execution, the API will return:
+	  -successMessage: 'Cookie update successful'
+	  -profileImagePath: profileImageName,
+	  -token: token
 
-#### `data`
-- **Type**: FormData
-- **Description**: FormData containing the information of the profile picture provided by the user.
-- **Required**: Yes
+- ### Potential Errors:
 
-- **Status Code**: `200 OK`
-
-- Upon successful execution, the API will return:
-  -successMessage: 'Cookie update successful'
-  -profileImagePath: profileImageName,
-  -token: token
-
-### Potential Errors:
-
-**Status Code**: `403 Forbidden`  
-**Description**: The server understands the request but refuses to authorize it.  
-**Reason**:  
-- The user provided an ilegal file name or was trying to access other directories.
-
-**Status Code**: `500 Internal Server Error`  
-**Description**: An unexpected error occurred on the server side.
+	**Status Code**: `403 Forbidden`  
+	**Description**: The server understands the request but refuses to authorize it.  
+	**Reason**:  
+	- The user provided an ilegal file name or was trying to access other directories.
+	
+	**Status Code**: `500 Internal Server Error`  
+	**Description**: An unexpected error occurred on the server side.
 
 ### **`Update User Theme`**
 
@@ -260,32 +285,32 @@ This endpoint allows users change their profile picture by uploading the image p
 - **Method**: POST
 - **URL**: `/update-user-theme`
 
-**Description**:  
-This endpoint allows users to change their theme of the application.
+- **Description**:  
+	This endpoint allows users to change their theme of the application.
 
-### Query Parameters:
+- ### Query Parameters:
 
-#### `myId`
-- **Type**: string
-- **Description**: The id of the current user signed in the application.
-- **Required**: Yes
+	#### `myId`
+	- **Type**: string
+	- **Description**: The id of the current user signed in the application.
+	- **Required**: Yes
+	
+	#### `theme`
+	- **Type**: string
+	- **Description**: The name of the selected theme.
+	- **Required**: Yes
+	
+	**Status Code**: `200 OK`
+	
+	- Upon successful execution, the API will return:
+	  -successMessage: 'Cookie update successful'
+	  -theme: theme,
+	  -token: token
 
-#### `theme`
-- **Type**: string
-- **Description**: The name of the selected theme.
-- **Required**: Yes
+- ### Potential Errors:
 
-**Status Code**: `200 OK`
-
-- Upon successful execution, the API will return:
-  -successMessage: 'Cookie update successful'
-  -theme: theme,
-  -token: token
-
-### Potential Errors:
-
-**Status Code**: `500 Internal Server Error`  
-**Description**: An unexpected error occurred on the server side.
+	**Status Code**: `500 Internal Server Error`  
+	**Description**: An unexpected error occurred on the server side.
 
 ### **`Update User Name`**
 
@@ -293,32 +318,32 @@ This endpoint allows users to change their theme of the application.
 - **Method**: POST
 - **URL**: `/update-user-name`
 
-**Description**:  
-This endpoint allows users to change their user name visible to other users.
+- **Description**:  
+	This endpoint allows users to change their user name visible to other users.
 
-### Query Parameters:
+- ### Query Parameters:
 
-#### `myId`
-- **Type**: string
-- **Description**: The id of the current user signed in the application.
-- **Required**: Yes
+	#### `myId`
+	- **Type**: string
+	- **Description**: The id of the current user signed in the application.
+	- **Required**: Yes
+	
+	#### `name`
+	- **Type**: string
+	- **Description**: The new name of the user.
+	- **Required**: Yes
 
-#### `name`
-- **Type**: string
-- **Description**: The new name of the user.
-- **Required**: Yes
+- **Status Code**: `200 OK`
+	
+	Upon successful execution, the API will return:
+	  -successMessage: 'Cookie update successful'
+	  -name: name,
+	  -token: token
 
-**Status Code**: `200 OK`
+- ### Potential Errors:
 
-Upon successful execution, the API will return:
-  -successMessage: 'Cookie update successful'
-  -name: name,
-  -token: token
-
-### Potential Errors:
-
-**Status Code**: `500 Internal Server Error`  
-**Description**: An unexpected error occurred on the server side.
+- **Status Code**: `500 Internal Server Error`  
+- **Description**: An unexpected error occurred on the server side.
 
 ### **`Update User Status`**
 
@@ -326,32 +351,32 @@ Upon successful execution, the API will return:
 - **Method**: POST
 - **URL**: `/update-user-status`
 
-**Description**:  
-This endpoint allows users to change their status visible to other users.
+- **Description**:  
+	This endpoint allows users to change their status visible to other users.
 
-### Query Parameters:
+- ### Query Parameters:
 
-#### `myId`
-- **Type**: string
-- **Description**: The id of the current user signed in the application.
-- **Required**: Yes
+	#### `myId`
+	- **Type**: string
+	- **Description**: The id of the current user signed in the application.
+	- **Required**: Yes
+	
+	#### `status`
+	- **Type**: status
+	- **Description**: The new status of the user.
+	- **Required**: Yes
 
-#### `status`
-- **Type**: status
-- **Description**: The new status of the user.
-- **Required**: Yes
+- **Status Code**: `200 OK`
 
-**Status Code**: `200 OK`
+	- Upon successful execution, the API will return:
+	  -successMessage: 'Cookie update successful'
+	  -status: status,
+	  -token: token
 
-- Upon successful execution, the API will return:
-  -successMessage: 'Cookie update successful'
-  -status: status,
-  -token: token
+- ### Potential Errors:
 
-### Potential Errors:
-
-**Status Code**: `500 Internal Server Error`  
-**Description**: An unexpected error occurred on the server side.
+	**Status Code**: `500 Internal Server Error`  
+	**Description**: An unexpected error occurred on the server side.
 
 ### **`Get Last Messages`**
 
@@ -359,24 +384,24 @@ This endpoint allows users to change their status visible to other users.
 - **Method**: GET
 - **URL**: `/get-last-messages`
 
-**Description**:  
-This endpoint retieves from the database all last messages between the current, provided user and other users in tha databse.
+- **Description**:  
+	This endpoint retieves from the database all last messages between the current, provided user and other users in tha databse.
 
-### Query Parameters:
+- ### Query Parameters:
 
-#### `myId`
-- **Type**: string
-- **Description**: The id of the current user signed in the application.
-- **Required**: Yes
+	#### `myId`
+	- **Type**: string
+	- **Description**: The id of the current user signed in the application.
+	- **Required**: Yes
 
-**Status Code**: `200 OK`
+- **Status Code**: `200 OK`
 
-- Upon successful execution, the API will return a map containing all the found messages.
+	- Upon successful execution, the API will return a map containing all the found messages.
 
-### Potential Errors:
+- ### Potential Errors:
 
-**Status Code**: `500 Internal Server Error`  
-**Description**: An unexpected error occurred on the server side.
+	**Status Code**: `500 Internal Server Error`  
+	**Description**: An unexpected error occurred on the server side.
 
 ### **`Get Friends`**
 
@@ -384,24 +409,24 @@ This endpoint retieves from the database all last messages between the current, 
 - **Method**: GET
 - **URL**: `/get-friends`
 
-**Description**:  
-This endpoint retieves all the users within the databse expect the current/provided user.
+- **Description**:  
+	This endpoint retieves all the users within the databse expect the current/provided user.
 
-### Query Parameters:
+- ### Query Parameters:
 
-#### `myId`
-- **Type**: string
-- **Description**: The id of the current user signed in the application.
-- **Required**: Yes
+	#### `myId`
+	- **Type**: string
+	- **Description**: The id of the current user signed in the application.
+	- **Required**: Yes
 
-**Status Code**: `200 OK`
+- **Status Code**: `200 OK`
 
-- Upon successful execution, the API will return a map containing all the found users.
+	- Upon successful execution, the API will return a map containing all the found users.
 
-### Potential Errors:
+- ### Potential Errors:
 
-**Status Code**: `500 Internal Server Error`  
-**Description**: An unexpected error occurred on the server side.
+	**Status Code**: `500 Internal Server Error`  
+	**Description**: An unexpected error occurred on the server side.
 
 ### **`Get Messages`**
 
@@ -409,31 +434,31 @@ This endpoint retieves all the users within the databse expect the current/provi
 - **Method**: GET
 - **URL**: `/get-messages/:id`
 
-**Description**:  
-This endpoint retieves all the messages between two provided users.
+- **Description**:  
+	This endpoint retieves all the messages between two provided users.
 
-### Query Parameters:
+- ### Query Parameters:
 
-#### `myId`
-- **Type**: string
-- **Description**: The id of the current user signed in the application.
-- **Required**: Yes
+	#### `myId`
+	- **Type**: string
+	- **Description**: The id of the current user signed in the application.
+	- **Required**: Yes
 
-### Path Parameters:
+- ### Path Parameters:
 
-#### `id`
-- **Type**: string
-- **Description**: The id of the other users involved in the conversation.
-- **Required**: Yes
+	#### `id`
+	- **Type**: string
+	- **Description**: The id of the other users involved in the conversation.
+	- **Required**: Yes
 
-**Status Code**: `200 OK`
+- **Status Code**: `200 OK`
 
-- Upon successful execution, the API will return a map containing all the found messages.
+	- Upon successful execution, the API will return a map containing all the found messages.
 
-### Potential Errors:
+- ### Potential Errors:
 
-**Status Code**: `500 Internal Server Error`  
-**Description**: An unexpected error occurred on the server side.
+	**Status Code**: `500 Internal Server Error`  
+	**Description**: An unexpected error occurred on the server side.
 
 ### **`Send Message`**
 
@@ -441,44 +466,44 @@ This endpoint retieves all the messages between two provided users.
 - **Method**: POST
 - **URL**: `/send-message`
 
-**Description**:  
-This endpoint will upload to the database the message data sent by a user.
+- **Description**:  
+	This endpoint will upload to the database the message data sent by a user.
 
-### Query Parameters:
+- ### Query Parameters:
 
-#### `senderId`
-- **Type**: string
-- **Description**: The id of the sender.
-- **Required**: Yes
+	#### `senderId`
+	- **Type**: string
+	- **Description**: The id of the sender.
+	- **Required**: Yes
+	
+	#### `receiverId`
+	- **Type**: string
+	- **Description**: The id of the receiver.
+	- **Required**: Yes
+	
+	#### `message`
+	- **Type**: string
+	- **Description**: The message of the conversation.
+	- **Required**: Yes
+	
+	#### `senderName`
+	- **Type**: string
+	- **Description**: The name of the sender.
+	- **Required**: Yes
+	
+	#### `images`
+	- **Type**: string
+	- **Description**: The image paths of the message.
+	- **Required**: Yes
 
-#### `receiverId`
-- **Type**: string
-- **Description**: The id of the receiver.
-- **Required**: Yes
+- **Status Code**: `201 OK`
 
-#### `message`
-- **Type**: string
-- **Description**: The message of the conversation.
-- **Required**: Yes
+	- Upon successful execution, the API will return a success message and the new uploaded messages from the database.
 
-#### `senderName`
-- **Type**: string
-- **Description**: The name of the sender.
-- **Required**: Yes
+- ### Potential Errors:
 
-#### `images`
-- **Type**: string
-- **Description**: The image paths of the message.
-- **Required**: Yes
-
-**Status Code**: `201 OK`
-
-- Upon successful execution, the API will return a success message and the new uploaded messages from the database.
-
-### Potential Errors:
-
-**Status Code**: `500 Internal Server Error`  
-**Description**: An unexpected error occurred on the server side.
+	**Status Code**: `500 Internal Server Error`  
+	**Description**: An unexpected error occurred on the server side.
 
 ### **`Deliver Message`**
 
@@ -486,24 +511,24 @@ This endpoint will upload to the database the message data sent by a user.
 - **Method**: POST
 - **URL**: `/deliver-message`
 
-**Description**:  
-This endpoint will update the status of an existing message within the database to 'delivered'.
+- **Description**:  
+	This endpoint will update the status of an existing message within the database to 'delivered'.
 
-### Query Parameters:
+- ### Query Parameters:
 
-#### `_id`
-- **Type**: string
-- **Description**: The id of the existing message.
-- **Required**: Yes
+	#### `_id`
+	- **Type**: string
+	- **Description**: The id of the existing message.
+	- **Required**: Yes
 
-**Status Code**: `200 OK`
+- **Status Code**: `200 OK`
 
-- Upon successful execution, the API will return the new updated message.
+	- Upon successful execution, the API will return the new updated message.
 
-### Potential Errors:
-
-**Status Code**: `500 Internal Server Error`  
-**Description**: An unexpected error occurred on the server side.
+- ### Potential Errors:
+	
+	**Status Code**: `500 Internal Server Error`  
+	**Description**: An unexpected error occurred on the server side.
 
 ### **`Seen Message`**
 
@@ -511,24 +536,24 @@ This endpoint will update the status of an existing message within the database 
 - **Method**: POST
 - **URL**: `/seen-message`
 
-**Description**:  
-This endpoint will update the status of an existing message within the database to 'seen'.
+- **Description**:  
+	This endpoint will update the status of an existing message within the database to 'seen'.
 
-### Query Parameters:
+- ### Query Parameters:
+	
+	#### `_id`
+	- **Type**: string
+	- **Description**: The id of the existing message.
+	- **Required**: Yes
 
-#### `_id`
-- **Type**: string
-- **Description**: The id of the existing message.
-- **Required**: Yes
+- **Status Code**: `200 OK`
 
-**Status Code**: `200 OK`
+	- Upon successful execution, the API will return the new updated message.
 
-- Upon successful execution, the API will return the new updated message.
+- ### Potential Errors:
 
-### Potential Errors:
-
-**Status Code**: `500 Internal Server Error`  
-**Description**: An unexpected error occurred on the server side.
+	**Status Code**: `500 Internal Server Error`  
+	**Description**: An unexpected error occurred on the server side.
 
 ### **`Update Undelivered Messages`**
 
@@ -536,31 +561,31 @@ This endpoint will update the status of an existing message within the database 
 - **Method**: POST
 - **URL**: `/update-undelivered-messages/:id`
 
-**Description**:  
-This endpoint will update the status of all existing messages within a database that have the status 'undelivered' to the status of 'delivered'.
+- **Description**:  
+	This endpoint will update the status of all existing messages within a database that have the status 'undelivered' to the status of 'delivered'.
 
-### Query Parameters:
+- ### Query Parameters:
 
-#### `myId`
-- **Type**: string
-- **Description**: The id of the current/provided user.
-- **Required**: Yes
+	#### `myId`
+	- **Type**: string
+	- **Description**: The id of the current/provided user.
+	- **Required**: Yes
 
-### Path Parameters:
+- ### Path Parameters:
 
-#### `id`
-- **Type**: string
-- **Description**: The id of the other users involved in the conversation.
-- **Required**: Yes
+	#### `id`
+	- **Type**: string
+	- **Description**: The id of the other users involved in the conversation.
+	- **Required**: Yes
 
-**Status Code**: `200 OK`
+- **Status Code**: `200 OK`
 
-- Upon successful execution, the API will return 'success: true'.
+	- Upon successful execution, the API will return 'success: true'.
 
-### Potential Errors:
+- ### Potential Errors:
 
-**Status Code**: `500 Internal Server Error`  
-**Description**: An unexpected error occurred on the server side.
+	**Status Code**: `500 Internal Server Error`  
+	**Description**: An unexpected error occurred on the server side.
 
 ### **`Update Unseen Messages`**
 
@@ -568,31 +593,31 @@ This endpoint will update the status of all existing messages within a database 
 - **Method**: POST
 - **URL**: `/update-unseen-messages/:id`
 
-**Description**:  
-This endpoint will update the status of all existing messages within a database that have the status 'delivered' to the status of 'seen'.
+- **Description**:  
+	This endpoint will update the status of all existing messages within a database that have the status 'delivered' to the status of 'seen'.
 
-### Query Parameters:
+- ### Query Parameters:
 
-#### `myId`
-- **Type**: string
-- **Description**: The id of the current/provided user.
-- **Required**: Yes
+	#### `myId`
+	- **Type**: string
+	- **Description**: The id of the current/provided user.
+	- **Required**: Yes
 
-### Path Parameters:
+- ### Path Parameters:
 
-#### `id`
-- **Type**: string
-- **Description**: The id of the other users involved in the conversation.
-- **Required**: Yes
+	#### `id`
+	- **Type**: string
+	- **Description**: The id of the other users involved in the conversation.
+	- **Required**: Yes
 
-**Status Code**: `200 OK`
+- **Status Code**: `200 OK`
 
-- Upon successful execution, the API will return 'success: true'.
+	- Upon successful execution, the API will return 'success: true'.
 
-### Potential Errors:
-
-**Status Code**: `500 Internal Server Error`  
-**Description**: An unexpected error occurred on the server side.
+- ### Potential Errors:
+	
+	**Status Code**: `500 Internal Server Error`  
+	**Description**: An unexpected error occurred on the server side.
 
 ### **`Images Upload`**
 
@@ -600,26 +625,26 @@ This endpoint will update the status of all existing messages within a database 
 - **Method**: POST
 - **URL**: `/images-upload`
 
-**Description**:  
-This endpoint will update the status of all existing messages within a database that have the status 'undelivered' to the status of 'delivered'.
+- **Description**:  
+	This endpoint will update the status of all existing messages within a database that have the status 'undelivered' to the status of 'delivered'.
 
-### Query Parameters:
+- ### Query Parameters:
 
-#### `data`
-- **Type**: FormData
-- **Description**: FormData containing the information of the pictures provided by the user.
-- **Required**: Yes
+	#### `data`
+	- **Type**: FormData
+	- **Description**: FormData containing the information of the pictures provided by the user.
+	- **Required**: Yes
 
-**Status Code**: `200 OK`
+- **Status Code**: `200 OK`
 
-- Upon successful execution, the API will return a list containing all the paths of the newly uploaded images.
+	- Upon successful execution, the API will return a list containing all the paths of the newly uploaded images.
 
-### Potential Errors:
+- ### Potential Errors:
 
-**Status Code**: `403 Forbidden`  
-**Description**: The server understands the request but refuses to authorize it.  
-**Reason**:  
-- The user provided an ilegal file name or was trying to access other directories.
-
-**Status Code**: `500 Internal Server Error`  
-**Description**: An unexpected error occurred on the server side.
+	**Status Code**: `403 Forbidden`  
+	**Description**: The server understands the request but refuses to authorize it.  
+	**Reason**:  
+	- The user provided an ilegal file name or was trying to access other directories.
+	
+	**Status Code**: `500 Internal Server Error`  
+	**Description**: An unexpected error occurred on the server side.
