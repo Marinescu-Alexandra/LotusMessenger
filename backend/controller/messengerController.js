@@ -6,6 +6,7 @@ import { MessageModel } from '../models/messageModel.js'
 import formidable from 'formidable';
 import { copyFile } from 'fs/promises'
 import { verifyFilename } from '../utils/verifyFilename.js'
+import { ForbiddenError } from '../errors/errors.js'
 
 export async function getLastMessages(req, res, next) {
     const myId = req.myId
@@ -223,7 +224,7 @@ export async function imagesUpload(req, res, next) {
 
             const verify = verifyFilename(name, path.resolve('frontend/public/userImages/'))
             if (!verify) {
-                throw new UnauthorizedError("Ilegall file name")
+                throw new ForbiddenError("Ilegall file name")
             }
 
             const __filename = fileURLToPath(import.meta.url);

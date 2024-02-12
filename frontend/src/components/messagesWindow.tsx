@@ -541,7 +541,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
 
                     {/* TYPING NOTICE */}
                     {
-                        typingMessage && typingMessage.message !== '' && typingMessage.senderId == selectedFriendData._id ?
+                        typingMessage && typingMessage.message && typingMessage.senderId == selectedFriendData._id ?
                             <p className={`mb-2 w-full text-semibold pl-6 text-lg text-left z-20 ${isMediaSelected || isGalleryImageSelected || isSharedMediaGalleryOpen ? 'hidden' : 'flex'}`}>Typing Message...</p> : ''
                     }
 

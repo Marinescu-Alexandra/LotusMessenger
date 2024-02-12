@@ -107,7 +107,7 @@ const Login = () => {
                                                         <input
                                                             onChange={handleInputChanges}
                                                             value={field.name === 'email' ? formInputState.email : formInputState.password}
-                                                            type="text"
+                                                            type={field.name === 'password' ? 'password' : 'text'}
                                                             name={field.name}
                                                             id="floating_outlined"
                                                             className="block px-2.5 h-9 pb-2.5 pt-4 w-full text-sm bg-transparent rounded-[5px] border border-gray-500 focus:border-none

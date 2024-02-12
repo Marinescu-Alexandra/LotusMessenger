@@ -5,7 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { join } from 'path'
 import { copyFile } from 'fs/promises'
-import { BadRequestError, ConflictError, UnauthorizedError } from '../errors/errors.js'
+import { BadRequestError, ConflictError, UnauthorizedError, ForbiddenError } from '../errors/errors.js'
 import { verifyFilename } from '../utils/verifyFilename.js'
 import jwtPackage from 'jsonwebtoken';
 import validatorPackage from 'validator';
@@ -146,7 +146,7 @@ export async function updateUserProfileImage(req, res, next) {
 
         const verify = verifyFilename(profileImageName[0], path.resolve('frontend/public/userProfileImages/'))
         if (!verify) {
-            throw new UnauthorizedError("Ilegall file name")
+            throw new ForbiddenError("Ilegall file name")
         }
 
         const __filename = fileURLToPath(import.meta.url);

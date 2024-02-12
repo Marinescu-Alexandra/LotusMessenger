@@ -23,10 +23,16 @@ class UnauthorizedError extends AppError {
     }
 }
 
+class ForbiddenError extends AppError {
+    constructor(message) {
+        super(message, 403);
+    }
+}
+
 class ExternalServerError extends AppError {
     constructor(message) {
         super(message, 502);
     }
 }
 
-export { BadRequestError, AppError, ExternalServerError, ConflictError, UnauthorizedError }
+export { BadRequestError, AppError, ExternalServerError, ConflictError, UnauthorizedError, ForbiddenError }

@@ -380,8 +380,8 @@ const DirectMessages: FC<DirectMessagesProps> = ({ className, activeUsers }) => 
                                                             `${lastMessage && ((lastMessage.status === 'delivered' || lastMessage.status === 'undelivered') && myInfo && lastMessage.senderId !== myInfo.id) ?
                                                                 'font-extrabold'
                                                                 :
-                                                                'font-normal line-clamp-1 break-all text-left'
-                                                            }`
+                                                                'font-normal'
+                                                            } line-clamp-1 break-all text-left`
                                                         }>
                                                             {
                                                                 lastMessage && (lastMessage.message !== undefined) ?
