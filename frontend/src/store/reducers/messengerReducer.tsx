@@ -158,6 +158,8 @@ export const messengerReducer = (state = messengerState, action: PayloadAction<{
                 friends: [],
                 messages: [],
                 messageSendSuccess: false,
+                lastMessages: {},
+                lastMessagesGetSuccess: false,
             }
     
         default:

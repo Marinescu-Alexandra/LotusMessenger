@@ -92,7 +92,7 @@ const MessagesWinow: FC<MessagesWindowProps> = ({ className, activeUsers }) => {
 
     const handleSendMessage = () => {
         newMessage.trim()
-        if ((newMessage !== "" && newMessage !== '\n') || imagePaths.length > 0) {
+        if ((newMessage !== "" && newMessage !== '\n' && newMessage.indexOf(" ") !== 0) || imagePaths.length > 0) {
             const data = {
                 senderName: myInfo.username,
                 senderId: myInfo.id,
