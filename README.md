@@ -54,6 +54,7 @@ This project is an online messaging web application. This application lets users
 ## User Interface
 
 A complete demo video can be found here:
+https://www.youtube.com/embed/Wqlzex300ls?si=BguTTGgOE8r7AJSE
 
 ### Register
 ![register](https://github.com/Marinescu-Alexandra/LotusMessenger/assets/73072605/50595365-395f-4c36-9c2e-4c38416d5cfc)
