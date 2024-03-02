@@ -50,6 +50,26 @@ This project is an online messaging web application. This application lets users
 * Docker
 
 ## Instalation
+To run this project you must have valid Node and MongoDB versions installed. The Node version used for this project is 18.17.0. The MongoDB server and shell versions used for this project are 4.4.6.
+MongoDB Compass was installed and used for easier data visualization and manipulation. To connect to MongoDB Compass, simply add a new connection with the URI "mongodb://localhost:27017". The MongoDB Compass version used for this project is 1.41.0.
+
+To run the client server open a terminal from the frontend folder and run:
+```
+npm install
+npm run dev
+```
+
+To run the backend server open a terminal from the backend folder and run:
+```
+npm install
+nodemon server.js
+```
+
+To run the socket server open a terminal from the socket folder and run:
+```
+npm install
+nodemon socket.js
+```
 
 ## User Interface
 
